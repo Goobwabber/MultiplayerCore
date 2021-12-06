@@ -5,14 +5,12 @@ namespace MultiplayerCore.Patchers
 {
     public class NetworkConfigPatcher : IAffinity
     {
-        /// <summary>
-        /// The <see cref="INetworkConfig"/> being used. 
-        /// Uses Official config when null.
-        /// </summary>
-        public INetworkConfig? NetworkConfig => _networkConfig;
-
-        private bool _enableOfficial = true;
-        private INetworkConfig? _networkConfig = null;
+        public MasterServerEndPoint? MasterServerEndPoint { get; set; }
+        public string? MasterServerStatusUrl { get; set; }
+        public int? MaxPartySize { get; set; }
+        public int? DiscoveryPort { get; set; }
+        public int? PartyPort { get; set; }
+        public int? MultiplayerPort { get; set; }
 
         private readonly SiraLog _logger;
 
@@ -23,13 +21,19 @@ namespace MultiplayerCore.Patchers
         }
 
         /// <summary>
-        /// Uses the network config from the provided <see cref="INetworkConfig"/> object.
+        /// Uses a custom master server
         /// </summary>
-        /// <param name="networkConfig">The <see cref="INetworkConfig"/> to use</param>
-        public void UseNetworkConfig(INetworkConfig networkConfig)
+        /// <param name="endPoint"></param>
+        /// <param name="statusUrl"></param>
+        /// <param name="maxPartySize"></param>
+        public void UseMasterServer(MasterServerEndPoint endPoint, string statusUrl, int? maxPartySize = null)
         {
-            _networkConfig = networkConfig;
-            _enableOfficial = false;
+            MasterServerEndPoint = endPoint;
+            MasterServerStatusUrl = statusUrl;
+            MaxPartySize = maxPartySize;
+            DiscoveryPort = null;
+            PartyPort = null;
+            MultiplayerPort = null;
         }
 
         /// <summary>
@@ -37,73 +41,78 @@ namespace MultiplayerCore.Patchers
         /// </summary>
         public void UseOfficialConfig()
         {
-            _enableOfficial = true;
+            MasterServerEndPoint = null;
+            MasterServerStatusUrl = null;
+            MaxPartySize = null;
+            DiscoveryPort = null;
+            PartyPort = null;
+            MultiplayerPort = null;
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.masterServerEndPoint), AffinityMethodType.Getter)]
         private void GetMasterServerEndPoint(ref MasterServerEndPoint __result)
         {
-            if (_enableOfficial || _networkConfig == null)
+            if (MasterServerEndPoint == null)
                 return;
 
-            __result = _networkConfig.masterServerEndPoint;
+            __result = MasterServerEndPoint;
             _logger.Debug($"Patching master server end point with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.masterServerStatusUrl), AffinityMethodType.Getter)]
         private void GetMasterServerStatusUrl(ref string __result)
         {
-            if (_enableOfficial || _networkConfig == null)
+            if (MasterServerStatusUrl == null)
                 return;
 
-            __result = _networkConfig.masterServerStatusUrl;
+            __result = MasterServerStatusUrl;
             _logger.Debug($"Patching master server status URL with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.maxPartySize), AffinityMethodType.Getter)]
         private void GetMaxPartySize(ref int __result)
         {
-            if (_enableOfficial || _networkConfig == null)
+            if (MaxPartySize == null)
                 return;
 
-            __result = _networkConfig.maxPartySize;
+            __result = (int)MaxPartySize;
             _logger.Debug($"Patching master server max party size with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.discoveryPort), AffinityMethodType.Getter)]
         private void GetDiscoveryPort(ref int __result)
         {
-            if (_enableOfficial || _networkConfig == null)
+            if (DiscoveryPort == null)
                 return;
 
-            __result = _networkConfig.discoveryPort;
-            _logger.Debug($"Patching master server discovery port with '{__result}'.");
+            __result = (int)DiscoveryPort;
+            _logger.Debug($"Patching network config discovery port with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.partyPort), AffinityMethodType.Getter)]
         private void GetPartyPort(ref int __result)
         {
-            if (_enableOfficial || _networkConfig == null)
+            if (PartyPort == null)
                 return;
 
-            __result = _networkConfig.partyPort;
-            _logger.Debug($"Patching master server party port with '{__result}'.");
+            __result = (int)PartyPort;
+            _logger.Debug($"Patching network config party port with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.multiplayerPort), AffinityMethodType.Getter)]
         private void GetMultiplayerPort(ref int __result)
         {
-            if (_enableOfficial || _networkConfig == null)
+            if (MultiplayerPort == null)
                 return;
 
-            __result = _networkConfig.multiplayerPort;
-            _logger.Debug($"Patching master server multiplayer port with '{__result}'.");
+            __result = (int)MultiplayerPort;
+            _logger.Debug($"Patching network config multiplayer port with '{__result}'.");
         }
 
         [AffinityPatch(typeof(UserCertificateValidator), "ValidateCertificateChainInternal")]
         private bool ValidateCertificateChain()
         {
-            if (_enableOfficial || _networkConfig == null)
+            if (MasterServerEndPoint == null)
                 return true;
 
             // TODO
