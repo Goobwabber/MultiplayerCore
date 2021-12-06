@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+  "id": "MultiplayerCore",
+  "name": "MultiplayerCore",
+  "author": "Goobwabber",
+  "version": "1.0.0",
+  "description": "Adds custom songs to Beat Saber Multiplayer.",
+  "gameVersion": "1.19.0",
+  "dependsOn": {
+    "BSIPA": "^4.1.4",
+    "SongCore": "^3.2.0",
+    "BeatSaverSharp": "^3.0.1",
+    "SiraUtil": "^3.0.0"
+  },
+  "links": {
+    "project-home": "https://github.com/Goobwabber/MultiplayerCore",
+    "donate": "https://github.com/Goobwabber/MultiplayerCore#donate"
+  }
+}
