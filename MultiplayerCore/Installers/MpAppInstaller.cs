@@ -28,7 +28,7 @@ namespace MultiplayerCore.Installers
             Container.BindInterfacesAndSelfTo<NetworkConfigPatcher>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlayerCountPatcher>().AsSingle();
             Container.BindInterfacesAndSelfTo<LoggingPatcher>().AsSingle();
-            Container.Bind<BGNetLogger>().ToSelf().AsSingle();
+            Container.Bind<BGNetDebugLogger>().ToSelf().AsSingle();
         }
     }
 }

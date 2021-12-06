@@ -2,11 +2,11 @@
 
 namespace MultiplayerCore.Objects
 {
-    public class BGNetLogger : BGNetDebug.ILogger
+    public class BGNetDebugLogger : BGNetDebug.ILogger
     {
         private readonly SiraLog _logger;
 
-        internal BGNetLogger(
+        internal BGNetDebugLogger(
             SiraLog logger)
         {
             _logger = logger;

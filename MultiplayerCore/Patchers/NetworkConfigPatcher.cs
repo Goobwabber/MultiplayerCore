@@ -109,6 +109,7 @@ namespace MultiplayerCore.Patchers
             _logger.Debug($"Patching network config multiplayer port with '{__result}'.");
         }
 
+        [AffinityPrefix]
         [AffinityPatch(typeof(UserCertificateValidator), "ValidateCertificateChainInternal")]
         private bool ValidateCertificateChain()
         {
