@@ -43,7 +43,7 @@ namespace MultiplayerCore
 		[OnDisable]
 		public void OnDisable()
 		{
-			_harmony.UnpatchAll(ID);
+			_harmony.UnpatchSelf();
 		}
 	}
 }

@@ -112,8 +112,6 @@ namespace MultiplayerCore.Objects
                 try
                 {
                     SongCore.Loader.SongsLoadedEvent += awaiter.OnEvent;
-
-                    SongCore.Collections.AddSong($"custom_level_{levelHash}", folderPath);
                     SongCore.Loader.Instance.RefreshSongs(false);
                     await awaiter.Task;
                 }
