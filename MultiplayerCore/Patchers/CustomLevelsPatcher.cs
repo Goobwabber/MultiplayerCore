@@ -38,13 +38,5 @@ namespace MultiplayerCore.Patchers
             if (!string.IsNullOrEmpty(playersMissingLevelText) && ____startGameReadyButton.interactable)
                 __instance.SetStartGameEnabled(CannotStartGameReason.DoNotOwnSong);
         }
-
-        [AffinityPostfix]
-        [AffinityPatch(typeof(MultiplayerSessionManager), "InitInternal")]
-        private void SessionManagerInitInternal(MultiplayerSessionManager __instance)
-        {
-            __instance.SetLocalPlayerState("modded", true);
-            // TODO: move this to a better place
-        }
     }
 }

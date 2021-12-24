@@ -66,11 +66,6 @@
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\LiteNetLib.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
-		<Reference Include="MediaLoader">
-			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\MediaLoader.dll</HintPath>
-			<Private>False</Private>
-			<SpecificVersion>False</SpecificVersion>
-		</Reference>
 		<Reference Include="netstandard">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\netstandard.dll</HintPath>
 			<Private>False</Private>
