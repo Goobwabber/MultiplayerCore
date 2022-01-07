@@ -5,6 +5,8 @@ namespace MultiplayerCore.Patchers
 {
     public class NetworkConfigPatcher : IAffinity
     {
+        public const int OfficialMaxPartySize = 5;
+
         public MasterServerEndPoint? MasterServerEndPoint { get; set; }
         public string? MasterServerStatusUrl { get; set; }
         public int? MaxPartySize { get; set; }
@@ -31,22 +33,16 @@ namespace MultiplayerCore.Patchers
             MasterServerEndPoint = endPoint;
             MasterServerStatusUrl = statusUrl;
             MaxPartySize = maxPartySize;
-            DiscoveryPort = null;
-            PartyPort = null;
-            MultiplayerPort = null;
         }
 
         /// <summary>
-        /// Uses the official network config.
+        /// Uses the official servers.
         /// </summary>
-        public void UseOfficialConfig()
+        public void UseOfficialServer()
         {
             MasterServerEndPoint = null;
             MasterServerStatusUrl = null;
             MaxPartySize = null;
-            DiscoveryPort = null;
-            PartyPort = null;
-            MultiplayerPort = null;
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.masterServerEndPoint), AffinityMethodType.Getter)]
@@ -73,7 +69,10 @@ namespace MultiplayerCore.Patchers
         private void GetMaxPartySize(ref int __result)
         {
             if (MaxPartySize == null)
+            {
+                __result = OfficialMaxPartySize;
                 return;
+            }
 
             __result = (int)MaxPartySize;
             _logger.Debug($"Patching master server max party size with '{__result}'.");
