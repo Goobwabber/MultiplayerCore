@@ -6,6 +6,8 @@ using IPA.Loader;
 using MultiplayerCore.Installers;
 using SiraUtil.Zenject;
 using System;
+using System.IO;
+using UnityEngine;
 using IPALogger = IPA.Logging.Logger;
 
 namespace MultiplayerCore
@@ -13,10 +15,12 @@ namespace MultiplayerCore
     [Plugin(RuntimeOptions.SingleStartInit)]
     class Plugin
     {
-        private readonly Harmony _harmony;
+		public const string ID = "com.goobwabber.multiplayercore";
+		public const string CustomLevelsPath = "CustomMultiplayerLevels";
+
+		private readonly Harmony _harmony;
         private readonly PluginMetadata _metadata;
 		private readonly BeatSaver _beatsaver;
-        public const string ID = "com.goobwabber.multiplayercore";
 
 		[Init]
 		public Plugin(IPALogger logger, PluginMetadata pluginMetadata, Zenjector zenjector)
@@ -37,6 +41,7 @@ namespace MultiplayerCore
 		[OnEnable]
 		public void OnEnable()
 		{
+			SongCore.Collections.AddSeperateSongFolder("Multiplayer", Path.Combine(Application.dataPath, CustomLevelsPath), SongCore.Data.FolderLevelPack.CustomLevels);
 			_harmony.PatchAll(_metadata.Assembly);
 		}
 

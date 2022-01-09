@@ -9,12 +9,13 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace MultiplayerCore.Objects
 {
     public class MpLevelDownloader
     {
-        public readonly string CustomLevelsFolder = Path.Combine(IPA.Utilities.UnityGame.InstallPath, "Beat Saber_Data", "CustomLevels");
+        public readonly string CustomLevelsFolder = Path.Combine(Application.dataPath, Plugin.CustomLevelsPath);
 
         private ConcurrentDictionary<string, Task<bool>> _downloads = new();
         private readonly ZipExtractor _zipExtractor = new();
