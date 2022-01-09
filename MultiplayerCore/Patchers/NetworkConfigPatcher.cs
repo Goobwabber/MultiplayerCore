@@ -30,6 +30,7 @@ namespace MultiplayerCore.Patchers
         /// <param name="maxPartySize"></param>
         public void UseMasterServer(MasterServerEndPoint endPoint, string statusUrl, int? maxPartySize = null)
         {
+            _logger.Debug($"Master server set to '{endPoint}'");
             MasterServerEndPoint = endPoint;
             MasterServerStatusUrl = statusUrl;
             MaxPartySize = maxPartySize;
@@ -40,6 +41,7 @@ namespace MultiplayerCore.Patchers
         /// </summary>
         public void UseOfficialServer()
         {
+            _logger.Debug($"Master server set to 'official'");
             MasterServerEndPoint = null;
             MasterServerStatusUrl = null;
             MaxPartySize = null;
@@ -52,7 +54,6 @@ namespace MultiplayerCore.Patchers
                 return;
 
             __result = MasterServerEndPoint;
-            _logger.Debug($"Patching master server end point with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.masterServerStatusUrl), AffinityMethodType.Getter)]
@@ -62,7 +63,6 @@ namespace MultiplayerCore.Patchers
                 return;
 
             __result = MasterServerStatusUrl;
-            _logger.Debug($"Patching master server status URL with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.maxPartySize), AffinityMethodType.Getter)]
