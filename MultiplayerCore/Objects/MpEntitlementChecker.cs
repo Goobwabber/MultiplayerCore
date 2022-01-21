@@ -106,7 +106,7 @@ namespace MultiplayerCore.Objects
 				if (beatmap == null)
 					return EntitlementsStatus.NotOwned;
 
-				BeatmapVersion beatmapVersion = beatmap.Versions.First(x => x.Hash == levelHash);
+				BeatmapVersion beatmapVersion = beatmap.Versions.First(x => string.Equals(x.Hash, levelHash, StringComparison.OrdinalIgnoreCase));
 				string[] requirements = beatmapVersion.Difficulties
 					.Aggregate(Array.Empty<string>(), (a, n) => a
 						.Append(n.Chroma ? "Chroma" : "")
