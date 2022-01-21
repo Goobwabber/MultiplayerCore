@@ -82,7 +82,7 @@ namespace MultiplayerCore.Objects
 		{
 			_logger.Debug($"Checking level entitlement for '{levelId}'");
 
-			string? levelHash = SongCore.Collections.hashForLevelID(levelId);
+			string? levelHash = Utilities.HashForLevelID(levelId);
 			if (string.IsNullOrEmpty(levelHash))
 				return base.GetEntitlementStatus(levelId);
 
@@ -127,7 +127,7 @@ namespace MultiplayerCore.Objects
 		/// <returns>Level entitlement status</returns>
 		public Task<EntitlementsStatus> GetUserEntitlementStatus(string userId, string levelId)
 		{
-			if (!string.IsNullOrEmpty(SongCore.Collections.hashForLevelID(levelId)) && !_sessionManager.GetPlayerByUserId(userId).HasState("modded"))
+			if (!string.IsNullOrEmpty(Utilities.HashForLevelID(levelId)) && !_sessionManager.GetPlayerByUserId(userId).HasState("modded"))
 				return Task.FromResult(EntitlementsStatus.NotOwned);
 
 			if (userId == _sessionManager.localPlayer.userId)

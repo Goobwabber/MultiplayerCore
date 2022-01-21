@@ -67,7 +67,7 @@ namespace MultiplayerCore.Objects
 
         public override void HandleMenuRpcManagerRecommendBeatmap(string userId, BeatmapIdentifierNetSerializable beatmapId)
         {
-            if (!string.IsNullOrEmpty(SongCore.Collections.hashForLevelID(beatmapId.levelID)))
+            if (!string.IsNullOrEmpty(Utilities.HashForLevelID(beatmapId.levelID)))
                 return;
             base.HandleMenuRpcManagerRecommendBeatmap(userId, beatmapId);
         }
@@ -75,7 +75,7 @@ namespace MultiplayerCore.Objects
         public async override void SetLocalPlayerBeatmapLevel(string levelId, BeatmapDifficulty beatmapDifficulty, BeatmapCharacteristicSO characteristic)
         {
             _logger.Debug($"Local player selected song '{levelId}'");
-            string? levelHash = SongCore.Collections.hashForLevelID(levelId);
+            string? levelHash = Utilities.HashForLevelID(levelId);
             if (!string.IsNullOrEmpty(levelHash))
             {
                 IPreviewBeatmapLevel? beatmapLevel = await _beatmapLevelProvider.GetBeatmap(levelHash);
