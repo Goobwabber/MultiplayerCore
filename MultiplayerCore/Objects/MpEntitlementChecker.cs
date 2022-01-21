@@ -23,12 +23,6 @@ namespace MultiplayerCore.Objects
 		private BeatSaver _beatsaver = null!;
 		private SiraLog _logger = null!;
 
-		internal MpEntitlementChecker(
-			IMultiplayerSessionManager sessionManager)
-		{
-			_sessionManager = sessionManager;
-		}
-
 		[Inject]
 		internal void Inject(
 			IMultiplayerSessionManager sessionManager,
