@@ -1,4 +1,5 @@
-﻿using SiraUtil.Logging;
+﻿using System;
+using SiraUtil.Logging;
 
 namespace MultiplayerCore.Objects
 {
@@ -15,6 +16,13 @@ namespace MultiplayerCore.Objects
 
         public void LogError(string message)
             => _logger.Error(message);
+
+        public void LogException(Exception exception, string? message = null)
+        {
+            if (message != null)
+                _logger.Error(message);
+            _logger.Error(exception);
+        }
 
         public void LogInfo(string message)
             => _logger.Info(message);
