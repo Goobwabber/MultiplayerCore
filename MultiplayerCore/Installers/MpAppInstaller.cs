@@ -22,7 +22,7 @@ namespace MultiplayerCore.Installers
         public override void InstallBindings()
         {
             Container.BindInstance(new UBinder<Plugin, BeatSaver>(_beatsaver)).AsSingle();
-            Container.Bind<MpPacketSerializer>().ToSelf().AsSingle();
+            Container.BindInterfacesAndSelfTo<MpPacketSerializer>().AsSingle();
             Container.Bind<MpPlayerManager>().ToSelf().AsSingle();
             Container.Bind<MpLevelDownloader>().ToSelf().AsSingle();
             Container.Bind<MpBeatmapLevelProvider>().ToSelf().AsSingle();
