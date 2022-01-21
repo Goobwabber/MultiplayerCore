@@ -48,21 +48,16 @@ namespace MultiplayerCore.Objects
 
         [AffinityTranspiler]
         [AffinityPatch(typeof(MultiplayerLevelLoader), nameof(MultiplayerLevelLoader.LoadLevel))]
-        private IEnumerable<CodeInstruction> LoadLevelPatch(IEnumerable<CodeInstruction> instructions)
-        {
-            var codes = instructions.ToList();
-            for (int i = 0; i < codes.Count; i++)
-            {
-                if (codes[i].opcode == OpCodes.Stfld)
-                {
-                    if (codes[i].OperandIs(_previewBeatmapLevelField))
-                        codes.RemoveRange(i - 7, 7);
-                    if (codes[i].OperandIs(_beatmapCharacteristic))
-                        codes.RemoveRange(i - 11, 11);
-                }
-            }
-            return codes.AsEnumerable();
-        }
+        private IEnumerable<CodeInstruction> LoadLevelPatch(IEnumerable<CodeInstruction> instructions) =>
+            new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Stfld, _previewBeatmapLevelField))
+                .Advance(-6)
+                .RemoveInstructions(7)
+                .MatchForward(false, new CodeMatch(OpCodes.Stfld, _beatmapCharacteristicField))
+                .Advance(-9)
+                .RemoveInstructions(10)
+                .InstructionEnumeration()
+                .ToList();
 
         public override void Tick()
         {
