@@ -1,4 +1,4 @@
-﻿using BeatSaverSharp;
+using BeatSaverSharp;
 using BeatSaverSharp.Models;
 using SiraUtil.Logging;
 using SiraUtil.Zenject;
@@ -19,7 +19,7 @@ namespace MultiplayerCore.Objects
 		private ConcurrentDictionary<string, ConcurrentDictionary<string, EntitlementsStatus>> _entitlementsDictionary = new();
 		private ConcurrentDictionary<string, ConcurrentDictionary<string, TaskCompletionSource<EntitlementsStatus>>> _tcsDictionary = new();
 
-		private readonly IMultiplayerSessionManager _sessionManager;
+		private IMultiplayerSessionManager _sessionManager = null!;
 		private BeatSaver _beatsaver = null!;
 		private SiraLog _logger = null!;
 
@@ -31,9 +31,11 @@ namespace MultiplayerCore.Objects
 
 		[Inject]
 		internal void Inject(
+			IMultiplayerSessionManager sessionManager,
 			[InjectOptional] UBinder<Plugin, BeatSaver> beatsaver,
 			[InjectOptional] SiraLog logger)
         {
+			_sessionManager = sessionManager;
 			_beatsaver = beatsaver.Value;
 			_logger = logger;
 		}
