@@ -65,14 +65,16 @@ namespace MultiplayerCore.Objects
             {
                 base.Tick();
                 if (_loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown)
+                {
+                    _previewBeatmapLevel = _beatmapLevelsModel.GetLevelPreviewForLevelId(_beatmapId.levelID);
+                    _beatmapCharacteristic = _previewBeatmapLevel.previewDifficultyBeatmapSets.First((PreviewDifficultyBeatmapSet set) => set.beatmapCharacteristic.serializedName == _beatmapId.beatmapCharacteristicSerializedName).beatmapCharacteristic;
                     _logger.Debug($"Loaded level {_beatmapId.levelID}");
+                }
             }
             else if (_loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown)
             {
                 if (_sessionManager.connectedPlayers.All(p => _entitlementChecker.GetUserEntitlementStatusWithoutRequest(p.userId, _beatmapId.levelID) == EntitlementsStatus.Ok))
                 {
-                    _previewBeatmapLevel = _beatmapLevelsModel.GetLevelPreviewForLevelId(_beatmapId.levelID);
-                    _beatmapCharacteristic = _previewBeatmapLevel.previewDifficultyBeatmapSets.First((PreviewDifficultyBeatmapSet set) => set.beatmapCharacteristic.serializedName == _beatmapId.beatmapCharacteristicSerializedName).beatmapCharacteristic;
                     _logger.Debug($"All players finished loading");
                     base.Tick();
                 }
