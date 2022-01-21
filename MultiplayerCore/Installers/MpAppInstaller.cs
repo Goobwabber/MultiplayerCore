@@ -23,7 +23,7 @@ namespace MultiplayerCore.Installers
         {
             Container.BindInstance(new UBinder<Plugin, BeatSaver>(_beatsaver)).AsSingle();
             Container.BindInterfacesAndSelfTo<MpPacketSerializer>().AsSingle();
-            Container.Bind<MpPlayerManager>().ToSelf().AsSingle();
+            Container.BindInterfacesAndSelfTo<MpPlayerManager>().AsSingle();
             Container.Bind<MpLevelDownloader>().ToSelf().AsSingle();
             Container.Bind<MpBeatmapLevelProvider>().ToSelf().AsSingle();
             Container.BindInterfacesAndSelfTo<CustomLevelsPatcher>().AsSingle();
