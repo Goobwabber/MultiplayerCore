@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using MultiplayerCore.Objects;
+using SiraUtil.Affinity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace MultiplayerCore.Patches
 
         private static FromBinderNonGeneric LevelLoaderAttacher(DiContainer contract)
         {
-            return contract.Bind(typeof(MultiplayerLevelLoader), typeof(MpLevelLoader), typeof(ITickable)).To<MpLevelLoader>();
+            return contract.Bind(typeof(MultiplayerLevelLoader), typeof(MpLevelLoader), typeof(ITickable), typeof(IAffinity)).To<MpLevelLoader>();
         }
     }
 }
