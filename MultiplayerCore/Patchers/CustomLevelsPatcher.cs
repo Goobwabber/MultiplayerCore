@@ -6,13 +6,16 @@ namespace MultiplayerCore.Patchers
 {
     public class CustomLevelsPatcher : IAffinity
     {
-        private readonly NetworkConfigPatcher _networkConfig;
+        private readonly NetworkConfigPatcher _networkConfigPatcher;
+        private readonly INetworkConfig _networkConfig;
         private readonly SiraLog _logger;
 
         internal CustomLevelsPatcher(
-            NetworkConfigPatcher networkConfig,
+            NetworkConfigPatcher networkConfigPatcher,
+            INetworkConfig networkConfig,
             SiraLog logger)
         {
+            _networkConfigPatcher = networkConfigPatcher;
             _networkConfig = networkConfig;
             _logger = logger;
         }
@@ -22,7 +25,7 @@ namespace MultiplayerCore.Patchers
         private bool CustomLevelsEnabled(ref bool __result, SongPackMask ____songPackMask)
         {
             __result = 
-                _networkConfig.MasterServerEndPoint != null 
+                (_networkConfigPatcher.MasterServerEndPoint != null || (_networkConfig is CustomNetworkConfig))
                 && ____songPackMask.Contains(new SongPackMask("custom_levelpack_CustomLevels"));
             return false;
         }

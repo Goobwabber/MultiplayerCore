@@ -7,7 +7,7 @@ namespace MultiplayerCore.Patchers
     {
         public const int OfficialMaxPartySize = 5;
 
-        public MasterServerEndPoint? MasterServerEndPoint { get; set; }
+        public DnsEndPoint? MasterServerEndPoint { get; set; }
         public string? MasterServerStatusUrl { get; set; }
         public int? MaxPartySize { get; set; }
         public int? DiscoveryPort { get; set; }
@@ -15,10 +15,13 @@ namespace MultiplayerCore.Patchers
         public int? MultiplayerPort { get; set; }
 
         private readonly SiraLog _logger;
+        private readonly INetworkConfig _networkConfig;
 
         internal NetworkConfigPatcher(
+            INetworkConfig networkConfig,
             SiraLog logger)
         {
+            _networkConfig = networkConfig;
             _logger = logger;
         }
 
@@ -28,7 +31,7 @@ namespace MultiplayerCore.Patchers
         /// <param name="endPoint"></param>
         /// <param name="statusUrl"></param>
         /// <param name="maxPartySize"></param>
-        public void UseMasterServer(MasterServerEndPoint endPoint, string statusUrl, int? maxPartySize = null)
+        public void UseMasterServer(DnsEndPoint endPoint, string statusUrl, int? maxPartySize = null)
         {
             _logger.Debug($"Master server set to '{endPoint}'");
             MasterServerEndPoint = endPoint;
@@ -48,7 +51,7 @@ namespace MultiplayerCore.Patchers
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.masterServerEndPoint), AffinityMethodType.Getter)]
-        private void GetMasterServerEndPoint(ref MasterServerEndPoint __result)
+        private void GetMasterServerEndPoint(ref DnsEndPoint __result)
         {
             if (MasterServerEndPoint == null)
                 return;
@@ -56,7 +59,7 @@ namespace MultiplayerCore.Patchers
             __result = MasterServerEndPoint;
         }
 
-        [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.masterServerStatusUrl), AffinityMethodType.Getter)]
+        [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.multiplayerStatusUrl), AffinityMethodType.Getter)]
         private void GetMasterServerStatusUrl(ref string __result)
         {
             if (MasterServerStatusUrl == null)
@@ -109,10 +112,10 @@ namespace MultiplayerCore.Patchers
         }
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(UserCertificateValidator), "ValidateCertificateChainInternal")]
+        [AffinityPatch(typeof(ClientCertificateValidator), "ValidateCertificateChainInternal")]
         private bool ValidateCertificateChain()
         {
-            if (MasterServerEndPoint == null)
+            if (MasterServerEndPoint == null && !(_networkConfig is CustomNetworkConfig))
                 return true;
 
             // TODO

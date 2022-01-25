@@ -21,5 +21,11 @@ namespace MultiplayerCore.Objects
 
         public void LogWarning(string message)
             => _logger.Warn(message);
+
+        public void LogException(System.Exception ex, string message) {
+            if(!string.IsNullOrEmpty(message))
+                _logger.Error(message);
+            _logger.Error(ex.ToString());
+        }
     }
 }

@@ -15,23 +15,23 @@ namespace MultiplayerCore.Patchers
         }
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(MasterServerAvailabilityModel), nameof(MasterServerAvailabilityModel.IsAvailabilityTaskValid))]
+        [AffinityPatch(typeof(MultiplayerStatusModel), nameof(MultiplayerStatusModel.IsAvailabilityTaskValid))]
         private bool IsAvailabilityTaskValid(ref bool __result)
         {
-            if (_networkConfig.masterServerStatusUrl == _lastStatusUrl)
+            if (_networkConfig.multiplayerStatusUrl == _lastStatusUrl)
                 return true;
-            _lastStatusUrl = _networkConfig.masterServerStatusUrl;
+            _lastStatusUrl = _networkConfig.multiplayerStatusUrl;
             __result = false;
             return false;
         }
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(MasterServerQuickPlaySetupModel), nameof(MasterServerQuickPlaySetupModel.IsQuickPlaySetupTaskValid))]
+        [AffinityPatch(typeof(QuickPlaySetupModel), nameof(QuickPlaySetupModel.IsQuickPlaySetupTaskValid))]
         private bool IsQuickplaySetupTaskValid(ref bool __result)
         {
-            if (_networkConfig.masterServerStatusUrl == _lastStatusUrl)
+            if (_networkConfig.multiplayerStatusUrl == _lastStatusUrl)
                 return true;
-            _lastStatusUrl = _networkConfig.masterServerStatusUrl;
+            _lastStatusUrl = _networkConfig.multiplayerStatusUrl;
             __result = false;
             return false;
         }
@@ -39,7 +39,7 @@ namespace MultiplayerCore.Patchers
         // If there is no availability data, assume that it's fine
         [AffinityPrefix]
         [AffinityPatch(typeof(MultiplayerUnavailableReasonMethods), nameof(MultiplayerUnavailableReasonMethods.TryGetMultiplayerUnavailableReason))]
-        private bool GetMultiplayerUnavailableReason(MasterServerAvailabilityData data, ref bool __result)
+        private bool GetMultiplayerUnavailableReason(MultiplayerStatusData data, ref bool __result)
         {
             if (data != null)
                 return true;
