@@ -1,4 +1,4 @@
-﻿using BeatSaverSharp;
+using BeatSaverSharp;
 using BeatSaverSharp.Models;
 using SiraUtil.Logging;
 using SiraUtil.Zenject;
@@ -19,21 +19,17 @@ namespace MultiplayerCore.Objects
 		private ConcurrentDictionary<string, ConcurrentDictionary<string, EntitlementsStatus>> _entitlementsDictionary = new();
 		private ConcurrentDictionary<string, ConcurrentDictionary<string, TaskCompletionSource<EntitlementsStatus>>> _tcsDictionary = new();
 
-		private readonly IMultiplayerSessionManager _sessionManager;
+		private IMultiplayerSessionManager _sessionManager = null!;
 		private BeatSaver _beatsaver = null!;
 		private SiraLog _logger = null!;
 
-		internal MpEntitlementChecker(
-			IMultiplayerSessionManager sessionManager)
-		{
-			_sessionManager = sessionManager;
-		}
-
 		[Inject]
 		internal void Inject(
+			IMultiplayerSessionManager sessionManager,
 			[InjectOptional] UBinder<Plugin, BeatSaver> beatsaver,
 			[InjectOptional] SiraLog logger)
         {
+			_sessionManager = sessionManager;
 			_beatsaver = beatsaver.Value;
 			_logger = logger;
 		}
@@ -86,7 +82,7 @@ namespace MultiplayerCore.Objects
 		{
 			_logger.Debug($"Checking level entitlement for '{levelId}'");
 
-			string? levelHash = SongCore.Collections.hashForLevelID(levelId);
+			string? levelHash = Utilities.HashForLevelID(levelId);
 			if (string.IsNullOrEmpty(levelHash))
 				return base.GetEntitlementStatus(levelId);
 
@@ -110,7 +106,7 @@ namespace MultiplayerCore.Objects
 				if (beatmap == null)
 					return EntitlementsStatus.NotOwned;
 
-				BeatmapVersion beatmapVersion = beatmap.Versions.First(x => x.Hash == levelHash);
+				BeatmapVersion beatmapVersion = beatmap.Versions.First(x => string.Equals(x.Hash, levelHash, StringComparison.OrdinalIgnoreCase));
 				string[] requirements = beatmapVersion.Difficulties
 					.Aggregate(Array.Empty<string>(), (a, n) => a
 						.Append(n.Chroma ? "Chroma" : "")
@@ -131,7 +127,7 @@ namespace MultiplayerCore.Objects
 		/// <returns>Level entitlement status</returns>
 		public Task<EntitlementsStatus> GetUserEntitlementStatus(string userId, string levelId)
 		{
-			if (!string.IsNullOrEmpty(SongCore.Collections.hashForLevelID(levelId)) && !_sessionManager.GetPlayerByUserId(userId).HasState("modded"))
+			if (!string.IsNullOrEmpty(Utilities.HashForLevelID(levelId)) && !_sessionManager.GetPlayerByUserId(userId).HasState("modded"))
 				return Task.FromResult(EntitlementsStatus.NotOwned);
 
 			if (userId == _sessionManager.localPlayer.userId)

@@ -20,7 +20,7 @@ namespace MultiplayerCore.Beatmaps.Packets
 
         public MpBeatmapPacket(IPreviewBeatmapLevel preview, string characteristic, BeatmapDifficulty difficulty)
         {
-            levelHash = SongCore.Collections.hashForLevelID(preview.levelID);
+            levelHash = Utilities.HashForLevelID(preview.levelID);
             songName = preview.songName;
             songSubName = preview.songSubName;
             songAuthorName = preview.songAuthorName;

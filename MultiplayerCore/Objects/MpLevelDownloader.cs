@@ -62,7 +62,7 @@ namespace MultiplayerCore.Objects
 
         private async Task<bool> TryDownloadLevelInternal(string levelId, CancellationToken cancellationToken, IProgress<double>? progress = null)
         {
-            string levelHash = SongCore.Collections.hashForLevelID(levelId);
+            string levelHash = Utilities.HashForLevelID(levelId);
             if (string.IsNullOrEmpty(levelHash))
             {
                 _logger.Error($"Could not parse hash from id {levelId}");
