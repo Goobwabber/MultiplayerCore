@@ -16,8 +16,7 @@ namespace MultiplayerCore
     class Plugin
     {
 		public const string ID = "com.goobwabber.multiplayercore";
-		//public const string CustomLevelsPath = "CustomMultiplayerLevels";
-		public const string CustomLevelsPath = "CustomLevels";
+		public const string CustomLevelsPath = "CustomMultiplayerLevels";
 
 		private readonly Harmony _harmony;
         private readonly PluginMetadata _metadata;
@@ -42,7 +41,7 @@ namespace MultiplayerCore
 		[OnEnable]
 		public void OnEnable()
 		{
-			//SongCore.Collections.AddSeperateSongFolder("Multiplayer", Path.Combine(Application.dataPath, CustomLevelsPath), SongCore.Data.FolderLevelPack.CustomLevels);
+			SongCore.Collections.AddSeperateSongFolder("Multiplayer", Path.Combine(Application.dataPath, CustomLevelsPath), SongCore.Data.FolderLevelPack.CustomLevels);
 			_harmony.PatchAll(_metadata.Assembly);
 		}
 
