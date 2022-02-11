@@ -99,7 +99,7 @@ namespace MultiplayerCore.Objects
 					.Aggregate(Array.Empty<string>(), (a, n) => a.Concat(n.additionalDifficultyData?._requirements ?? Array.Empty<string>()).ToArray())
 					.Distinct().ToArray();
 
-				bool hasRequirements = requirements.All(x => SongCore.Collections.capabilities.Contains(x));
+				bool hasRequirements = requirements.All(x => string.IsNullOrEmpty(x) || SongCore.Collections.capabilities.Contains(x));
 				return Task.FromResult(hasRequirements ? EntitlementsStatus.Ok : EntitlementsStatus.NotOwned);
             }
 
@@ -117,7 +117,7 @@ namespace MultiplayerCore.Objects
 						.Append(n.NoodleExtensions ? "Noodle Extensions" : "")
 						.ToArray()); // Damn this looks really cringe
 
-				bool hasRequirements = requirements.All(x => SongCore.Collections.capabilities.Contains(x));
+				bool hasRequirements = requirements.All(x => string.IsNullOrEmpty(x) || SongCore.Collections.capabilities.Contains(x));
 				return hasRequirements ? EntitlementsStatus.NotDownloaded : EntitlementsStatus.NotOwned;
 			});
 		}

@@ -94,7 +94,7 @@ namespace MultiplayerCore.Objects
             if (beatmap == null)
                 throw new Exception("Not found on BeatSaver.");
 
-            BeatmapVersion beatmapVersion = beatmap.Versions.First(version => version.Hash == levelHash);
+            BeatmapVersion beatmapVersion = beatmap.Versions.First(x => string.Equals(x.Hash, levelHash, StringComparison.OrdinalIgnoreCase));
             byte[]? beatmapBytes = await beatmapVersion.DownloadZIP(cancellationToken, progress);
 
             string folderPath = GetSongDirectoryName(beatmap.LatestVersion.Key, beatmap.Metadata.SongName, beatmap.Metadata.LevelAuthorName);
