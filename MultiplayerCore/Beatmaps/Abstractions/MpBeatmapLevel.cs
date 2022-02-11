@@ -35,8 +35,5 @@ namespace MultiplayerCore.Beatmaps.Abstractions
 
         public virtual Task<Sprite> GetCoverImageAsync(CancellationToken cancellationToken)
             => Task.FromResult<Sprite>(null!);
-
-        public virtual Task<AudioClip> GetPreviewAudioClipAsync(CancellationToken cancellationToken) 
-            => Task.FromResult<AudioClip>(null!);
     }
 }
