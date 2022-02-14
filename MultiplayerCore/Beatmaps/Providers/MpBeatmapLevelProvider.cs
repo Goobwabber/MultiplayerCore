@@ -30,7 +30,12 @@ namespace MultiplayerCore.Beatmaps.Providers
         /// <param name="levelHash">The hash of the level to get</param>
         /// <returns>An <see cref="IPreviewBeatmapLevel"/> with a matching level hash, or null if none was found.</returns>
         public IPreviewBeatmapLevel? GetBeatmapFromLocalBeatmaps(string levelHash)
-            => SongCore.Loader.GetLevelByHash(levelHash);
+        {
+            IPreviewBeatmapLevel? preview = SongCore.Loader.GetLevelByHash(levelHash);
+            if (preview == null)
+                return null;
+            return new LocalBeatmapLevel(levelHash, preview);
+        }
 
         /// <summary>
         /// Gets an <see cref="IPreviewBeatmapLevel"/> for the specified level hash from BeatSaver.

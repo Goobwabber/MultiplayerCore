@@ -18,17 +18,20 @@ namespace MultiplayerCore.Objects
         private readonly IMultiplayerSessionManager _sessionManager;
         private readonly MpLevelDownloader _levelDownloader;
         private readonly MpEntitlementChecker _entitlementChecker;
+        private readonly IMenuRpcManager _rpcManager;
         private readonly SiraLog _logger;
 
         internal MpLevelLoader(
             IMultiplayerSessionManager sessionManager,
             MpLevelDownloader levelDownloader,
             NetworkPlayerEntitlementChecker entitlementChecker,
+            IMenuRpcManager rpcManager,
             SiraLog logger)
         {
             _sessionManager = sessionManager;
             _levelDownloader = levelDownloader;
             _entitlementChecker = (entitlementChecker as MpEntitlementChecker)!;
+            _rpcManager = rpcManager;
             _logger = logger;
         }
 
@@ -68,6 +71,7 @@ namespace MultiplayerCore.Objects
                 {
                     _previewBeatmapLevel = _beatmapLevelsModel.GetLevelPreviewForLevelId(_beatmapId.levelID);
                     _beatmapCharacteristic = _previewBeatmapLevel.previewDifficultyBeatmapSets.First((PreviewDifficultyBeatmapSet set) => set.beatmapCharacteristic.serializedName == _beatmapId.beatmapCharacteristicSerializedName).beatmapCharacteristic;
+                    _rpcManager.SetIsEntitledToLevel(_beatmapId.levelID, EntitlementsStatus.Ok);
                     _logger.Debug($"Loaded level {_beatmapId.levelID}");
                 }
             }

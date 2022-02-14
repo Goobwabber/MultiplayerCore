@@ -23,7 +23,7 @@ namespace MultiplayerCore.Patchers
         [AffinityPatch(typeof(ConnectedPlayerManager), "OnNetworkReceive")]
         private IEnumerable<CodeInstruction> PacketErrorLogger(IEnumerable<CodeInstruction> instructions, ILGenerator gen)
         {
-            LocalBuilder? localException = gen.DeclareLocal(typeof(Exception));
+            LocalBuilder localException = gen.DeclareLocal(typeof(Exception));
             localException.SetLocalSymInfo("ex");
 
             foreach (CodeInstruction? code in instructions)
@@ -40,6 +40,7 @@ namespace MultiplayerCore.Patchers
                     current = new CodeInstruction(OpCodes.Ldloc, localException);
                     yield return current; // Load exception onto stack
                     current = new CodeInstruction(OpCodes.Callvirt, SymbolExtensions.GetMethodInfo(() => LogPacketError(null!, null!)));
+                    yield return current;
                 } 
                 else
                 {

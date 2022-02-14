@@ -60,7 +60,10 @@ namespace MultiplayerCore.Objects
 
 		private void HandleSetIsEntitledToLevel(string userId, string levelId, EntitlementsStatus entitlement)
 		{
-			_logger.Debug($"Entitlement from '{userId}' for '{levelId}' is {entitlement}");
+			if (!_entitlementsDictionary.TryGetValue(userId, out var userDictionary) 
+				|| !userDictionary.TryGetValue(levelId, out var currentEntitlement) ||
+				currentEntitlement != entitlement) // only log if entitlement is different
+				_logger.Debug($"Entitlement from '{userId}' for '{levelId}' is {entitlement}");
 
 			if (!_entitlementsDictionary.ContainsKey(userId))
 				_entitlementsDictionary[userId] = new ConcurrentDictionary<string, EntitlementsStatus>();
@@ -80,7 +83,7 @@ namespace MultiplayerCore.Objects
 		/// <returns>Level entitlement status</returns>
 		public override Task<EntitlementsStatus> GetEntitlementStatus(string levelId)
 		{
-			_logger.Debug($"Checking level entitlement for '{levelId}'");
+			//_logger.Debug($"Checking level entitlement for '{levelId}'");
 
 			string? levelHash = Utilities.HashForLevelID(levelId);
 			if (string.IsNullOrEmpty(levelHash))
@@ -96,7 +99,7 @@ namespace MultiplayerCore.Objects
 					.Aggregate(Array.Empty<string>(), (a, n) => a.Concat(n.additionalDifficultyData?._requirements ?? Array.Empty<string>()).ToArray())
 					.Distinct().ToArray();
 
-				bool hasRequirements = requirements.All(x => SongCore.Collections.capabilities.Contains(x));
+				bool hasRequirements = requirements.All(x => string.IsNullOrEmpty(x) || SongCore.Collections.capabilities.Contains(x));
 				return Task.FromResult(hasRequirements ? EntitlementsStatus.Ok : EntitlementsStatus.NotOwned);
             }
 
@@ -114,7 +117,7 @@ namespace MultiplayerCore.Objects
 						.Append(n.NoodleExtensions ? "Noodle Extensions" : "")
 						.ToArray()); // Damn this looks really cringe
 
-				bool hasRequirements = requirements.All(x => SongCore.Collections.capabilities.Contains(x));
+				bool hasRequirements = requirements.All(x => string.IsNullOrEmpty(x) || SongCore.Collections.capabilities.Contains(x));
 				return hasRequirements ? EntitlementsStatus.NotDownloaded : EntitlementsStatus.NotOwned;
 			});
 		}
