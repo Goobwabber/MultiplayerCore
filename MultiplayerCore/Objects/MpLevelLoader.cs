@@ -35,32 +35,16 @@ namespace MultiplayerCore.Objects
             _logger = logger;
         }
 
-        public override void LoadLevel(BeatmapIdentifierNetSerializable beatmapId, GameplayModifiers gameplayModifiers, float initialStartTime)
+        public override void LoadLevel(ILevelGameplaySetupData gameplaySetupData, float initialStartTime)
         {
-            string levelHash = SongCore.Collections.hashForLevelID(beatmapId.levelID);
-            _logger.Debug($"Loading level {beatmapId.levelID}");
-            base.LoadLevel(beatmapId, gameplayModifiers, initialStartTime);
+            string levelHash = SongCore.Collections.hashForLevelID(gameplaySetupData.beatmapLevel.beatmapLevel.levelID);
+            _logger.Debug($"Loading level {gameplaySetupData.beatmapLevel.beatmapLevel.levelID}");
+            base.LoadLevel(gameplaySetupData, initialStartTime);
             if (levelHash != null && !SongCore.Collections.songWithHashPresent(levelHash))
-                _getBeatmapLevelResultTask = DownloadBeatmapLevelAsync(beatmapId.levelID, _getBeatmapCancellationTokenSource.Token);
+                _getBeatmapLevelResultTask = DownloadBeatmapLevelAsync(gameplaySetupData.beatmapLevel.beatmapLevel.levelID, _getBeatmapCancellationTokenSource.Token);
 
             // Possible race condition here
         }
-
-        private readonly FieldInfo _previewBeatmapLevelField = AccessTools.Field(typeof(MultiplayerLevelLoader), "_previewBeatmapLevel");
-        private readonly FieldInfo _beatmapCharacteristicField = AccessTools.Field(typeof(MultiplayerLevelLoader), "_beatmapCharacteristic");
-
-        [AffinityTranspiler]
-        [AffinityPatch(typeof(MultiplayerLevelLoader), nameof(MultiplayerLevelLoader.LoadLevel))]
-        private IEnumerable<CodeInstruction> LoadLevelPatch(IEnumerable<CodeInstruction> instructions) =>
-            new CodeMatcher(instructions)
-                .MatchForward(false, new CodeMatch(OpCodes.Stfld, _previewBeatmapLevelField))
-                .Advance(-6)
-                .RemoveInstructions(7)
-                .MatchForward(false, new CodeMatch(OpCodes.Stfld, _beatmapCharacteristicField))
-                .Advance(-9)
-                .RemoveInstructions(10)
-                .InstructionEnumeration()
-                .ToList();
 
         public override void Tick()
         {
@@ -69,15 +53,13 @@ namespace MultiplayerCore.Objects
                 base.Tick();
                 if (_loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown)
                 {
-                    _previewBeatmapLevel = _beatmapLevelsModel.GetLevelPreviewForLevelId(_beatmapId.levelID);
-                    _beatmapCharacteristic = _previewBeatmapLevel.previewDifficultyBeatmapSets.First((PreviewDifficultyBeatmapSet set) => set.beatmapCharacteristic.serializedName == _beatmapId.beatmapCharacteristicSerializedName).beatmapCharacteristic;
-                    _rpcManager.SetIsEntitledToLevel(_beatmapId.levelID, EntitlementsStatus.Ok);
-                    _logger.Debug($"Loaded level {_beatmapId.levelID}");
+                    _rpcManager.SetIsEntitledToLevel(_gameplaySetupData.beatmapLevel.beatmapLevel.levelID, EntitlementsStatus.Ok);
+                    _logger.Debug($"Loaded level {_gameplaySetupData.beatmapLevel.beatmapLevel.levelID}");
                 }
             }
             else if (_loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown)
             {
-                if (_sessionManager.connectedPlayers.All(p => _entitlementChecker.GetUserEntitlementStatusWithoutRequest(p.userId, _beatmapId.levelID) == EntitlementsStatus.Ok))
+                if (_sessionManager.connectedPlayers.All(p => _entitlementChecker.GetUserEntitlementStatusWithoutRequest(p.userId, _gameplaySetupData.beatmapLevel.beatmapLevel.levelID) == EntitlementsStatus.Ok))
                 {
                     _logger.Debug($"All players finished loading");
                     base.Tick();

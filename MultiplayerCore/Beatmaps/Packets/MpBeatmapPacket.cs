@@ -18,18 +18,18 @@ namespace MultiplayerCore.Beatmaps.Packets
 
         public MpBeatmapPacket() { }
 
-        public MpBeatmapPacket(IPreviewBeatmapLevel preview, string characteristic, BeatmapDifficulty difficulty)
+        public MpBeatmapPacket(PreviewDifficultyBeatmap beatmap)
         {
-            levelHash = Utilities.HashForLevelID(preview.levelID);
-            songName = preview.songName;
-            songSubName = preview.songSubName;
-            songAuthorName = preview.songAuthorName;
-            levelAuthorName = preview.levelAuthorName;
-            beatsPerMinute = preview.beatsPerMinute;
-            songDuration = preview.songDuration;
+            levelHash = Utilities.HashForLevelID(beatmap.beatmapLevel.levelID);
+            songName = beatmap.beatmapLevel.songName;
+            songSubName = beatmap.beatmapLevel.songSubName;
+            songAuthorName = beatmap.beatmapLevel.songAuthorName;
+            levelAuthorName = beatmap.beatmapLevel.levelAuthorName;
+            beatsPerMinute = beatmap.beatmapLevel.beatsPerMinute;
+            songDuration = beatmap.beatmapLevel.songDuration;
 
-            this.characteristic = characteristic;
-            this.difficulty = difficulty;
+            characteristic = beatmap.beatmapCharacteristic.serializedName;
+            difficulty = beatmap.beatmapDifficulty;
         }
 
         public override void Serialize(NetDataWriter writer)

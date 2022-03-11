@@ -52,15 +52,14 @@ namespace MultiplayerCore.Objects
             _logger.Debug($"'{player.userId}' selected song '{packet.levelHash}'.");
             BeatmapCharacteristicSO characteristic = _beatmapCharacteristicCollection.GetBeatmapCharacteristicBySerializedName(packet.characteristic);
             MpBeatmapLevel preview = new NetworkBeatmapLevel(packet);
-            base.SetPlayerBeatmapLevel(player.userId, preview, packet.difficulty, characteristic);
+            base.SetPlayerBeatmapLevel(player.userId, new PreviewDifficultyBeatmap(preview, characteristic, packet.difficulty));
         }
 
         public override void HandleMenuRpcManagerGetRecommendedBeatmap(string userId)
         {
-            ILobbyPlayerData localPlayerData = playersData[localUserId];
-
-            if (localPlayerData.beatmapLevel is MpBeatmapLevel mpexBeatmapLevel)
-                _multiplayerSessionManager.Send(new MpBeatmapPacket(mpexBeatmapLevel, localPlayerData.beatmapCharacteristic.serializedName, localPlayerData.beatmapDifficulty));
+            ILobbyPlayerData localPlayerData = _playersData[userId];
+            if (localPlayerData.beatmapLevel.beatmapLevel is MpBeatmapLevel)
+                _multiplayerSessionManager.Send(new MpBeatmapPacket(localPlayerData.beatmapLevel));
 
             base.HandleMenuRpcManagerGetRecommendedBeatmap(userId);
         }
@@ -72,22 +71,23 @@ namespace MultiplayerCore.Objects
             base.HandleMenuRpcManagerRecommendBeatmap(userId, beatmapId);
         }
 
-        public async override void SetLocalPlayerBeatmapLevel(string levelId, BeatmapDifficulty beatmapDifficulty, BeatmapCharacteristicSO characteristic)
+        public async override void SetLocalPlayerBeatmapLevel(PreviewDifficultyBeatmap beatmapLevel)
         {
-            _logger.Debug($"Local player selected song '{levelId}'");
-            string? levelHash = Utilities.HashForLevelID(levelId);
+            _logger.Debug($"Local player selected song '{beatmapLevel.beatmapLevel.levelID}'");
+            string? levelHash = Utilities.HashForLevelID(beatmapLevel.beatmapLevel.levelID);
             if (!string.IsNullOrEmpty(levelHash))
             {
-                IPreviewBeatmapLevel? beatmapLevel = await _beatmapLevelProvider.GetBeatmap(levelHash);
-                if (beatmapLevel == null)
+                IPreviewBeatmapLevel? previewBeatmap = await _beatmapLevelProvider.GetBeatmap(levelHash);
+                if (previewBeatmap == null)
                     return;
 
-                _multiplayerSessionManager.Send(new MpBeatmapPacket(beatmapLevel, characteristic.serializedName, beatmapDifficulty));
-                _menuRpcManager.RecommendBeatmap(new BeatmapIdentifierNetSerializable(levelId, characteristic.serializedName, beatmapDifficulty));
-                SetPlayerBeatmapLevel(localUserId, beatmapLevel, beatmapDifficulty, characteristic);
+                beatmapLevel.beatmapLevel = previewBeatmap;
+                _multiplayerSessionManager.Send(new MpBeatmapPacket(beatmapLevel));
+                _menuRpcManager.RecommendBeatmap(beatmapLevel.ToIdentifier());
+                SetPlayerBeatmapLevel(localUserId, beatmapLevel);
                 return;
             }
-            base.SetLocalPlayerBeatmapLevel(levelId, beatmapDifficulty, characteristic);
+            base.SetLocalPlayerBeatmapLevel(beatmapLevel);
         }
     }
 }
