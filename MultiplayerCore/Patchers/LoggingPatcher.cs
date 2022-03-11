@@ -20,7 +20,7 @@ namespace MultiplayerCore.Patchers
         }
 
         [AffinityTranspiler]
-        [AffinityPatch(typeof(ConnectedPlayerManager), "OnNetworkReceive")]
+        [AffinityPatch(typeof(ConnectedPlayerManager), "HandleNetworkReceive")]
         private IEnumerable<CodeInstruction> PacketErrorLogger(IEnumerable<CodeInstruction> instructions, ILGenerator gen)
         {
             LocalBuilder localException = gen.DeclareLocal(typeof(Exception));
