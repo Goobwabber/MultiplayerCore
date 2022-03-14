@@ -118,7 +118,7 @@ namespace MultiplayerCore.Patchers
                 return;
 
             __result = false;
-            _logger.Warn($"Patching network config forceGameLift with '{__result}'.");
+            _logger.Debug($"Patching network config forceGameLift with '{__result}'.");
         }
 
         [AffinityPrefix]
