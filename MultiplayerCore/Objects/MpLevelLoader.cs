@@ -33,7 +33,7 @@ namespace MultiplayerCore.Objects
 
         public override void LoadLevel(ILevelGameplaySetupData gameplaySetupData, float initialStartTime)
         {
-            string levelHash = SongCore.Collections.hashForLevelID(gameplaySetupData.beatmapLevel.beatmapLevel.levelID);
+            string levelHash = Utilities.HashForLevelID(gameplaySetupData.beatmapLevel.beatmapLevel.levelID);
             _logger.Debug($"Loading level {gameplaySetupData.beatmapLevel.beatmapLevel.levelID}");
             base.LoadLevel(gameplaySetupData, initialStartTime);
             if (levelHash != null && !SongCore.Collections.songWithHashPresent(levelHash))
@@ -77,6 +77,7 @@ namespace MultiplayerCore.Objects
         public async Task<BeatmapLevelsModel.GetBeatmapLevelResult> DownloadBeatmapLevelAsync(string levelId, CancellationToken cancellationToken)
         {
             _ = await _levelDownloader.TryDownloadLevel(levelId, cancellationToken, this); // Handle?
+            _gameplaySetupData.beatmapLevel.beatmapLevel = _beatmapLevelsModel.GetLevelPreviewForLevelId(levelId);
             return await _beatmapLevelsModel.GetBeatmapLevelAsync(levelId, cancellationToken);
         }
     }

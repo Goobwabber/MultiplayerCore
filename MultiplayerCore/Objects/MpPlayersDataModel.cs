@@ -3,8 +3,10 @@ using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Beatmaps.Packets;
 using MultiplayerCore.Beatmaps.Providers;
 using MultiplayerCore.Networking;
+using SiraUtil.Affinity;
 using SiraUtil.Logging;
 using System;
+using System.Linq;
 
 namespace MultiplayerCore.Objects
 {
@@ -57,8 +59,8 @@ namespace MultiplayerCore.Objects
 
         public override void HandleMenuRpcManagerGetRecommendedBeatmap(string userId)
         {
-            ILobbyPlayerData localPlayerData = _playersData[userId];
-            if (localPlayerData.beatmapLevel.beatmapLevel is MpBeatmapLevel)
+            ILobbyPlayerData localPlayerData = _playersData[localUserId];
+            if (localPlayerData.beatmapLevel?.beatmapLevel is MpBeatmapLevel)
                 _multiplayerSessionManager.Send(new MpBeatmapPacket(localPlayerData.beatmapLevel));
 
             base.HandleMenuRpcManagerGetRecommendedBeatmap(userId);
@@ -71,22 +73,12 @@ namespace MultiplayerCore.Objects
             base.HandleMenuRpcManagerRecommendBeatmap(userId, beatmapId);
         }
 
-        public async override void SetLocalPlayerBeatmapLevel(PreviewDifficultyBeatmap beatmapLevel)
+        public override void SetLocalPlayerBeatmapLevel(PreviewDifficultyBeatmap beatmapLevel)
         {
             _logger.Debug($"Local player selected song '{beatmapLevel.beatmapLevel.levelID}'");
             string? levelHash = Utilities.HashForLevelID(beatmapLevel.beatmapLevel.levelID);
             if (!string.IsNullOrEmpty(levelHash))
-            {
-                IPreviewBeatmapLevel? previewBeatmap = await _beatmapLevelProvider.GetBeatmap(levelHash);
-                if (previewBeatmap == null)
-                    return;
-
-                beatmapLevel.beatmapLevel = previewBeatmap;
                 _multiplayerSessionManager.Send(new MpBeatmapPacket(beatmapLevel));
-                _menuRpcManager.RecommendBeatmap(beatmapLevel.ToIdentifier());
-                SetPlayerBeatmapLevel(localUserId, beatmapLevel);
-                return;
-            }
             base.SetLocalPlayerBeatmapLevel(beatmapLevel);
         }
     }

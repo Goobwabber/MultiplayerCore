@@ -1,3 +1,4 @@
+using MultiplayerCore.Beatmaps;
 using SiraUtil.Affinity;
 using SiraUtil.Logging;
 using UnityEngine.UI;
@@ -33,6 +34,13 @@ namespace MultiplayerCore.Patchers
         {
             if (!string.IsNullOrEmpty(playersMissingLevelText) && ____startGameReadyButton.interactable)
                 __instance.SetStartGameEnabled(CannotStartGameReason.DoNotOwnSong);
+        }
+
+        [AffinityPatch(typeof(BeatmapIdentifierNetSerializableHelper), nameof(BeatmapIdentifierNetSerializableHelper.ToPreviewDifficultyBeatmap))]
+        private void BeatmapIdentifierToPreviewDifficultyBeatmap(BeatmapIdentifierNetSerializable beatmapId, ref PreviewDifficultyBeatmap __result)
+        {
+            if (__result.beatmapLevel == null)
+                __result.beatmapLevel = new NoInfoBeatmapLevel(Utilities.HashForLevelID(beatmapId.levelID));
         }
     }
 }
