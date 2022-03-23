@@ -1,4 +1,5 @@
 ﻿using MultiplayerCore.Beatmaps.Abstractions;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -21,7 +22,7 @@ namespace MultiplayerCore.Beatmaps
         public override float songDuration => _preview.songDuration;
         public override float previewStartTime => _preview.previewStartTime;
         public override float previewDuration => _preview.previewDuration;
-        public override PreviewDifficultyBeatmapSet[]? previewDifficultyBeatmapSets => _preview.previewDifficultyBeatmapSets;
+        public override IReadOnlyList<PreviewDifficultyBeatmapSet>? previewDifficultyBeatmapSets => _preview.previewDifficultyBeatmapSets;
 
         private readonly IPreviewBeatmapLevel _preview;
 

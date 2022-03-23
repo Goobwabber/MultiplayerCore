@@ -13,6 +13,7 @@ namespace MultiplayerCore.Patchers
         public int? DiscoveryPort { get; set; }
         public int? PartyPort { get; set; }
         public int? MultiplayerPort { get; set; }
+        public bool DisableGameLift { get; set; }
 
         private readonly SiraLog _logger;
 
@@ -34,6 +35,7 @@ namespace MultiplayerCore.Patchers
             MasterServerEndPoint = endPoint;
             MasterServerStatusUrl = statusUrl;
             MaxPartySize = maxPartySize;
+            DisableGameLift = true;
         }
 
         /// <summary>
@@ -45,6 +47,7 @@ namespace MultiplayerCore.Patchers
             MasterServerEndPoint = null;
             MasterServerStatusUrl = null;
             MaxPartySize = null;
+            DisableGameLift = false;
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.masterServerEndPoint), AffinityMethodType.Getter)]
@@ -106,6 +109,16 @@ namespace MultiplayerCore.Patchers
 
             __result = (int)MultiplayerPort;
             _logger.Debug($"Patching network config multiplayer port with '{__result}'.");
+        }
+
+        [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.forceGameLift), AffinityMethodType.Getter)]
+        private void GetForceGameLift(ref bool __result)
+        {
+            if (!DisableGameLift)
+                return;
+
+            __result = false;
+            _logger.Debug($"Patching network config forceGameLift with '{__result}'.");
         }
 
         [AffinityPrefix]

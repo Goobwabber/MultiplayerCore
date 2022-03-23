@@ -1,9 +1,10 @@
 ﻿using System;
+using BGNet.Logging;
 using SiraUtil.Logging;
 
 namespace MultiplayerCore.Objects
 {
-    public class BGNetDebugLogger : BGNetDebug.ILogger
+    public class BGNetDebugLogger : Debug.ILogger
     {
         private readonly SiraLog _logger;
 
@@ -11,7 +12,7 @@ namespace MultiplayerCore.Objects
             SiraLog logger)
         {
             _logger = logger;
-            BGNetDebug.SetLogger(this);
+            Debug.AddLogger(this);
         }
 
         public void LogError(string message)
