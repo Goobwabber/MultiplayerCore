@@ -131,6 +131,9 @@ namespace MultiplayerCore.Networking
         /// </summary>
         /// <typeparam name="TPacket">Type of packet to unregister. Inherits <see cref="LiteNetLib.Utils.INetSerializable"/></typeparam>
         public void UnregisterCallback<TPacket>() where TPacket : INetSerializable, new()
-            => packetHandlers.Remove(typeof(TPacket).Name);
+        {
+            packetHandlers.Remove(typeof(TPacket).Name);
+            registeredTypes.Remove(typeof(TPacket));
+        }
     }
 }
