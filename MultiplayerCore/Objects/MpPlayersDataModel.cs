@@ -53,7 +53,7 @@ namespace MultiplayerCore.Objects
         {
             _logger.Debug($"'{player.userId}' selected song '{packet.levelHash}'.");
             BeatmapCharacteristicSO characteristic = _beatmapCharacteristicCollection.GetBeatmapCharacteristicBySerializedName(packet.characteristic);
-            MpBeatmapLevel preview = new NetworkBeatmapLevel(packet);
+            IPreviewBeatmapLevel preview = _beatmapLevelProvider.GetBeatmapFromPacket(packet);
             base.SetPlayerBeatmapLevel(player.userId, new PreviewDifficultyBeatmap(preview, characteristic, packet.difficulty));
         }
 

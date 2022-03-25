@@ -1,5 +1,9 @@
-﻿using MultiplayerCore.Beatmaps.Abstractions;
+﻿using BeatSaverSharp;
+using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Beatmaps.Packets;
+using System.Threading;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace MultiplayerCore.Beatmaps
 {
@@ -18,11 +22,43 @@ namespace MultiplayerCore.Beatmaps
         public override float songDuration => _packet.songDuration;
 
         private readonly MpBeatmapPacket _packet;
+        private readonly BeatSaver? _beatsaver;
 
         public NetworkBeatmapLevel(MpBeatmapPacket packet)
         {
             levelHash = packet.levelHash;
             _packet = packet;
+        }
+
+        public NetworkBeatmapLevel(MpBeatmapPacket packet, BeatSaver beatsaver)
+        {
+            levelHash = packet.levelHash;
+            _packet = packet;
+            _beatsaver = beatsaver;
+        }
+
+        private Task<Sprite>? _coverImageTask;
+
+        public override Task<Sprite> GetCoverImageAsync(CancellationToken cancellationToken)
+        {
+            if (_coverImageTask == null)
+                _coverImageTask = FetchCoverImage(cancellationToken);
+            return _coverImageTask;
+        }
+
+        private async Task<Sprite> FetchCoverImage(CancellationToken cancellationToken)
+        {
+            if (_beatsaver == null)
+                return null!;
+            var beatmap = await _beatsaver.BeatmapByHash(levelHash, cancellationToken);
+            if (beatmap == null)
+                return null!;
+            byte[]? coverBytes = await beatmap.LatestVersion.DownloadCoverImage(cancellationToken);
+            if (coverBytes == null || coverBytes.Length == 0)
+                return null!;
+            Texture2D texture = new Texture2D(2, 2);
+            texture.LoadImage(coverBytes);
+            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0, 0), 100.0f);
         }
     }
 }

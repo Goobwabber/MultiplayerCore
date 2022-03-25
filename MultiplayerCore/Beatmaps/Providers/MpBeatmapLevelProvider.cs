@@ -1,5 +1,7 @@
 ﻿using BeatSaverSharp;
 using BeatSaverSharp.Models;
+using MultiplayerCore.Beatmaps.Packets;
+using SiraUtil.Logging;
 using SiraUtil.Zenject;
 using System.Threading.Tasks;
 
@@ -49,5 +51,13 @@ namespace MultiplayerCore.Beatmaps.Providers
                 return null;
             return new BeatSaverBeatmapLevel(levelHash, beatmap);
         }
+
+        /// <summary>
+        /// Gets an <see cref="IPreviewBeatmapLevel"/> from the information in the provided packet.
+        /// </summary>
+        /// <param name="packet">The packet to get preview data from</param>
+        /// <returns>An <see cref="IPreviewBeatmapLevel"/> with a cover from BeatSaver.</returns>
+        public IPreviewBeatmapLevel GetBeatmapFromPacket(MpBeatmapPacket packet)
+            => new NetworkBeatmapLevel(packet, _beatsaver);
     }
 }
