@@ -57,6 +57,7 @@ namespace MultiplayerCore.Patchers
                 return;
 
             __result = MasterServerEndPoint;
+            _logger.Debug($"Patching masterServerEndPoint with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.multiplayerStatusUrl), AffinityMethodType.Getter)]
@@ -66,6 +67,7 @@ namespace MultiplayerCore.Patchers
                 return;
 
             __result = MasterServerStatusUrl;
+            _logger.Debug($"Patching multiplayerStatusUrl with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.maxPartySize), AffinityMethodType.Getter)]
@@ -119,6 +121,17 @@ namespace MultiplayerCore.Patchers
 
             __result = false;
             _logger.Debug($"Patching network config forceGameLift with '{__result}'.");
+        }
+        
+        [AffinityPrefix]
+        [AffinityPatch(typeof(UnifiedNetworkPlayerModel), nameof(UnifiedNetworkPlayerModel.SetActiveNetworkPlayerModelType))]
+        private void PrefixSetActiveNetworkPlayerModelType(ref UnifiedNetworkPlayerModel.ActiveNetworkPlayerModelType activeNetworkPlayerModelType)
+        {
+            if (!DisableGameLift)
+                return;
+
+            activeNetworkPlayerModelType = UnifiedNetworkPlayerModel.ActiveNetworkPlayerModelType.MasterServer;
+            _logger.Debug($"Patching activeNetworkPlayerModelType with '{activeNetworkPlayerModelType}'.");
         }
 
         [AffinityPrefix]
