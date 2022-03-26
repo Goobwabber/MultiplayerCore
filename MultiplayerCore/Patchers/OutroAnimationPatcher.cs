@@ -48,6 +48,8 @@ namespace MultiplayerCore.Patchers
             return contract.allActiveAtGameStartPlayers.Take(4).ToList();
         }
 
+        [AffinityPrefix]
+        [AffinityPatch(typeof(MultiplayerResultsPyramidView), nameof(MultiplayerResultsPyramidView.SetupResults))]
         private void SetupResultsPyramid(ref IReadOnlyList<MultiplayerPlayerResultsData> resultsData)
         {
             resultsData = resultsData.Take(5).ToList();
