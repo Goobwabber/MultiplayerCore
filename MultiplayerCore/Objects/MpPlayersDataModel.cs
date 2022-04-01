@@ -60,8 +60,12 @@ namespace MultiplayerCore.Objects
         public override void HandleMenuRpcManagerGetRecommendedBeatmap(string userId)
         {
             ILobbyPlayerData localPlayerData = _playersData[localUserId];
-            if (localPlayerData.beatmapLevel?.beatmapLevel is MpBeatmapLevel)
-                _multiplayerSessionManager.Send(new MpBeatmapPacket(localPlayerData.beatmapLevel));
+            string? levelId = localPlayerData.beatmapLevel?.beatmapLevel?.levelID;
+            if (string.IsNullOrEmpty(levelId))
+                return;
+            string? levelHash = Utilities.HashForLevelID(levelId!);
+            if (!string.IsNullOrEmpty(levelHash))
+                _multiplayerSessionManager.Send(new MpBeatmapPacket(localPlayerData.beatmapLevel!));
 
             base.HandleMenuRpcManagerGetRecommendedBeatmap(userId);
         }
