@@ -17,7 +17,7 @@ namespace MultiplayerCore.Objects
         private readonly IMenuRpcManager _rpcManager;
         private readonly SiraLog _logger;
 
-        internal MpLevelLoader(
+        public MpLevelLoader(
             IMultiplayerSessionManager sessionManager,
             MpLevelDownloader levelDownloader,
             NetworkPlayerEntitlementChecker entitlementChecker,

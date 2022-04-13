@@ -16,7 +16,7 @@ namespace MultiplayerCore.Objects
         private readonly MpBeatmapLevelProvider _beatmapLevelProvider;
         private readonly SiraLog _logger;
 
-        internal MpPlayersDataModel(
+        public MpPlayersDataModel(
             MpPacketSerializer packetSerializer,
             MpBeatmapLevelProvider beatmapLevelProvider,
             SiraLog logger)
