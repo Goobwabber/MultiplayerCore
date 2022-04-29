@@ -55,7 +55,7 @@ namespace MultiplayerCore.Objects
             }
             else if (_loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown)
             {
-                if (_sessionManager.connectedPlayers.All(p => _entitlementChecker.GetUserEntitlementStatusWithoutRequest(p.userId, _gameplaySetupData.beatmapLevel.beatmapLevel.levelID) == EntitlementsStatus.Ok))
+                if (_sessionManager.connectedPlayers.All(p => _entitlementChecker.GetUserEntitlementStatusWithoutRequest(p.userId, _gameplaySetupData.beatmapLevel.beatmapLevel.levelID) == EntitlementsStatus.Ok || p.HasState("in_gameplay")))
                 {
                     _logger.Debug($"All players finished loading");
                     base.Tick();
