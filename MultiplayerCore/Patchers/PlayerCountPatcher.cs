@@ -63,6 +63,15 @@ namespace MultiplayerCore.Patchers
             return codes.AsEnumerable();
         }
 
+        [AffinityPrefix]
+        [AffinityPatch(typeof(MultiplayerLobbyController), nameof(MultiplayerLobbyController.ActivateMultiplayerLobby))]
+        private void LoadLobby(ref float ____innerCircleRadius, ref float ____minOuterCircleRadius)
+        {
+            // Fix circle for bigger player counts
+            ____innerCircleRadius = 1f;
+            ____minOuterCircleRadius = 4.4f;
+        }
+
         [AffinityTranspiler]
         [AffinityPatch(typeof(MultiplayerPlayerPlacement), nameof(MultiplayerPlayerPlacement.GetAngleBetweenPlayersWithEvenAdjustment))]
         private IEnumerable<CodeInstruction> PlayerPlacementAngle(IEnumerable<CodeInstruction> instructions)
