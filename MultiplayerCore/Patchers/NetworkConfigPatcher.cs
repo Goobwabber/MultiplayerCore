@@ -9,6 +9,7 @@ namespace MultiplayerCore.Patchers
 
         public DnsEndPoint? MasterServerEndPoint { get; set; }
         public string? MasterServerStatusUrl { get; set; }
+        public string? QuickPlaySetupUrl { get; set; }
         public int? MaxPartySize { get; set; }
         public int? DiscoveryPort { get; set; }
         public int? PartyPort { get; set; }
@@ -35,6 +36,24 @@ namespace MultiplayerCore.Patchers
             MasterServerEndPoint = endPoint;
             MasterServerStatusUrl = statusUrl;
             MaxPartySize = maxPartySize;
+            QuickPlaySetupUrl = statusUrl + "/mp_override.json";
+            DisableGameLift = true;
+        }
+
+        /// <summary>
+        /// Uses a custom master server
+        /// </summary>
+        /// <param name="endPoint"></param>
+        /// <param name="statusUrl"></param>
+        /// <param name="maxPartySize"></param>
+        /// <param name="quickPlaySetupUrl"></param>
+        public void UseMasterServer(DnsEndPoint endPoint, string statusUrl, int? maxPartySize = null, string? quickPlaySetupUrl = null)
+        {
+            _logger.Debug($"Master server set to '{endPoint}'");
+            MasterServerEndPoint = endPoint;
+            MasterServerStatusUrl = statusUrl;
+            MaxPartySize = maxPartySize;
+            QuickPlaySetupUrl = quickPlaySetupUrl != null ? quickPlaySetupUrl : statusUrl + "/mp_override.json";
             DisableGameLift = true;
         }
 
@@ -47,6 +66,7 @@ namespace MultiplayerCore.Patchers
             MasterServerEndPoint = null;
             MasterServerStatusUrl = null;
             MaxPartySize = null;
+            QuickPlaySetupUrl = null;
             DisableGameLift = false;
         }
 
@@ -81,6 +101,21 @@ namespace MultiplayerCore.Patchers
 
             __result = (int)MaxPartySize;
             _logger.Debug($"Patching master server max party size with '{__result}'.");
+        }
+
+        [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.quickPlaySetupUrl), AffinityMethodType.Getter)]
+        private void GetQuickPlaySetupUrl(ref string __result)
+        {
+            _logger.Debug("Get quickPlaySetupUrl called.");
+
+            if (QuickPlaySetupUrl == null)
+            {
+                _logger.Debug($"quickPlaySetupUrl is null.");
+                return;
+            }
+
+            __result = QuickPlaySetupUrl;
+            _logger.Debug($"Patching quickPlaySetupUrl with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.discoveryPort), AffinityMethodType.Getter)]
