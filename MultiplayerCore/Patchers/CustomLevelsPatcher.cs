@@ -2,6 +2,8 @@ using MultiplayerCore.Beatmaps;
 using SiraUtil.Affinity;
 using SiraUtil.Logging;
 using UnityEngine.UI;
+using System;
+using System.Threading.Tasks;
 
 namespace MultiplayerCore.Patchers
 {
@@ -9,7 +11,6 @@ namespace MultiplayerCore.Patchers
     {
         private readonly NetworkConfigPatcher _networkConfig;
         private readonly SiraLog _logger;
-
         internal CustomLevelsPatcher(
             NetworkConfigPatcher networkConfig,
             SiraLog logger)
@@ -42,5 +43,36 @@ namespace MultiplayerCore.Patchers
             if (__result.beatmapLevel == null)
                 __result.beatmapLevel = new NoInfoBeatmapLevel(Utilities.HashForLevelID(beatmapId.levelID));
         }
+
+        [AffinityPrefix]
+        [AffinityPatch(typeof(JoinQuickPlayViewController), nameof(JoinQuickPlayViewController.Setup))]
+        private void SetupPre(JoinQuickPlayViewController __instance, ref BeatmapDifficultyDropdown ____beatmapDifficultyDropdown)
+        {
+            if (_networkConfig.MasterServerEndPoint != null) ____beatmapDifficultyDropdown.includeAllDifficulties = true;
+        }
+
+        [AffinityPostfix]
+        [AffinityPatch(typeof(BeatmapDifficultyDropdown), nameof(BeatmapDifficultyDropdown.GetIdxForBeatmapDifficultyMask))]
+        private void GetIdxForBeatmapDifficultyMask(BeatmapDifficultyDropdown __instance, ref int __result)
+        {
+            if (__instance.includeAllDifficulties) __result = 0;
+            _logger.Debug($"GetIdxForBeatmapDifficultyMask {__result}"); // TODO: Remove this line for release
+        }
+
+        [AffinityPostfix]
+        [AffinityPatch(typeof(QuickPlaySetupModel), nameof(QuickPlaySetupModel.IsQuickPlaySetupTaskValid))]
+        private void IsQuickPlaySetupTaskValid(QuickPlaySetupModel __instance, ref bool __result, Task<QuickPlaySetupData> ____request, DateTime ____lastRequestTime)
+        {
+            if (_networkConfig.MasterServerEndPoint != null) __result = false;
+            _logger.Debug($"IsQuickPlaySetupTaskValid {__result}"); // TODO: Remove this line for release
+        }
+
+        //[AffinityPostfix]
+        //[AffinityPatch(typeof(MultiplayerModeSelectionFlowCoordinator), nameof(MultiplayerModeSelectionFlowCoordinator.HandleJoinQuickPlayViewControllerDidFinish))]
+        //private void HandleJoinQuickPlayViewControllerDidFinish(MultiplayerModeSelectionFlowCoordinator __instance, ref bool __result, Task<QuickPlaySetupData> ____request, DateTime ____lastRequestTime)
+        //{
+        //    // TODO: Possibly add warning screen.
+        //}
+
     }
 }
