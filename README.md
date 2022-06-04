@@ -1,7 +1,5 @@
 # MultiplayerCore (Steam/PC-Only) [![Build](https://github.com/Goobwabber/MultiplayerCore/workflows/Build/badge.svg?event=push)](https://github.com/Goobwabber/MultiplayerCore/actions?query=workflow%3ABuild+branch%3Amain)
-A Beat Saber mod that implements core custom multiplayer functionality.
-
-**NOT RELEASED FOR 1.19 YET**
+A Beat Saber mod that implements core custom multiplayer functionality. This is a core mod and doesn't really add anything to the game without a custom server to support it's features. I Recommend [BeatTogether](https://github.com/BeatTogether/BeatTogether).
 
 ## Installation
 1. Ensure you have the [required mods](https://github.com/Goobwabber/MultiplayerCore#requirements).
@@ -56,4 +54,4 @@ You can support development of MultiplayerCore by donating at the following link
 
 ## Related Mods
 * [MultiplayerExtensions](https://github.com/Goobwabber/MultiplayerExtensions)
-* [BeatTogether](https://github.com/pythonology/BeatTogether)
+* [BeatTogether](https://github.com/BeatTogether/BeatTogether)
