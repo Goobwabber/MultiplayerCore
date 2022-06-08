@@ -55,10 +55,13 @@ namespace MultiplayerCore.Objects
             }
             else if (_loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown)
             {
-                if (_sessionManager.connectedPlayers.All(p => _entitlementChecker.GetUserEntitlementStatusWithoutRequest(p.userId, _gameplaySetupData.beatmapLevel.beatmapLevel.levelID) == EntitlementsStatus.Ok || p.HasState("in_gameplay")))
+                if (_sessionManager.syncTime >= _startTime)
                 {
-                    _logger.Debug($"All players finished loading");
-                    base.Tick();
+                    if (_sessionManager.connectedPlayers.All(p => _entitlementChecker.GetUserEntitlementStatusWithoutRequest(p.userId, _gameplaySetupData.beatmapLevel.beatmapLevel.levelID) == EntitlementsStatus.Ok || p.HasState("in_gameplay")))
+                    {
+                        _logger.Debug($"All players finished loading");
+                        base.Tick();
+                    }
                 }
             }
             else
