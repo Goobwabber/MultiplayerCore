@@ -109,8 +109,11 @@ namespace MultiplayerCore.Objects
 				if (beatmap == null)
 					return EntitlementsStatus.NotOwned;
 
-				BeatmapVersion beatmapVersion = beatmap.Versions.First(x => string.Equals(x.Hash, levelHash, StringComparison.OrdinalIgnoreCase));
-				string[] requirements = beatmapVersion.Difficulties
+				BeatmapVersion? beatmapVersion = beatmap.Versions.FirstOrDefault(x => string.Equals(x.Hash, levelHash, StringComparison.OrdinalIgnoreCase));
+				if (beatmapVersion == null)
+                    return EntitlementsStatus.NotOwned;
+
+                string[] requirements = beatmapVersion.Difficulties
 					.Aggregate(Array.Empty<string>(), (a, n) => a
 						.Append(n.Chroma ? "Chroma" : "")
 						.Append(n.MappingExtensions ? "Mapping Extensions" : "")
