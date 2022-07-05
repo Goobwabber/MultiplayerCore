@@ -27,6 +27,48 @@ These can be downloaded from [BeatMods](https://beatmods.com/#/mods) or using Mo
     * The log file can be found at `Beat Saber\Logs\_latest.log` (`Beat Saber` being the folder `Beat Saber.exe` is in).
 * If you ask for help on Discord, at least include your `_latest.log` file in your help request.
 
+## For Other Modders
+How do I send and receive packets???
+ok just do this
+```cs
+// ok cool wanna make a packet?
+public class WhateverTheFuckPacket : MpPacket {
+    public override void Serialize(NetDataWriter writer)
+    {
+        // write data into packet
+    }
+
+    public override void Deserialize(NetDataReader reader)
+    {
+        // read data from packet
+    }
+}
+
+// ok cool wanna send it and receive it now?
+public class WhateverTheFuckManager : IInitializable, IDisposable
+{
+    [Inject]
+    private readonly MpPacketSerializer _packetSerializer;
+
+    public void Initialize()
+        => _packetSerializer.RegisterCallback<WhateverTheFuckPacket>(HandlePacket);
+
+    public void Dispose()
+        => _packetSerializer.UnregisterCallback<WhateverTheFuckPacket>();
+
+    public void Send()
+    {
+        // send (you can do this from anywhere really that the game can handle it but i prefer to do it here)
+        _multiplayerSessionManager.Send(new WhateverTheFuckPacket());
+    }
+
+    public void HandlePacket(WhateverTheFuckPacket packet, IConnectedPlayer player)
+    {
+        // handle that shit fam 
+    }
+}
+```
+
 ## Contributing
 Anyone can feel free to contribute bug fixes or enhancements to MultiplayerCore. Please keep in mind that this mod's purpose is to implement core functionality of modded multiplayer, so we will likely not be accepting enhancements that fall out of that scope. GitHub Actions for Pull Requests made from GitHub accounts that don't have direct access to the repository will fail. This is normal because the Action requires a `Secret` to download dependencies.
 ### Building
