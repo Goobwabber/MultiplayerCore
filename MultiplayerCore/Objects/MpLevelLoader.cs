@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MultiplayerCore.Objects
 {
-    public class MpLevelLoader : MultiplayerLevelLoader, IAffinity, IProgress<double>
+    public class MpLevelLoader : MultiplayerLevelLoader, IProgress<double>
     {
         public event Action<double> progressUpdated = null!;
 
