@@ -35,7 +35,7 @@ namespace MultiplayerCore.Patches
 
         private static FromBinderNonGeneric LevelLoaderAttacher(DiContainer contract)
         {
-            return contract.Bind(typeof(MultiplayerLevelLoader), typeof(MpLevelLoader), typeof(ITickable), typeof(IAffinity)).To<MpLevelLoader>();
+            return contract.Bind(typeof(MultiplayerLevelLoader), typeof(MpLevelLoader), typeof(ITickable)).To<MpLevelLoader>();
         }
     }
 }
