@@ -45,31 +45,12 @@ namespace MultiplayerCore.Beatmaps
             return requirements;
         });
 
-        public override Contributor[] contributors 
-        { 
-            get
-            {
-                var contributors = new Contributor[]
-                {
-                    new Contributor
-                    {
-                        _role = "Uploader",
-                        _name = _beatmap.Uploader.Name,
-                        _iconPath = ""
-                    }
-                };
-
-                if (_beatmap.BeatmapCurator != null)
-                    contributors.Append(new Contributor
-                    {
-                        _role = "Curator",
-                        _name = _beatmap.BeatmapCurator.Name,
-                        _iconPath = ""
-                    });
-
-                return contributors;
-            }
-        }
+        public override Contributor[] contributors => new Contributor[] { new Contributor
+        {
+            _role = "Uploader",
+            _name = _beatmap.Uploader.Name,
+            _iconPath = ""
+        }};
 
         private readonly Beatmap _beatmap;
 

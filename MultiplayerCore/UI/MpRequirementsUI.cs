@@ -109,10 +109,9 @@ namespace MultiplayerCore.UI
         }
 
         private void BeatmapSelected(string a)
-        {
-            _logger.Info($"{(_playersDataModel[_playersDataModel.localUserId]?.beatmapLevel?.beatmapLevel?.GetType()?.ToString() ?? "null")}");
-            ButtonInteractable = _playersDataModel[_playersDataModel.localUserId]?.beatmapLevel?.beatmapLevel is MpBeatmapLevel;
-        }
+            => ButtonInteractable = _playersDataModel[_playersDataModel.localUserId].beatmapLevel?.beatmapLevel is MpBeatmapLevel mpLevel 
+            && (mpLevel.requirements.Any(x => x.Value.Any()) || (mpLevel.contributors?.Any() ?? false) || (mpLevel.difficultyColors.TryGetValue(_playersDataModel[_playersDataModel.localUserId].beatmapLevel?.beatmapDifficulty ?? BeatmapDifficulty.Easy, out var colors) 
+            && (colors._colorLeft != null || colors._colorRight != null || colors._envColorLeft != null || colors._envColorRight != null || colors._envColorLeftBoost != null || colors._envColorRightBoost != null || colors._obstacleColor != null)));
 
         private void ColorsDismissed()
             => ShowRequirements();
