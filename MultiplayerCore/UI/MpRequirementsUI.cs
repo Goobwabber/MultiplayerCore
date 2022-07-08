@@ -150,7 +150,7 @@ namespace MultiplayerCore.UI
                     {
                         if (contributor.icon == null)
                         {
-                            if (!string.IsNullOrWhiteSpace(contributor._iconPath))
+                            if (!string.IsNullOrWhiteSpace(contributor._iconPath) && !string.IsNullOrEmpty(contributor._iconPath) && SongCore.Collections.songWithHashPresent(mpLevel.levelHash))
                             {
                                 var songCoreLevel = SongCore.Loader.GetLevelByHash(mpLevel.levelHash);
                                 contributor.icon = SongCore.Utilities.Utils.LoadSpriteFromFile(Path.Combine(songCoreLevel!.customLevelPath, contributor._iconPath));
