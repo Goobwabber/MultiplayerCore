@@ -56,7 +56,6 @@ namespace MultiplayerCore.Patchers
         private void GetIdxForBeatmapDifficultyMask(BeatmapDifficultyDropdown __instance, ref int __result)
         {
             if (__instance.includeAllDifficulties) __result = 0;
-            _logger.Debug($"GetIdxForBeatmapDifficultyMask {__result}"); // TODO: Remove this line for release
         }
 
         [AffinityPostfix]
@@ -64,7 +63,6 @@ namespace MultiplayerCore.Patchers
         private void IsQuickPlaySetupTaskValid(QuickPlaySetupModel __instance, ref bool __result, Task<QuickPlaySetupData> ____request, DateTime ____lastRequestTime)
         {
             if (_networkConfig.MasterServerEndPoint != null) __result = false;
-            _logger.Debug($"IsQuickPlaySetupTaskValid {__result}"); // TODO: Remove this line for release
         }
 
         //[AffinityPostfix]
