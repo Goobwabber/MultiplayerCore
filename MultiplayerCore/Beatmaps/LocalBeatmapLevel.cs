@@ -27,10 +27,44 @@ namespace MultiplayerCore.Beatmaps
         public override float previewDuration => _preview.previewDuration;
         public override IReadOnlyList<PreviewDifficultyBeatmapSet>? previewDifficultyBeatmapSets => _preview.previewDifficultyBeatmapSets;
 
-        public override Dictionary<BeatmapDifficulty, string[]> requirements => SongCore.Collections.RetrieveExtraSongData(levelHash)?._difficulties.ToDictionary(x => x._difficulty, x => x.additionalDifficultyData._requirements) ?? new Dictionary<BeatmapDifficulty, string[]>();
+        public override Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements
+        {
+            get
+            {
+                Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> reqs = new();
+                var difficulties = SongCore.Collections.RetrieveExtraSongData(levelHash)?._difficulties;
+                if (difficulties == null)
+                    return new();
+                foreach (var difficulty in difficulties)
+                {
+                    if (!reqs.ContainsKey(difficulty._beatmapCharacteristicName))
+                        reqs.Add(difficulty._beatmapCharacteristicName, new());
+                    reqs[difficulty._beatmapCharacteristicName][difficulty._difficulty] = difficulty.additionalDifficultyData._requirements;
+                }
+                return reqs;
+            }
+        }
+
+        public override Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> difficultyColors
+        {
+            get
+            {
+                Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> colors = new();
+                var difficulties = SongCore.Collections.RetrieveExtraSongData(levelHash)?._difficulties;
+                if (difficulties == null)
+                    return new();
+                foreach (var difficulty in difficulties)
+                {
+                    if (!colors.ContainsKey(difficulty._beatmapCharacteristicName))
+                        colors.Add(difficulty._beatmapCharacteristicName, new());
+                    colors[difficulty._beatmapCharacteristicName][difficulty._difficulty]
+                        = new DifficultyColors(difficulty._colorLeft, difficulty._colorRight, difficulty._envColorLeft, difficulty._envColorRight, difficulty._envColorLeftBoost, difficulty._envColorRightBoost, difficulty._obstacleColor);
+                }
+                return colors;
+            }
+        }
+
         public override Contributor[] contributors => SongCore.Collections.RetrieveExtraSongData(levelHash)?.contributors ?? new Contributor[0];
-        public override Dictionary<BeatmapDifficulty, DifficultyColors> difficultyColors => SongCore.Collections.RetrieveExtraSongData(levelHash)?._difficulties.ToDictionary(x => x._difficulty, x
-            => new DifficultyColors(x._colorLeft, x._colorRight, x._envColorLeft, x._envColorRight, x._envColorLeftBoost, x._envColorRightBoost, x._obstacleColor)) ?? new Dictionary<BeatmapDifficulty, DifficultyColors>();
 
         private readonly IPreviewBeatmapLevel _preview;
 

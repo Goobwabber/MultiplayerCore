@@ -109,9 +109,23 @@ namespace MultiplayerCore.UI
         }
 
         private void BeatmapSelected(string a)
-            => ButtonInteractable = _playersDataModel[_playersDataModel.localUserId].beatmapLevel?.beatmapLevel is MpBeatmapLevel mpLevel 
-            && (mpLevel.requirements.Any(x => x.Value.Any()) || (mpLevel.contributors?.Any() ?? false) || (mpLevel.difficultyColors.TryGetValue(_playersDataModel[_playersDataModel.localUserId].beatmapLevel?.beatmapDifficulty ?? BeatmapDifficulty.Easy, out var colors) 
-            && (colors._colorLeft != null || colors._colorRight != null || colors._envColorLeft != null || colors._envColorRight != null || colors._envColorLeftBoost != null || colors._envColorRightBoost != null || colors._obstacleColor != null)));
+        {
+            var beatmapLevel = _playersDataModel[_playersDataModel.localUserId].beatmapLevel;
+            if (beatmapLevel?.beatmapLevel is MpBeatmapLevel mpLevel)
+            {
+                string characteristicName = null!;
+                if (mpLevel.difficultyColors.ContainsKey(beatmapLevel.beatmapCharacteristic.name))
+                    characteristicName = beatmapLevel.beatmapCharacteristic.name;
+                else if (mpLevel.difficultyColors.ContainsKey(beatmapLevel.beatmapCharacteristic.serializedName))
+                    characteristicName = beatmapLevel.beatmapCharacteristic.serializedName;
+                if (characteristicName != null && mpLevel.difficultyColors[characteristicName].TryGetValue(beatmapLevel.beatmapDifficulty, out var colors))
+                    ButtonInteractable = (colors._colorLeft != null || colors._colorRight != null || colors._envColorLeft != null || colors._envColorRight != null || colors._envColorLeftBoost != null || colors._envColorRightBoost != null || colors._obstacleColor != null);
+                else
+                    ButtonInteractable = mpLevel.requirements.Any(x => x.Value.Any()) || (mpLevel.contributors?.Any() ?? false);
+            }
+            else
+                ButtonInteractable = false;
+        }
 
         private void ColorsDismissed()
             => ShowRequirements();
@@ -137,12 +151,19 @@ namespace MultiplayerCore.UI
 
             if (level.beatmapLevel is MpBeatmapLevel mpLevel)
             {
+                string characteristicName = null!;
+                if (mpLevel.requirements.ContainsKey(level.beatmapCharacteristic.name) || mpLevel.difficultyColors.ContainsKey(level.beatmapCharacteristic.name))
+                    characteristicName = level.beatmapCharacteristic.name;
+                else if (mpLevel.requirements.ContainsKey(level.beatmapCharacteristic.serializedName) || mpLevel.difficultyColors.ContainsKey(level.beatmapCharacteristic.serializedName))
+                    characteristicName = level.beatmapCharacteristic.serializedName;
+
                 // Requirements
-                if (mpLevel.requirements.TryGetValue(level.beatmapDifficulty, out var difficultyRequirements) && difficultyRequirements.Any())
-                    foreach (string req in difficultyRequirements)
-                        customListTableData.data.Add(!SongCore.Collections.capabilities.Contains(req)
-                            ? new CustomCellInfo($"<size=75%>{req}", "Missing Requirement", MissingReqIcon)
-                            : new CustomCellInfo($"<size=75%>{req}", "Requirement", HaveReqIcon));
+                if (mpLevel.requirements.TryGetValue(characteristicName, out var difficultiesRequirements))
+                    if (difficultiesRequirements.TryGetValue(level.beatmapDifficulty, out var difficultyRequirements) && difficultyRequirements.Any())
+                        foreach (string req in difficultyRequirements)
+                            customListTableData.data.Add(!SongCore.Collections.capabilities.Contains(req)
+                                ? new CustomCellInfo($"<size=75%>{req}", "Missing Requirement", MissingReqIcon)
+                                : new CustomCellInfo($"<size=75%>{req}", "Requirement", HaveReqIcon));
 
                 // Contributors
                 if (mpLevel.contributors != null)
@@ -166,7 +187,7 @@ namespace MultiplayerCore.UI
                 // Colors
                 object sConfiguration = typeof(SongCore.Plugin).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
                 bool customSongColors = (bool)typeof(SongCore.Plugin).Assembly.GetType("SongCore.SConfiguration").GetProperty("CustomSongColors").GetValue(sConfiguration);
-                if (mpLevel.difficultyColors.TryGetValue(level.beatmapDifficulty, out var colors) && (colors._colorLeft != null || colors._colorRight != null || colors._envColorLeft != null || colors._envColorRight != null || colors._envColorLeftBoost != null || colors._envColorRightBoost != null || colors._obstacleColor != null))
+                if (mpLevel.difficultyColors.TryGetValue(characteristicName, out var difficultyColors) && difficultyColors.TryGetValue(level.beatmapDifficulty, out var colors) && (colors._colorLeft != null || colors._colorRight != null || colors._envColorLeft != null || colors._envColorRight != null || colors._envColorLeftBoost != null || colors._envColorRightBoost != null || colors._obstacleColor != null))
                     customListTableData.data.Add(new CustomCellInfo($"<size=75%>Custom Colors Available", $"Click here to preview & {(customSongColors ? "disable" : "enable")} it.", ColorsIcon));
                 else if (mpLevel is BeatSaverBeatmapLevel)
                     customListTableData.data.Add(new CustomCellInfo($"<size=75%>Custom Colors", $"Click here to preview & {(customSongColors ? "disable" : "enable")} it.", ColorsIcon));
@@ -184,9 +205,15 @@ namespace MultiplayerCore.UI
 
             if (beatmapLevel.beatmapLevel is MpBeatmapLevel mpLevel)
             {
+                string characteristicName = null!;
+                if (mpLevel.requirements.ContainsKey(beatmapLevel.beatmapCharacteristic.name) || mpLevel.difficultyColors.ContainsKey(beatmapLevel.beatmapCharacteristic.name))
+                    characteristicName = beatmapLevel.beatmapCharacteristic.name;
+                else if (mpLevel.requirements.ContainsKey(beatmapLevel.beatmapCharacteristic.serializedName) || mpLevel.difficultyColors.ContainsKey(beatmapLevel.beatmapCharacteristic.serializedName))
+                    characteristicName = beatmapLevel.beatmapCharacteristic.serializedName;
+
                 customListTableData.tableView.ClearSelection();
                 if (customListTableData.data[index].icon == ColorsIcon)
-                    _modal.Hide(false, () => _colorsUI.ShowColors(mpLevel.difficultyColors[beatmapLevel.beatmapDifficulty]));
+                    _modal.Hide(false, () => _colorsUI.ShowColors(mpLevel.difficultyColors[characteristicName][beatmapLevel.beatmapDifficulty]));
             }
         }
     }

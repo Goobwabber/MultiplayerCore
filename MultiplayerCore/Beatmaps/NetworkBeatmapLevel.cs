@@ -23,7 +23,8 @@ namespace MultiplayerCore.Beatmaps
         public override float beatsPerMinute => _packet.beatsPerMinute;
         public override float songDuration => _packet.songDuration;
 
-        public override Dictionary<BeatmapDifficulty, string[]> requirements => _packet.requirements;
+        public override Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements => new() { { _packet.characteristic, _packet.requirements } };
+        public override Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> difficultyColors => new() { { _packet.characteristic, _packet.mapColors } };
         public override Contributor[] contributors => _packet.contributors;
 
         private readonly MpBeatmapPacket _packet;

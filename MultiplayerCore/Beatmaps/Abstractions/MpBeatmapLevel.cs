@@ -36,9 +36,9 @@ namespace MultiplayerCore.Beatmaps.Abstractions
         public EnvironmentInfoSO? allDirectionsEnvironmentInfo => null; // Not needed, used for level load
 
         // SongCore stuff
-        public virtual Dictionary<BeatmapDifficulty, string[]> requirements { get; protected set; } = new();
+        public virtual Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements { get; protected set; } = new();
+        public virtual Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> difficultyColors { get; protected set; } = new();
         public virtual Contributor[]? contributors { get; protected set; } = null!;
-        public virtual Dictionary<BeatmapDifficulty, DifficultyColors> difficultyColors { get; protected set; } = new();
 
         public virtual Task<Sprite> GetCoverImageAsync(CancellationToken cancellationToken)
             => Task.FromResult<Sprite>(null!);

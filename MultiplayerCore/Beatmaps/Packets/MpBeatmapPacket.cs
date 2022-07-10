@@ -20,8 +20,8 @@ namespace MultiplayerCore.Beatmaps.Packets
         public BeatmapDifficulty difficulty;
 
         public Dictionary<BeatmapDifficulty, string[]> requirements = new();
-        public Contributor[] contributors = null!;
         public Dictionary<BeatmapDifficulty, DifficultyColors> mapColors = new();
+        public Contributor[] contributors = null!;
 
         public MpBeatmapPacket() { }
 
@@ -40,8 +40,11 @@ namespace MultiplayerCore.Beatmaps.Packets
 
             if (beatmap.beatmapLevel is MpBeatmapLevel mpBeatmapLevel)
             {
-                requirements = mpBeatmapLevel.requirements;
-                contributors = mpBeatmapLevel.contributors;
+                if (mpBeatmapLevel.requirements.ContainsKey(beatmap.beatmapCharacteristic.name))
+                    requirements = mpBeatmapLevel.requirements[beatmap.beatmapCharacteristic.name];
+                if (mpBeatmapLevel.requirements.ContainsKey(beatmap.beatmapCharacteristic.serializedName))
+                    requirements = mpBeatmapLevel.requirements[beatmap.beatmapCharacteristic.serializedName];
+                contributors = mpBeatmapLevel.contributors!;
             }
         }
 
