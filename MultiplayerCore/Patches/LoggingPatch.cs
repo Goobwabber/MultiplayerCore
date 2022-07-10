@@ -1,6 +1,4 @@
 ﻿using HarmonyLib;
-using SiraUtil.Affinity;
-using SiraUtil.Logging;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;

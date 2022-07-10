@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using MultiplayerCore.Objects;
-using SiraUtil.Affinity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
