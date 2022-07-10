@@ -77,7 +77,7 @@ namespace MultiplayerCore.Patchers
                 return;
 
             __result = MasterServerEndPoint;
-            _logger.Debug($"Patching masterServerEndPoint with '{__result}'.");
+            //_logger.Debug($"Patching masterServerEndPoint with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.multiplayerStatusUrl), AffinityMethodType.Getter)]
@@ -87,7 +87,7 @@ namespace MultiplayerCore.Patchers
                 return;
 
             __result = MasterServerStatusUrl;
-            _logger.Debug($"Patching multiplayerStatusUrl with '{__result}'.");
+            //_logger.Debug($"Patching multiplayerStatusUrl with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.maxPartySize), AffinityMethodType.Getter)]
@@ -100,22 +100,22 @@ namespace MultiplayerCore.Patchers
             }
 
             __result = (int)MaxPartySize;
-            _logger.Debug($"Patching master server max party size with '{__result}'.");
+            //_logger.Debug($"Patching master server max party size with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.quickPlaySetupUrl), AffinityMethodType.Getter)]
         private void GetQuickPlaySetupUrl(ref string __result)
         {
-            _logger.Debug("Get quickPlaySetupUrl called.");
+            //_logger.Debug("Get quickPlaySetupUrl called.");
 
             if (QuickPlaySetupUrl == null)
             {
-                _logger.Debug($"quickPlaySetupUrl is null.");
+                //_logger.Debug($"quickPlaySetupUrl is null.");
                 return;
             }
 
             __result = QuickPlaySetupUrl;
-            _logger.Debug($"Patching quickPlaySetupUrl with '{__result}'.");
+            //_logger.Debug($"Patching quickPlaySetupUrl with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.discoveryPort), AffinityMethodType.Getter)]
@@ -125,7 +125,7 @@ namespace MultiplayerCore.Patchers
                 return;
 
             __result = (int)DiscoveryPort;
-            _logger.Debug($"Patching network config discovery port with '{__result}'.");
+            //_logger.Debug($"Patching network config discovery port with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.partyPort), AffinityMethodType.Getter)]
@@ -135,7 +135,7 @@ namespace MultiplayerCore.Patchers
                 return;
 
             __result = (int)PartyPort;
-            _logger.Debug($"Patching network config party port with '{__result}'.");
+            //_logger.Debug($"Patching network config party port with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.multiplayerPort), AffinityMethodType.Getter)]
@@ -145,7 +145,7 @@ namespace MultiplayerCore.Patchers
                 return;
 
             __result = (int)MultiplayerPort;
-            _logger.Debug($"Patching network config multiplayer port with '{__result}'.");
+            //_logger.Debug($"Patching network config multiplayer port with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.forceGameLift), AffinityMethodType.Getter)]
@@ -155,7 +155,7 @@ namespace MultiplayerCore.Patchers
                 return;
 
             __result = false;
-            _logger.Debug($"Patching network config forceGameLift with '{__result}'.");
+            //_logger.Debug($"Patching network config forceGameLift with '{__result}'.");
         }
         
         [AffinityPrefix]
@@ -166,7 +166,7 @@ namespace MultiplayerCore.Patchers
                 return;
 
             activeNetworkPlayerModelType = UnifiedNetworkPlayerModel.ActiveNetworkPlayerModelType.MasterServer;
-            _logger.Debug($"Patching activeNetworkPlayerModelType with '{activeNetworkPlayerModelType}'.");
+            //_logger.Debug($"Patching activeNetworkPlayerModelType with '{activeNetworkPlayerModelType}'.");
         }
 
         [AffinityPrefix]
