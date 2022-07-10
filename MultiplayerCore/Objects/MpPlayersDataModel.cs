@@ -81,12 +81,12 @@ namespace MultiplayerCore.Objects
         {
             _logger.Debug($"Local player selected song '{beatmapLevel.beatmapLevel.levelID}'");
             string? levelHash = Utilities.HashForLevelID(beatmapLevel.beatmapLevel.levelID);
-            if (!string.IsNullOrEmpty(levelHash) && beatmapLevel.beatmapLevel is not MpBeatmapLevel)
+            if (!string.IsNullOrEmpty(levelHash))
             {
-                var mpBeatmapLevel = await _beatmapLevelProvider.GetBeatmap(levelHash);
-                var difficultyBeatmap = new PreviewDifficultyBeatmap(mpBeatmapLevel, beatmapLevel.beatmapCharacteristic, beatmapLevel.beatmapDifficulty);
-                _multiplayerSessionManager.Send(new MpBeatmapPacket(difficultyBeatmap));
-                base.SetLocalPlayerBeatmapLevel(difficultyBeatmap);
+                if (beatmapLevel.beatmapLevel is not MpBeatmapLevel)
+                    beatmapLevel.beatmapLevel = await _beatmapLevelProvider.GetBeatmap(levelHash);
+                _multiplayerSessionManager.Send(new MpBeatmapPacket(beatmapLevel));
+                base.SetLocalPlayerBeatmapLevel(beatmapLevel);
                 return;
             }
             base.SetLocalPlayerBeatmapLevel(beatmapLevel);
