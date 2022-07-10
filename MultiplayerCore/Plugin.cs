@@ -18,6 +18,8 @@ namespace MultiplayerCore
         public const string ID = "com.goobwabber.multiplayercore";
         public const string CustomLevelsPath = "CustomMultiplayerLevels";
 
+        internal static IPALogger Logger = null!;
+
         private readonly Harmony _harmony;
         private readonly PluginMetadata _metadata;
         private readonly BeatSaver _beatsaver;
@@ -28,6 +30,7 @@ namespace MultiplayerCore
             _harmony = new Harmony(ID);
             _metadata = pluginMetadata;
             _beatsaver = new BeatSaver(ID, new Version(_metadata.HVersion.ToString()));
+            Logger = logger;
 
             zenjector.UseMetadataBinder<Plugin>();
             zenjector.UseLogger(logger);
@@ -35,7 +38,6 @@ namespace MultiplayerCore
             zenjector.UseSiraSync(SiraUtil.Web.SiraSync.SiraSyncServiceType.GitHub, "Goobwabber", "MultiplayerCore");
             zenjector.Install<MpAppInstaller>(Location.App, _beatsaver);
             zenjector.Install<MpMenuInstaller>(Location.Menu);
-            zenjector.Install<MpGameInstaller>(Location.MultiplayerCore);
         }
 
         [OnEnable]
