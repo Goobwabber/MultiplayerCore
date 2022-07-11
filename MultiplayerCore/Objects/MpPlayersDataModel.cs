@@ -77,12 +77,18 @@ namespace MultiplayerCore.Objects
             base.HandleMenuRpcManagerRecommendBeatmap(userId, beatmapId);
         }
 
-        public override void SetLocalPlayerBeatmapLevel(PreviewDifficultyBeatmap beatmapLevel)
+        public override async void SetLocalPlayerBeatmapLevel(PreviewDifficultyBeatmap beatmapLevel)
         {
             _logger.Debug($"Local player selected song '{beatmapLevel.beatmapLevel.levelID}'");
             string? levelHash = Utilities.HashForLevelID(beatmapLevel.beatmapLevel.levelID);
             if (!string.IsNullOrEmpty(levelHash))
+            {
+                if (beatmapLevel.beatmapLevel is not MpBeatmapLevel)
+                    beatmapLevel.beatmapLevel = await _beatmapLevelProvider.GetBeatmap(levelHash);
                 _multiplayerSessionManager.Send(new MpBeatmapPacket(beatmapLevel));
+                base.SetLocalPlayerBeatmapLevel(beatmapLevel);
+                return;
+            }
             base.SetLocalPlayerBeatmapLevel(beatmapLevel);
         }
     }

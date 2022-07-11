@@ -1,0 +1,3 @@
+﻿<bg id='root'>
+	<action-button id='info-button' text='?' active='~button-glow' interactable='~button-interactable' anchor-pos-x='43' anchor-pos-y='0' pref-width='12' pref-height='9' on-click='button-click'/>
+</bg>

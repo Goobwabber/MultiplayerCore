@@ -1,9 +1,11 @@
 ﻿using BeatSaverSharp;
 using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Beatmaps.Packets;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using static SongCore.Data.ExtraSongData;
 
 namespace MultiplayerCore.Beatmaps
 {
@@ -20,6 +22,10 @@ namespace MultiplayerCore.Beatmaps
         public override string levelAuthorName => _packet.levelAuthorName;
         public override float beatsPerMinute => _packet.beatsPerMinute;
         public override float songDuration => _packet.songDuration;
+
+        public override Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements => new() { { _packet.characteristic, _packet.requirements } };
+        public override Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> difficultyColors => new() { { _packet.characteristic, _packet.mapColors } };
+        public override Contributor[] contributors => _packet.contributors;
 
         private readonly MpBeatmapPacket _packet;
         private readonly BeatSaver? _beatsaver;

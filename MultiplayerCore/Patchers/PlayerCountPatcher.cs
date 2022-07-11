@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace MultiplayerCore.Patchers
 {
+    [HarmonyPatch]
     public class PlayerCountPatcher : IAffinity
     {
         /// <summary>
@@ -48,9 +49,9 @@ namespace MultiplayerCore.Patchers
             ____maxPlayersList.values = Enumerable.Range(MinPlayers, MaxPlayers - MinPlayers + 1).Select(x => (float)x).ToArray();
         }
 
-        [AffinityTranspiler]
-        [AffinityPatch(typeof(CreateServerFormController), nameof(CreateServerFormController.formData), AffinityMethodType.Getter)]
-        private IEnumerable<CodeInstruction> CreateServerFormData(IEnumerable<CodeInstruction> instructions)
+        [HarmonyTranspiler]
+        [HarmonyPatch(typeof(CreateServerFormController), nameof(CreateServerFormController.formData), MethodType.Getter)]
+        private static IEnumerable<CodeInstruction> CreateServerFormData(IEnumerable<CodeInstruction> instructions)
         {
             var codes = instructions.ToList();
             for (int i = 0; i < codes.Count; i++)
@@ -63,9 +64,9 @@ namespace MultiplayerCore.Patchers
             return codes.AsEnumerable();
         }
 
-        [AffinityPrefix]
-        [AffinityPatch(typeof(MultiplayerLobbyController), nameof(MultiplayerLobbyController.ActivateMultiplayerLobby))]
-        private void LoadLobby(ref float ____innerCircleRadius, ref float ____minOuterCircleRadius)
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MultiplayerLobbyController), nameof(MultiplayerLobbyController.ActivateMultiplayerLobby))]
+        private static void LoadLobby(ref float ____innerCircleRadius, ref float ____minOuterCircleRadius)
         {
             // Fix circle for bigger player counts
             ____innerCircleRadius = 1f;

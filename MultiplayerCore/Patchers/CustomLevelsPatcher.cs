@@ -4,13 +4,16 @@ using SiraUtil.Logging;
 using UnityEngine.UI;
 using System;
 using System.Threading.Tasks;
+using HarmonyLib;
 
 namespace MultiplayerCore.Patchers
 {
+    [HarmonyPatch]
     public class CustomLevelsPatcher : IAffinity
     {
         private readonly NetworkConfigPatcher _networkConfig;
         private readonly SiraLog _logger;
+
         internal CustomLevelsPatcher(
             NetworkConfigPatcher networkConfig,
             SiraLog logger)
@@ -29,16 +32,17 @@ namespace MultiplayerCore.Patchers
             return false;
         }
 
-        [AffinityPrefix]
-        [AffinityPatch(typeof(LobbySetupViewController), nameof(LobbySetupViewController.SetPlayersMissingLevelText))]
-        private void SetPlayersMissingLevelText(LobbySetupViewController __instance, string playersMissingLevelText, ref Button ____startGameReadyButton)
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(LobbySetupViewController), nameof(LobbySetupViewController.SetPlayersMissingLevelText))]
+        private static void SetPlayersMissingLevelText(LobbySetupViewController __instance, string playersMissingLevelText, ref Button ____startGameReadyButton)
         {
             if (!string.IsNullOrEmpty(playersMissingLevelText) && ____startGameReadyButton.interactable)
                 __instance.SetStartGameEnabled(CannotStartGameReason.DoNotOwnSong);
         }
 
-        [AffinityPatch(typeof(BeatmapIdentifierNetSerializableHelper), nameof(BeatmapIdentifierNetSerializableHelper.ToPreviewDifficultyBeatmap))]
-        private void BeatmapIdentifierToPreviewDifficultyBeatmap(BeatmapIdentifierNetSerializable beatmapId, ref PreviewDifficultyBeatmap __result)
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(BeatmapIdentifierNetSerializableHelper), nameof(BeatmapIdentifierNetSerializableHelper.ToPreviewDifficultyBeatmap))]
+        private static void BeatmapIdentifierToPreviewDifficultyBeatmap(BeatmapIdentifierNetSerializable beatmapId, ref PreviewDifficultyBeatmap __result)
         {
             if (__result.beatmapLevel == null)
                 __result.beatmapLevel = new NoInfoBeatmapLevel(Utilities.HashForLevelID(beatmapId.levelID));
@@ -51,12 +55,11 @@ namespace MultiplayerCore.Patchers
             if (_networkConfig.MasterServerEndPoint != null) ____beatmapDifficultyDropdown.includeAllDifficulties = true;
         }
 
-        [AffinityPostfix]
-        [AffinityPatch(typeof(BeatmapDifficultyDropdown), nameof(BeatmapDifficultyDropdown.GetIdxForBeatmapDifficultyMask))]
-        private void GetIdxForBeatmapDifficultyMask(BeatmapDifficultyDropdown __instance, ref int __result)
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(BeatmapDifficultyDropdown), nameof(BeatmapDifficultyDropdown.GetIdxForBeatmapDifficultyMask))]
+        private static void GetIdxForBeatmapDifficultyMask(BeatmapDifficultyDropdown __instance, ref int __result)
         {
             if (__instance.includeAllDifficulties) __result = 0;
-            _logger.Debug($"GetIdxForBeatmapDifficultyMask {__result}"); // TODO: Remove this line for release
         }
 
         [AffinityPostfix]
@@ -64,7 +67,6 @@ namespace MultiplayerCore.Patchers
         private void IsQuickPlaySetupTaskValid(QuickPlaySetupModel __instance, ref bool __result, Task<QuickPlaySetupData> ____request, DateTime ____lastRequestTime)
         {
             if (_networkConfig.MasterServerEndPoint != null) __result = false;
-            _logger.Debug($"IsQuickPlaySetupTaskValid {__result}"); // TODO: Remove this line for release
         }
 
         //[AffinityPostfix]

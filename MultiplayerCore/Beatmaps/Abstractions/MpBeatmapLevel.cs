@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using static SongCore.Data.ExtraSongData;
 
 namespace MultiplayerCore.Beatmaps.Abstractions
 {
@@ -33,6 +34,11 @@ namespace MultiplayerCore.Beatmaps.Abstractions
         public float shufflePeriod { get; private set; } // Not needed
         public EnvironmentInfoSO? environmentInfo => null; // Not needed, used for level load
         public EnvironmentInfoSO? allDirectionsEnvironmentInfo => null; // Not needed, used for level load
+
+        // SongCore stuff
+        public virtual Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements { get; protected set; } = new();
+        public virtual Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> difficultyColors { get; protected set; } = new();
+        public virtual Contributor[]? contributors { get; protected set; } = null!;
 
         public virtual Task<Sprite> GetCoverImageAsync(CancellationToken cancellationToken)
             => Task.FromResult<Sprite>(null!);
