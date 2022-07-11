@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace MultiplayerCore.Patchers
 {
+    [HarmonyPatch]
     public class PlayerCountPatcher : IAffinity
     {
         /// <summary>

@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace MultiplayerCore.Patches
 {
+    [HarmonyPatch]
     public class OutroAnimationPatches
     {
         [HarmonyPrefix]

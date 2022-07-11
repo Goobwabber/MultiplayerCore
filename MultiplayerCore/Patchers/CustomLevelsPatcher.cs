@@ -8,6 +8,7 @@ using HarmonyLib;
 
 namespace MultiplayerCore.Patchers
 {
+    [HarmonyPatch]
     public class CustomLevelsPatcher : IAffinity
     {
         private readonly NetworkConfigPatcher _networkConfig;
