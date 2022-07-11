@@ -11,7 +11,7 @@
     "SongCore": "^3.9.3",
     "BeatSaverSharp": "^3.0.1",
     "SiraUtil": "^3.0.0",
-    "BeatSaberMarkupLanguage": "^1.6.6"
+    "BeatSaberMarkupLanguage": "^1.6.3"
   },
   "links": {
     "project-home": "https://github.com/Goobwabber/MultiplayerCore",
