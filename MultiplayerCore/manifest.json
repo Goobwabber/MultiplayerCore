@@ -10,7 +10,8 @@
     "BSIPA": "^4.1.4",
     "SongCore": "^3.9.3",
     "BeatSaverSharp": "^3.0.1",
-    "SiraUtil": "^3.0.0"
+    "SiraUtil": "^3.0.0",
+    "BeatSaberMarkupLanguage": "^1.6.6"
   },
   "links": {
     "project-home": "https://github.com/Goobwabber/MultiplayerCore",
