@@ -30,6 +30,7 @@ These can be downloaded from [BeatMods](https://beatmods.com/#/mods) or using Mo
 ## For Other Modders
 How do I send and receive packets???
 ok just do this
+oh yeah also you have to register the packet before you send it!!!!
 ```cs
 // ok cool wanna make a packet?
 public class WhateverTheFuckPacket : MpPacket {
