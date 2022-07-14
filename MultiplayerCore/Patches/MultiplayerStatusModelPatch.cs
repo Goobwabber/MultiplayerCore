@@ -2,28 +2,17 @@
 using MultiplayerCore.Models;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Reflection.Emit;
 
 namespace MultiplayerCore.Patches
 {
     [HarmonyPatch]
     public class MultiplayerStatusModelPatch
     {
-        static MethodBase TargetMethod() =>
-            AccessTools.FirstInner(typeof(MultiplayerStatusModel), t => t.Name.StartsWith("<GetMultiplayerStatusAsyncInternal"))?.GetMethod("MoveNext", BindingFlags.NonPublic | BindingFlags.Instance)!;
-
-        private static readonly MethodInfo _deserializeObjectMethod = SymbolExtensions.GetMethodInfo(() => JsonConvert.DeserializeObject<MultiplayerStatusData>(null!));
-        private static readonly MethodInfo _deserializeObjectAttacher = SymbolExtensions.GetMethodInfo(() => DeserializeObjectAttacher(null!));
-
-        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) =>
-            new CodeMatcher(instructions)
-                .MatchForward(false, new CodeMatch(i => i.opcode == OpCodes.Call && i.Calls(_deserializeObjectMethod)))
-                .Set(OpCodes.Call, _deserializeObjectAttacher)
-                .InstructionEnumeration();
-
-        private static object DeserializeObjectAttacher(string value)
-            => JsonConvert.DeserializeObject<MpStatusData>(value);
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(JsonConvert), nameof(JsonConvert.DeserializeObject), new[] {typeof(string), typeof(Type), typeof(JsonSerializerSettings)})]
+        private static void DeserializeObject(ref Type type) {
+            if (type == typeof(MultiplayerStatusData))
+                type = typeof(MpStatusData);
+        }
     }
 }
