@@ -3,9 +3,9 @@
   "id": "MultiplayerCore",
   "name": "MultiplayerCore",
   "author": "Goobwabber",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Adds custom songs to Beat Saber Multiplayer.",
-  "gameVersion": "1.20.0",
+  "gameVersion": "1.24.0",
   "dependsOn": {
     "BSIPA": "^4.1.4",
     "SongCore": "^3.9.3",
