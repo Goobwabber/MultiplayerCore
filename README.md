@@ -15,9 +15,10 @@ Lastly, check out [other mods](https://github.com/Goobwabber/MultiplayerCore#rel
 ## Requirements
 These can be downloaded from [BeatMods](https://beatmods.com/#/mods) or using Mod Assistant.
 * BSIPA v4.1.4+
-* SongCore v3.2.0+
+* SongCore v3.9.3+
 * BeatSaverSharp v3.0.1+
 * SiraUtil 3.0.0+
+* BeatSaberMarkupLanguage 1.6.3+
 
 ## Reporting Issues
 * The best way to report issues is to click on the `Issues` tab at the top of the GitHub page. This allows any contributor to see the problem and attempt to fix it, and others with the same issue can contribute more information. **Please try the troubleshooting steps before reporting the issues listed there. Please only report issues after using the latest build, your problem may have already been fixed.**
