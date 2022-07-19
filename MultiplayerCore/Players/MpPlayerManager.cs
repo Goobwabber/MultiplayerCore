@@ -1,7 +1,7 @@
-﻿using MultiplayerCore.Networking;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using MultiplayerCore.Networking;
 using Zenject;
 
 namespace MultiplayerCore.Players
@@ -44,7 +44,7 @@ namespace MultiplayerCore.Players
 
         private void HandlePlayerConnected(IConnectedPlayer player)
         {
-            _sessionManager.Send(new MpPlayerData
+            var playerData = new MpPlayerData
             {
                 PlatformId = _localPlayerInfo.platformUserId,
                 Platform = _localPlayerInfo.platform switch
@@ -55,7 +55,9 @@ namespace MultiplayerCore.Players
                     UserInfo.Platform.PS4 => Platform.PS4,
                     _ => throw new NotImplementedException()
                 }
-            });
+            };
+            _sessionManager.Send(playerData);
+            PlayerConnectedEvent?.Invoke(player, playerData);
         }
 
         private void HandlePlayerData(MpPlayerData packet, IConnectedPlayer player)
