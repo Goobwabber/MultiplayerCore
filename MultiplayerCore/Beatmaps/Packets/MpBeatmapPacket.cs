@@ -104,34 +104,41 @@ namespace MultiplayerCore.Beatmaps.Packets
             characteristic = reader.GetString();
             difficulty = (BeatmapDifficulty)reader.GetUInt();
 
-            var difficultyCount = reader.GetByte();
-            for (int i = 0; i < difficultyCount; i++)
+            try
             {
-                var difficulty = (BeatmapDifficulty)reader.GetByte();
-                var requirementCount = reader.GetByte();
-                string[] reqsForDifficulty = new string[requirementCount];
-                for (int j = 0; j < requirementCount; j++)
-                    reqsForDifficulty[j] = reader.GetString();
-                requirements[difficulty] = reqsForDifficulty;
-            }
-
-            var contributorCount = reader.GetByte();
-            contributors = new Contributor[contributorCount];
-            for (int i = 0; i < contributorCount; i++)
-                contributors[i] = new Contributor
+                var difficultyCount = reader.GetByte();
+                for (int i = 0; i < difficultyCount; i++)
                 {
-                    _role = reader.GetString(),
-                    _name = reader.GetString(),
-                    _iconPath = reader.GetString()
-                };
+                    var difficulty = (BeatmapDifficulty)reader.GetByte();
+                    var requirementCount = reader.GetByte();
+                    string[] reqsForDifficulty = new string[requirementCount];
+                    for (int j = 0; j < requirementCount; j++)
+                        reqsForDifficulty[j] = reader.GetString();
+                    requirements[difficulty] = reqsForDifficulty;
+                }
 
-            var colorCount = reader.GetByte();
-            for (int i = 0; i < colorCount; i++)
+                var contributorCount = reader.GetByte();
+                contributors = new Contributor[contributorCount];
+                for (int i = 0; i < contributorCount; i++)
+                    contributors[i] = new Contributor
+                    {
+                        _role = reader.GetString(),
+                        _name = reader.GetString(),
+                        _iconPath = reader.GetString()
+                    };
+
+                var colorCount = reader.GetByte();
+                for (int i = 0; i < colorCount; i++)
+                {
+                    var difficulty = (BeatmapDifficulty)reader.GetByte();
+                    var colors = new DifficultyColors();
+                    colors.Deserialize(reader);
+                    mapColors[difficulty] = colors;
+                }
+            }
+            catch
             {
-                var difficulty = (BeatmapDifficulty)reader.GetByte();
-                var colors = new DifficultyColors();
-                colors.Deserialize(reader);
-                mapColors[difficulty] = colors;
+                Plugin.Logger.Warn($"Player using old version of MultiplayerCore, not all info may be available.");
             }
         }
     }
