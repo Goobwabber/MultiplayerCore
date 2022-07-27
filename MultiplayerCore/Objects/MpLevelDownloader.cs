@@ -50,8 +50,13 @@ namespace MultiplayerCore.Objects
         {
             Task<bool> task;
             if (_downloads.TryGetValue(levelId, out task))
-                _logger.Debug($"Download already in progress: {levelId}");
-            if (task == null)
+            {
+                if (!task.IsCompleted)
+                    _logger.Debug($"Download already in progress: {levelId}");
+                if (task.IsCompleted && task.Result)
+                    _logger.Debug($"Download already finished: {levelId}");
+            }
+            if (task == null || (task.IsCompleted && !task.Result))
             {
                 _logger.Debug($"Starting download: {levelId}");
                 task = TryDownloadLevelInternal(levelId, cancellationToken, progress);

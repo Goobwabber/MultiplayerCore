@@ -51,13 +51,17 @@ namespace MultiplayerCore.Objects
                 {
                     _rpcManager.SetIsEntitledToLevel(_gameplaySetupData.beatmapLevel.beatmapLevel.levelID, EntitlementsStatus.Ok);
                     _logger.Debug($"Loaded level {_gameplaySetupData.beatmapLevel.beatmapLevel.levelID}");
-                    var extraSongData = SongCore.Collections.RetrieveExtraSongData(Utilities.HashForLevelID(_gameplaySetupData.beatmapLevel.beatmapLevel.levelID));
-                    if (extraSongData != null)
+                    var hash = Utilities.HashForLevelID(_gameplaySetupData.beatmapLevel.beatmapLevel.levelID);
+                    if (hash != null)
                     {
-                        var difficulty = extraSongData._difficulties.FirstOrDefault(x => x._difficulty == _gameplaySetupData.beatmapLevel.beatmapDifficulty && x._beatmapCharacteristicName == _gameplaySetupData.beatmapLevel.beatmapCharacteristic.name);
-                        if (difficulty != null && !difficulty.additionalDifficultyData._requirements.All(x => SongCore.Collections.capabilities.Contains(x)))
+                        var extraSongData = SongCore.Collections.RetrieveExtraSongData(hash);
+                        if (extraSongData != null)
                         {
-                            _difficultyBeatmap = null!;
+                            var difficulty = extraSongData._difficulties.FirstOrDefault(x => x._difficulty == _gameplaySetupData.beatmapLevel.beatmapDifficulty && x._beatmapCharacteristicName == _gameplaySetupData.beatmapLevel.beatmapCharacteristic.name);
+                            if (difficulty != null && !difficulty.additionalDifficultyData._requirements.All(x => SongCore.Collections.capabilities.Contains(x)))
+                            {
+                                _difficultyBeatmap = null!;
+                            }
                         }
                     }
                 }
