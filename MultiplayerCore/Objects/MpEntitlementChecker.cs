@@ -107,11 +107,17 @@ namespace MultiplayerCore.Objects
             {
                 Beatmap? beatmap = r.Result;
                 if (beatmap == null)
+                {
+                    _logger.Warn($"Level hash {levelHash} was not found on BeatSaver!");
                     return EntitlementsStatus.NotOwned;
+                }
 
                 BeatmapVersion? beatmapVersion = beatmap.Versions.FirstOrDefault(x => string.Equals(x.Hash, levelHash, StringComparison.OrdinalIgnoreCase));
-                if (beatmapVersion == null)
+                if (beatmapVersion == null!)
+                {
+                    _logger.Warn($"Level hash {levelHash} was not found in map versions provided by BeatSaver!");
                     return EntitlementsStatus.NotOwned;
+                }
 
                 string[] requirements = beatmapVersion.Difficulties
                     .Aggregate(Array.Empty<string>(), (a, n) => a

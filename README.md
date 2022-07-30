@@ -74,7 +74,7 @@ public class WhateverTheFuckManager : IInitializable, IDisposable
 ## Contributing
 Anyone can feel free to contribute bug fixes or enhancements to MultiplayerCore. Please keep in mind that this mod's purpose is to implement core functionality of modded multiplayer, so we will likely not be accepting enhancements that fall out of that scope. GitHub Actions for Pull Requests made from GitHub accounts that don't have direct access to the repository will fail. This is normal because the Action requires a `Secret` to download dependencies.
 ### Building
-Visual Studio 2019 with the [BeatSaberModdingTools](https://github.com/Zingabopp/BeatSaberModdingTools) extension is the recommended development environment.
+Visual Studio 2022 with the [BeatSaberModdingTools](https://github.com/Zingabopp/BeatSaberModdingTools) extension is the recommended development environment.
 1. Check out the repository
 2. Open `MultiplayerCore.sln`
 3. Right-click the `MultiplayerCore` project, go to `Beat Saber Modding Tools` -> `Set Beat Saber Directory`
