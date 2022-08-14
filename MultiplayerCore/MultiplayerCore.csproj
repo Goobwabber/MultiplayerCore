@@ -38,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="UI\ColorsUI.bsml" />
+    <None Remove="UI\LoadingIndicator.bsml" />
     <None Remove="UI\RequirementsButton.bsml" />
     <None Remove="UI\RequirementsUI.bsml" />
   </ItemGroup>
@@ -207,6 +208,7 @@
   <ItemGroup>
     <EmbeddedResource Include="manifest.json" />
     <EmbeddedResource Include="UI\ColorsUI.bsml" />
+    <EmbeddedResource Include="UI\LoadingIndicator.bsml" />
     <EmbeddedResource Include="UI\RequirementsButton.bsml" />
     <EmbeddedResource Include="UI\RequirementsUI.bsml" />
   </ItemGroup>
