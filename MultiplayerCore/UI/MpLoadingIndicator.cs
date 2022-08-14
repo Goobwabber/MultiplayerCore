@@ -1,6 +1,7 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
+using MultiplayerCore.Objects;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -16,6 +17,8 @@ namespace MultiplayerCore.UI
         private readonly IMultiplayerSessionManager _sessionManager;
         private readonly ILobbyGameStateController _gameStateController;
         private readonly ILobbyPlayersDataModel _playersDataModel;
+        private readonly MpEntitlementChecker _entitlementChecker;
+        private readonly MpLevelLoader _levelLoader;
         private readonly CenterStageScreenController _screenController;
 
         private LoadingControl _loadingControl = null!;
@@ -25,11 +28,15 @@ namespace MultiplayerCore.UI
             IMultiplayerSessionManager sessionManager,
             ILobbyGameStateController gameStateController,
             ILobbyPlayersDataModel playersDataModel,
+            MpEntitlementChecker entitlementChecker,
+            MpLevelLoader levelLoader,
             CenterStageScreenController screenController)
         {
             _sessionManager = sessionManager;
             _gameStateController = gameStateController;
             _playersDataModel = playersDataModel;
+            _entitlementChecker = entitlementChecker;
+            _levelLoader = levelLoader;
             _screenController = screenController;
         }
 
@@ -52,7 +59,7 @@ namespace MultiplayerCore.UI
             if (_isDownloading)
                 return;
             else if (_screenController.countdownShown && _sessionManager.syncTime >= _gameStateController.startTime && _gameStateController.levelStartInitiated)
-                _loadingControl.ShowLoading($"{_playersDataModel.Count(x => x.Value.isReady || !x.Value.isActive)} of {_playersDataModel.Count} players ready...");
+                _loadingControl.ShowLoading($"{_playersDataModel.Count(x => _entitlementChecker.GetUserEntitlementStatusWithoutRequest(x.Key, _levelLoader.CurrentLoadingData.beatmapLevel.beatmapLevel.levelID) == EntitlementsStatus.Ok)} of {_playersDataModel.Count} players ready...");
             else
                 _loadingControl.Hide();
         }
