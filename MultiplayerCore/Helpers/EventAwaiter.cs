@@ -57,7 +57,7 @@ namespace MultiplayerCore.Helpers
         }
     }
 
-    public class EventAwaiter<T1, T2> : EventAwaiter
+    internal class EventAwaiter<T1, T2> : EventAwaiter
     {
         public EventAwaiter()
             : base()
