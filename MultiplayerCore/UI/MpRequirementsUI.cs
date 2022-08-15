@@ -16,7 +16,7 @@ using static BeatSaberMarkupLanguage.Components.CustomListTableData;
 
 namespace MultiplayerCore.UI
 {
-    public class MpRequirementsUI : NotifiableBase, IInitializable, IDisposable
+    internal class MpRequirementsUI : NotifiableBase, IInitializable, IDisposable
     {
         public const string ButtonResourcePath = "MultiplayerCore.UI.RequirementsButton.bsml";
         public const string ResourcePath = "MultiplayerCore.UI.RequirementsUI.bsml";

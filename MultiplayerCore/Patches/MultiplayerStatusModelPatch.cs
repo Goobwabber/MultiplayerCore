@@ -9,7 +9,7 @@ using System.Reflection.Emit;
 namespace MultiplayerCore.Patches
 {
     [HarmonyPatch]
-    public class MultiplayerStatusModelPatch
+    internal class MultiplayerStatusModelPatch
     {
         static MethodBase TargetMethod() =>
             AccessTools.FirstInner(typeof(MultiplayerStatusModel), t => t.Name.StartsWith("<GetMultiplayerStatusAsyncInternal"))?.GetMethod("MoveNext", BindingFlags.NonPublic | BindingFlags.Instance)!;

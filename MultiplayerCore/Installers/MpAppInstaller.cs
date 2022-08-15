@@ -9,7 +9,7 @@ using Zenject;
 
 namespace MultiplayerCore.Installers
 {
-    class MpAppInstaller : Installer
+    internal class MpAppInstaller : Installer
     {
         private readonly BeatSaver _beatsaver;
 

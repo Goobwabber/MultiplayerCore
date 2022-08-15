@@ -4,7 +4,7 @@ using SiraUtil.Logging;
 
 namespace MultiplayerCore.Objects
 {
-    public class BGNetDebugLogger : Debug.ILogger
+    internal class BGNetDebugLogger : Debug.ILogger
     {
         private readonly SiraLog _logger;
 

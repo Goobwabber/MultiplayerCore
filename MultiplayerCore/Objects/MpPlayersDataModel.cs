@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace MultiplayerCore.Objects
 {
-    public class MpPlayersDataModel : LobbyPlayersDataModel, ILobbyPlayersDataModel, IDisposable
+    internal class MpPlayersDataModel : LobbyPlayersDataModel, ILobbyPlayersDataModel, IDisposable
     {
         private readonly MpPacketSerializer _packetSerializer;
         private readonly MpBeatmapLevelProvider _beatmapLevelProvider;

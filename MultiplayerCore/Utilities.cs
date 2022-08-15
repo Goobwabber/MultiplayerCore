@@ -1,6 +1,6 @@
 ﻿namespace MultiplayerCore
 {
-    public class Utilities
+    internal class Utilities
     {
         public static string HashForLevelID(string levelId)
         {

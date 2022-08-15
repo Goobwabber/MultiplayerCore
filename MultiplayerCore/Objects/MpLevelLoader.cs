@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MultiplayerCore.Objects
 {
-    internal class MpLevelLoader : MultiplayerLevelLoader, IProgress<double>
+    public class MpLevelLoader : MultiplayerLevelLoader, IProgress<double>
     {
         public event Action<double> progressUpdated = null!;
 
@@ -40,8 +40,6 @@ namespace MultiplayerCore.Objects
             base.LoadLevel(gameplaySetupData, initialStartTime);
             if (levelHash != null && !SongCore.Collections.songWithHashPresent(levelHash))
                 _getBeatmapLevelResultTask = DownloadBeatmapLevelAsync(gameplaySetupData.beatmapLevel.beatmapLevel.levelID, _getBeatmapCancellationTokenSource.Token);
-
-            // Possible race condition here
         }
 
         public override void Tick()

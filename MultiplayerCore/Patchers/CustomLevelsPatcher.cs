@@ -9,7 +9,7 @@ using HarmonyLib;
 namespace MultiplayerCore.Patchers
 {
     [HarmonyPatch]
-    public class CustomLevelsPatcher : IAffinity
+    internal class CustomLevelsPatcher : IAffinity
     {
         private readonly NetworkConfigPatcher _networkConfig;
         private readonly SiraLog _logger;

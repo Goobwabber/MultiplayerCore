@@ -3,7 +3,7 @@ using Zenject;
 
 namespace MultiplayerCore.Installers
 {
-    class MpMenuInstaller : Installer
+    internal class MpMenuInstaller : Installer
     {
         public override void InstallBindings()
         {

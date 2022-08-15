@@ -11,7 +11,7 @@ using UnityEngine.Timeline;
 namespace MultiplayerCore.Patches
 {
     [HarmonyPatch]
-    public class IntroAnimationPatches
+    internal class IntroAnimationPatches
     {
         private static PlayableDirector? _originalDirector;
         private static int _iteration = 0;

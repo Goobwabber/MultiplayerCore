@@ -13,7 +13,7 @@ using IPALogger = IPA.Logging.Logger;
 namespace MultiplayerCore
 {
     [Plugin(RuntimeOptions.DynamicInit)]
-    class Plugin
+    internal class Plugin
     {
         public const string ID = "com.goobwabber.multiplayercore";
         public const string CustomLevelsPath = "CustomMultiplayerLevels";

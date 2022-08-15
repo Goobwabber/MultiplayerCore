@@ -8,7 +8,7 @@ using UnityEngine;
 namespace MultiplayerCore.Patches
 {
     [HarmonyPatch]
-    public class OutroAnimationPatches
+    internal class OutroAnimationPatches
     {
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MultiplayerOutroAnimationController), nameof(MultiplayerOutroAnimationController.BindRingsAndAudio))]

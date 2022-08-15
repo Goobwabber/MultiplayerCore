@@ -12,7 +12,7 @@ using Zenject;
 
 namespace MultiplayerCore.UI
 {
-    public class MpColorsUI : NotifiableBase
+    internal class MpColorsUI : NotifiableBase
     {
         public const string ResourcePath = "MultiplayerCore.UI.ColorsUI.bsml";
 

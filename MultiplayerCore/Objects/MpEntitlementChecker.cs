@@ -12,7 +12,7 @@ using Zenject;
 
 namespace MultiplayerCore.Objects
 {
-    public class MpEntitlementChecker : NetworkPlayerEntitlementChecker
+    internal class MpEntitlementChecker : NetworkPlayerEntitlementChecker
     {
         public event Action<string, string, EntitlementsStatus>? receivedEntitlementEvent;
 

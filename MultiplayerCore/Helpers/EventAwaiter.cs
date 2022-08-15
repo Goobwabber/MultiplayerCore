@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MultiplayerCore.Helpers
 {
-    public class EventAwaiter : IDisposable
+    internal class EventAwaiter : IDisposable
     {
         private TaskCompletionSource<bool> _taskCompletion;
         private CancellationTokenRegistration TokenRegistration;

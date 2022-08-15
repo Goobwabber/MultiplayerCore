@@ -2,7 +2,7 @@
 
 namespace MultiplayerCore.Patchers
 {
-    public class ModeSelectionPatcher : IAffinity
+    internal class ModeSelectionPatcher : IAffinity
     {
         private string _lastStatusUrl = string.Empty;
 

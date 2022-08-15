@@ -6,7 +6,7 @@ using MultiplayerCore.Models;
 namespace MultiplayerCore.Patches
 {
     [HarmonyPatch]
-    public class MultiplayerUnavailableReasonPatches
+    internal class MultiplayerUnavailableReasonPatches
     {
         private static string _requiredMod = string.Empty;
         private static string _requiredVersion = string.Empty;

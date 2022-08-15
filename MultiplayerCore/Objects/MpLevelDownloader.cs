@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace MultiplayerCore.Objects
 {
-    public class MpLevelDownloader
+    internal class MpLevelDownloader
     {
         public readonly string CustomLevelsFolder = Path.Combine(Application.dataPath, Plugin.CustomLevelsPath);
 

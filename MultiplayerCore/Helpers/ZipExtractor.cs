@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MultiplayerCore.Helpers
 {
-    public class ZipExtractor
+    internal class ZipExtractor
     {
         public const int MaxFileSystemPathLength = 259;
 

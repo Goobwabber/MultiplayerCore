@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 namespace MultiplayerCore.Patches
 {
     [HarmonyPatch]
-    public class LoggingPatch
+    internal class LoggingPatch
     {
         [HarmonyTranspiler]
         [HarmonyPatch(typeof(ConnectedPlayerManager), "HandleNetworkReceive")]
