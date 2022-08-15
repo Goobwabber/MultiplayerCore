@@ -47,11 +47,13 @@ namespace MultiplayerCore.UI
             GameObject loadingControlGO = GameObject.Instantiate(existingLoadingControl, _vert.transform);
             _loadingControl = loadingControlGO.GetComponent<LoadingControl>();
             _loadingControl.Hide();
+
+            _levelLoader.progressUpdated += Report;
         }
 
         public void Dispose()
         {
-            
+            _levelLoader.progressUpdated -= Report;
         }
 
         public void Tick()
