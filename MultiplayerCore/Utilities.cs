@@ -2,11 +2,11 @@
 {
     internal class Utilities
     {
-        public static string HashForLevelID(string levelId)
+        public static string HashForLevelID(string? levelId)
         {
             if (string.IsNullOrWhiteSpace(levelId))
                 return null!;
-            string[] ary = levelId.Split('_', ' ');
+            string[] ary = levelId!.Split('_', ' ');
             string hash = null!;
             if (ary.Length > 2)
                 hash = ary[2];
