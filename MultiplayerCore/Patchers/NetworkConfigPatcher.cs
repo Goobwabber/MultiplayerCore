@@ -3,7 +3,7 @@ using SiraUtil.Logging;
 
 namespace MultiplayerCore.Patchers
 {
-    internal class NetworkConfigPatcher : IAffinity
+    public class NetworkConfigPatcher : IAffinity
     {
         public const int OfficialMaxPartySize = 5;
 

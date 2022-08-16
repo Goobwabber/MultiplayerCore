@@ -9,7 +9,7 @@ using UnityEngine;
 namespace MultiplayerCore.Patchers
 {
     [HarmonyPatch]
-    internal class PlayerCountPatcher : IAffinity
+    public class PlayerCountPatcher : IAffinity
     {
         /// <summary>
         /// The minimum amount of players you can create a lobby with.
