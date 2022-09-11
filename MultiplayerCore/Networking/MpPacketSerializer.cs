@@ -1,7 +1,9 @@
 ﻿using LiteNetLib.Utils;
+using MultiplayerCore.Networking.Attributes;
 using SiraUtil.Logging;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Zenject;
 
 namespace MultiplayerCore.Networking
@@ -37,7 +39,12 @@ namespace MultiplayerCore.Networking
         /// <param name="packet">The packet to serialize</param>
         public void Serialize(NetDataWriter writer, INetSerializable packet)
         {
-            writer.Put(packet.GetType().Name);
+            var packetType = packet.GetType();
+            var packetIdAttribute = packetType.GetCustomAttribute<PacketIDAttribute>();
+            if (packetIdAttribute is not null)
+                writer.Put(packetIdAttribute.ID);
+            else
+                writer.Put(packetType.Name);
             packet.Serialize(writer);
         }
 
@@ -50,12 +57,12 @@ namespace MultiplayerCore.Networking
         public void Deserialize(NetDataReader reader, int length, IConnectedPlayer data)
         {
             int prevPosition = reader.Position;
-            string packetType = reader.GetString();
+            string packetId = reader.GetString();
             length -= reader.Position - prevPosition;
             prevPosition = reader.Position;
 
             Action<NetDataReader, int, IConnectedPlayer> action;
-            if (packetHandlers.TryGetValue(packetType, out action) && action != null)
+            if (packetHandlers.TryGetValue(packetId, out action) && action != null)
             {
                 try
                 {
@@ -63,7 +70,7 @@ namespace MultiplayerCore.Networking
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warn($"An exception was thrown processing custom packet '{packetType}' from player '{data?.userName ?? "<NULL>"}|{data?.userId ?? " < NULL > "}': {ex.Message}");
+                    _logger.Warn($"An exception was thrown processing custom packet '{packetId}' from player '{data?.userName ?? "<NULL>"}|{data?.userId ?? " < NULL > "}': {ex.Message}");
                     _logger.Debug(ex);
                 }
             }
@@ -100,14 +107,18 @@ namespace MultiplayerCore.Networking
         /// <seealso cref="RegisterCallback{TPacket}(Action{TPacket})"/>
         public void RegisterCallback<TPacket>(Action<TPacket, IConnectedPlayer> callback) where TPacket : INetSerializable, new()
         {
-            registeredTypes.Add(typeof(TPacket));
+            var packetType = typeof(TPacket);
+            registeredTypes.Add(packetType);
+
+            var packetIdAttribute = packetType.GetCustomAttribute<PacketIDAttribute>();
+            var packetId = packetIdAttribute is not null ? packetIdAttribute.ID : packetType.Name;
 
             Func<NetDataReader, int, TPacket> deserialize = delegate (NetDataReader reader, int size)
             {
                 TPacket packet = new TPacket();
                 if (packet == null)
                 {
-                    _logger.Error($"Constructor for '{typeof(TPacket)}' returned null!");
+                    _logger.Error($"Constructor for '{packetType}' returned null!");
                     reader.SkipBytes(size);
                 }
                 else
@@ -118,12 +129,12 @@ namespace MultiplayerCore.Networking
                 return packet!;
             };
 
-            packetHandlers[typeof(TPacket).Name] = delegate (NetDataReader reader, int size, IConnectedPlayer player)
+            packetHandlers[packetId] = delegate (NetDataReader reader, int size, IConnectedPlayer player)
             {
                 callback(deserialize(reader, size), player);
             };
 
-            _logger.Debug($"Registered packet '{typeof(TPacket).Name}'.");
+            _logger.Debug($"Registered packet '{packetType}' with id '{packetId}'.");
         }
 
         /// <summary>
@@ -132,8 +143,11 @@ namespace MultiplayerCore.Networking
         /// <typeparam name="TPacket">Type of packet to unregister. Inherits <see cref="LiteNetLib.Utils.INetSerializable"/></typeparam>
         public void UnregisterCallback<TPacket>() where TPacket : INetSerializable, new()
         {
-            packetHandlers.Remove(typeof(TPacket).Name);
-            registeredTypes.Remove(typeof(TPacket));
+            var packetType = typeof(TPacket);
+            var packetIdAttribute = packetType.GetCustomAttribute<PacketIDAttribute>();
+            var packetId = packetIdAttribute is not null ? packetIdAttribute.ID : packetType.Name;
+            packetHandlers.Remove(packetId);
+            registeredTypes.Remove(packetType);
         }
     }
 }
