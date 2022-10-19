@@ -18,7 +18,7 @@ namespace MultiplayerCore.UI
 
         public event Action dismissedEvent = null!;
 
-        private BoostedColorSchemeView boostedColorSchemeView = null!;
+        private ColorSchemeView colorSchemeView = null!;
         private readonly Color voidColor = new Color(0.5f, 0.5f, 0.5f, 0.25f);
 
         private readonly LobbySetupViewController _lobbySetupViewController;
@@ -70,9 +70,6 @@ namespace MultiplayerCore.UI
         private void PostParse()
         {
             ColorSchemeView colorSchemeView = GameObject.Instantiate(Resources.FindObjectsOfTypeAll<ColorSchemeView>().First(), selectedColorTransform);
-            boostedColorSchemeView = IPA.Utilities.ReflectionUtil.CopyComponent<BoostedColorSchemeView>(colorSchemeView, colorSchemeView.gameObject);
-            GameObject.DestroyImmediate(colorSchemeView);
-            boostedColorSchemeView.Setup();
             _modalPosition = _modal.transform.localPosition;
             _modal.blockerClickedEvent += Dismiss;
         }
@@ -90,7 +87,7 @@ namespace MultiplayerCore.UI
             Color envRightBoost = colors._envColorRightBoost == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors._envColorRightBoost);
             Color obstacle = colors._obstacleColor == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors._obstacleColor);
 
-            boostedColorSchemeView.SetColors(saberLeft, saberRight, envLeft, envRight, envLeftBoost, envRightBoost, obstacle);
+            colorSchemeView.SetColors(saberLeft, saberRight, envLeft, envRight, envLeftBoost, envRightBoost, obstacle);
         }
     }
 }
