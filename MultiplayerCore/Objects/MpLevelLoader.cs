@@ -11,7 +11,7 @@ namespace MultiplayerCore.Objects
     {
         public event Action<double> progressUpdated = null!;
 
-        public ILevelGameplaySetupData CurrentLoadingData => _gameplaySetupData;
+        public ILevelGameplaySetupData? CurrentLoadingData => _gameplaySetupData;
 
         private readonly IMultiplayerSessionManager _sessionManager;
         private readonly MpLevelDownloader _levelDownloader;
