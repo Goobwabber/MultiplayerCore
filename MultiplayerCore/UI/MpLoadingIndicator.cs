@@ -28,14 +28,14 @@ namespace MultiplayerCore.UI
             IMultiplayerSessionManager sessionManager,
             ILobbyGameStateController gameStateController,
             ILobbyPlayersDataModel playersDataModel,
-            MpEntitlementChecker entitlementChecker,
+            NetworkPlayerEntitlementChecker entitlementChecker,
             MpLevelLoader levelLoader,
             CenterStageScreenController screenController)
         {
             _sessionManager = sessionManager;
             _gameStateController = gameStateController;
             _playersDataModel = playersDataModel;
-            _entitlementChecker = entitlementChecker;
+            _entitlementChecker = (entitlementChecker as MpEntitlementChecker)!;
             _levelLoader = levelLoader;
             _screenController = screenController;
         }
