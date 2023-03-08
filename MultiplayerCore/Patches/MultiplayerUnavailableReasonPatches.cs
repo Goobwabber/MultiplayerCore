@@ -63,11 +63,11 @@ namespace MultiplayerCore.Patches
             if (multiplayerUnavailableReason == (MultiplayerUnavailableReason)5)
             {
                 var metadata = PluginManager.GetPluginFromId(_requiredMod);
-                __result = $"Mod {metadata.Name} is out of date. Please update to version {_requiredVersion} or newer.";
+                __result = $"Multiplayer Unavailable\nMod {metadata.Name} is out of date.\nPlease update to version {_requiredVersion} or newer.";
                 return false;
             } else if (multiplayerUnavailableReason == (MultiplayerUnavailableReason)6)
             {
-                __result = $"Beat Saber version is too new, maximum version is {_maximumBsVersion}, current version is {UnityGame.GameVersion.ToString()}";
+                __result = $"Multiplayer Unavailable\nBeat Saber version is too new\nMaximum version: {_maximumBsVersion}, Current version: {UnityGame.GameVersion.ToString()}";
                 return false;
             }
             return true;
