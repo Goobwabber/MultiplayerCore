@@ -20,7 +20,22 @@ namespace MultiplayerCore.Models
             }
         }
 
+        [JsonProperty("maximum_app_version")]
+        private string _maximumAppVersion
+        {
+            get
+            {
+                return maximumAppVersion;
+            }
+
+            set
+            {
+                maximumAppVersion = value;
+            }
+        }
+
         public RequiredMod[] requiredMods = null!;
+        public string maximumAppVersion = null!;
 
         [Serializable]
         public class RequiredMod
