@@ -67,7 +67,7 @@ namespace MultiplayerCore.Patches
                 return false;
             } else if (multiplayerUnavailableReason == (MultiplayerUnavailableReason)6)
             {
-                __result = $"Multiplayer Unavailable\nBeat Saber version is too new\nMaximum version: {_maximumBsVersion}, Current version: {UnityGame.GameVersion.ToString()}";
+                __result = $"Multiplayer Unavailable\nBeat Saber version is too new\nMaximum version: {_maximumBsVersion}\nCurrent version: {UnityGame.GameVersion.ToString()}";
                 return false;
             }
             return true;
