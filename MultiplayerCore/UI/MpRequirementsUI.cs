@@ -119,9 +119,9 @@ namespace MultiplayerCore.UI
                 else if (mpLevel.difficultyColors.ContainsKey(beatmapLevel.beatmapCharacteristic.serializedName))
                     characteristicName = beatmapLevel.beatmapCharacteristic.serializedName;
                 if (characteristicName != null && mpLevel.difficultyColors[characteristicName].TryGetValue(beatmapLevel.beatmapDifficulty, out var colors))
-                    ButtonInteractable = (colors._colorLeft != null || colors._colorRight != null || colors._envColorLeft != null || colors._envColorRight != null || colors._envColorLeftBoost != null || colors._envColorRightBoost != null || colors._obstacleColor != null);
+                    ButtonInteractable = colors.AnyAreNotNull;
                 else
-                    ButtonInteractable = mpLevel.requirements.Any(x => x.Value.Any()) || (mpLevel.contributors?.Any() ?? false);
+                    ButtonInteractable = (characteristicName != null && mpLevel.requirements[characteristicName].Any()) || (mpLevel.contributors?.Any() ?? false);
             }
             else
                 ButtonInteractable = false;
@@ -187,7 +187,7 @@ namespace MultiplayerCore.UI
                 // Colors
                 object sConfiguration = typeof(SongCore.Plugin).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
                 bool customSongColors = (bool)typeof(SongCore.Plugin).Assembly.GetType("SongCore.SConfiguration").GetProperty("CustomSongColors").GetValue(sConfiguration);
-                if (mpLevel.difficultyColors.TryGetValue(characteristicName, out var difficultyColors) && difficultyColors.TryGetValue(level.beatmapDifficulty, out var colors) && (colors._colorLeft != null || colors._colorRight != null || colors._envColorLeft != null || colors._envColorRight != null || colors._envColorLeftBoost != null || colors._envColorRightBoost != null || colors._obstacleColor != null))
+                if (mpLevel.difficultyColors.TryGetValue(characteristicName, out var difficultyColors) && difficultyColors.TryGetValue(level.beatmapDifficulty, out var colors) && (colors.AnyAreNotNull))
                     customListTableData.data.Add(new CustomCellInfo($"<size=75%>Custom Colors Available", $"Click here to preview & {(customSongColors ? "disable" : "enable")} it.", ColorsIcon));
                 else if (mpLevel is BeatSaverBeatmapLevel)
                     customListTableData.data.Add(new CustomCellInfo($"<size=75%>Custom Colors", $"Click here to preview & {(customSongColors ? "disable" : "enable")} it.", ColorsIcon));

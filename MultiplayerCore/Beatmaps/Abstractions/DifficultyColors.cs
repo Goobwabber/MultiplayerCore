@@ -10,6 +10,8 @@ namespace MultiplayerCore.Beatmaps.Abstractions
 {
     public class DifficultyColors : INetSerializable
     {
+        public bool AnyAreNotNull => _colorLeft != null || _colorRight != null || _envColorLeft != null || _envColorRight != null || _envColorLeftBoost != null || _envColorRightBoost != null || _obstacleColor != null;
+
         public MapColor? _colorLeft;
         public MapColor? _colorRight;
         public MapColor? _envColorLeft;
