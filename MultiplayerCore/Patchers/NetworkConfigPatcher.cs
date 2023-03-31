@@ -14,7 +14,6 @@ namespace MultiplayerCore.Patchers
         public int? DiscoveryPort { get; set; }
         public int? PartyPort { get; set; }
         public int? MultiplayerPort { get; set; }
-        public bool DisableGameLift { get; set; }
 
         private readonly SiraLog _logger;
 
@@ -37,7 +36,6 @@ namespace MultiplayerCore.Patchers
             MasterServerStatusUrl = statusUrl;
             MaxPartySize = maxPartySize;
             QuickPlaySetupUrl = statusUrl + "/mp_override.json";
-            DisableGameLift = true;
         }
 
         /// <summary>
@@ -54,7 +52,6 @@ namespace MultiplayerCore.Patchers
             MasterServerStatusUrl = statusUrl;
             MaxPartySize = maxPartySize;
             QuickPlaySetupUrl = quickPlaySetupUrl != null ? quickPlaySetupUrl : statusUrl + "/mp_override.json";
-            DisableGameLift = true;
         }
 
         /// <summary>
@@ -67,7 +64,6 @@ namespace MultiplayerCore.Patchers
             MasterServerStatusUrl = null;
             MaxPartySize = null;
             QuickPlaySetupUrl = null;
-            DisableGameLift = false;
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.masterServerEndPoint), AffinityMethodType.Getter)]
@@ -151,9 +147,6 @@ namespace MultiplayerCore.Patchers
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.forceGameLift), AffinityMethodType.Getter)]
         private void GetForceGameLift(ref bool __result)
         {
-            if (!DisableGameLift)
-                return;
-
             __result = false;
             //_logger.Debug($"Patching network config forceGameLift with '{__result}'.");
         }
@@ -162,10 +155,7 @@ namespace MultiplayerCore.Patchers
         [AffinityPatch(typeof(UnifiedNetworkPlayerModel), nameof(UnifiedNetworkPlayerModel.SetActiveNetworkPlayerModelType))]
         private void PrefixSetActiveNetworkPlayerModelType(ref UnifiedNetworkPlayerModel.ActiveNetworkPlayerModelType activeNetworkPlayerModelType)
         {
-            if (!DisableGameLift)
-                return;
-
-            activeNetworkPlayerModelType = UnifiedNetworkPlayerModel.ActiveNetworkPlayerModelType.MasterServer;
+            activeNetworkPlayerModelType = UnifiedNetworkPlayerModel.ActiveNetworkPlayerModelType.GameLift;
             //_logger.Debug($"Patching activeNetworkPlayerModelType with '{activeNetworkPlayerModelType}'.");
         }
 
