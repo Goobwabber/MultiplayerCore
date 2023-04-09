@@ -45,13 +45,10 @@ namespace MultiplayerCore.Patchers
         }
 
         /// <summary>
-        /// Use the official API server and disable any override.
+        /// Use the official API server and disable any network overrides.
         /// </summary>
         public void UseOfficialServer()
         {
-            if (!IsOverridingApi)
-                return;
-
             _logger.Debug($"Removed multiplayer API server override");
 
             GraphUrl = null;
