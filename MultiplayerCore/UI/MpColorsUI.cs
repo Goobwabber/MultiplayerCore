@@ -4,6 +4,7 @@ using System.Reflection;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
+using BeatSaberMarkupLanguage.Components.Settings;
 using HMUI;
 using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Helpers;
@@ -21,6 +22,15 @@ namespace MultiplayerCore.UI
         private readonly Color voidColor = new Color(0.5f, 0.5f, 0.5f, 0.25f);
 
         private readonly LobbySetupViewController _lobbySetupViewController;
+
+        [UIComponent("noteColorsToggle")]
+        private ToggleSetting noteColorToggle;
+
+        [UIComponent("environmentColorsToggle")]
+        private ToggleSetting environmentColorToggle;
+
+        [UIComponent("obstacleColorsToggle")]
+        private ToggleSetting obstacleColorsToggle;
 
         internal MpColorsUI(
             LobbySetupViewController lobbySetupViewController)
@@ -62,6 +72,11 @@ namespace MultiplayerCore.UI
             Parse();
             _modal.Show(true);
             SetColors(colors);
+
+            // We do this to apply any changes to the toggles that might have been made from within SongCores UI
+            noteColorToggle.Value = SongCoreConfig.CustomSongNoteColors;
+            obstacleColorsToggle.Value = SongCoreConfig.CustomSongObstacleColors;
+            environmentColorToggle.Value = SongCoreConfig.CustomSongEnvironmentColors;
         }
 
         private void Parse()
