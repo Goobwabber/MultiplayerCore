@@ -1,14 +1,13 @@
-﻿using BeatSaberMarkupLanguage;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using HMUI;
 using MultiplayerCore.Beatmaps.Abstractions;
-using SongCore.UI;
-using System;
-using System.Linq;
-using System.Reflection;
+using MultiplayerCore.Helpers;
 using UnityEngine;
-using Zenject;
 
 namespace MultiplayerCore.UI
 {
@@ -40,16 +39,8 @@ namespace MultiplayerCore.UI
         [UIValue("colors")]
         public bool Colors
         {
-            get
-            {
-                object sConfiguration = typeof(SongCore.Plugin).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
-                return (bool)typeof(SongCore.Plugin).Assembly.GetType("SongCore.SConfiguration").GetProperty("CustomSongColors").GetValue(sConfiguration);
-            }
-            set
-            {
-                object sConfiguration = typeof(SongCore.Plugin).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
-                typeof(SongCore.Plugin).Assembly.GetType("SongCore.SConfiguration").GetProperty("CustomSongColors").SetValue(sConfiguration, value);
-            }
+            get => SongCoreConfig.AnyCustomSongColors;
+            set => SongCoreConfig.AnyCustomSongColors = value;
         }
 
         internal void ShowColors(DifficultyColors colors)
