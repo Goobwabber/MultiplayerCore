@@ -36,11 +36,25 @@ namespace MultiplayerCore.UI
         [UIComponent("selected-color")]
         private readonly RectTransform selectedColorTransform = null!;
 
-        [UIValue("colors")]
-        public bool Colors
+        [UIValue("noteColors")]
+        public bool NoteColors
         {
-            get => SongCoreConfig.AnyCustomSongColors;
-            set => SongCoreConfig.AnyCustomSongColors = value;
+            get => SongCoreConfig.CustomSongNoteColors;
+            set => SongCoreConfig.CustomSongNoteColors = value;
+        }
+
+        [UIValue("obstacleColors")]
+        public bool ObstacleColors
+        {
+            get => SongCoreConfig.CustomSongObstacleColors;
+            set => SongCoreConfig.CustomSongObstacleColors = value;
+        }
+
+        [UIValue("environmentColors")]
+        public bool EnvironmentColors
+        {
+            get => SongCoreConfig.CustomSongEnvironmentColors;
+            set => SongCoreConfig.CustomSongEnvironmentColors = value;
         }
 
         internal void ShowColors(DifficultyColors colors)
