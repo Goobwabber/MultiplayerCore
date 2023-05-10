@@ -1,4 +1,5 @@
-﻿using LiteNetLib.Utils;
+﻿using Hive.Versioning;
+using LiteNetLib.Utils;
 using MultiplayerCore.Networking.Abstractions;
 using System.Collections.Generic;
 
@@ -16,16 +17,23 @@ namespace MultiplayerCore.Players
         /// </summary>
         public Platform Platform { get; set; }
 
+        /// <summary>
+        /// Version
+        /// </summary>
+        public Version GameVersion { get; set; }
+
         public override void Serialize(NetDataWriter writer)
         {
             writer.Put(PlatformId);
             writer.Put((int)Platform);
+            writer.Put(GameVersion.ToString());
         }
 
         public override void Deserialize(NetDataReader reader)
         {
             PlatformId = reader.GetString();
             Platform = (Platform)reader.GetInt();
+            GameVersion = Version.Parse(reader.GetString());
         }
     }
 
