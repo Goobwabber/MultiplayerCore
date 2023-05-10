@@ -61,7 +61,7 @@ namespace MultiplayerCore.UI
             if (_isDownloading)
                 return;
             else if (_screenController.countdownShown && _sessionManager.syncTime >= _gameStateController.startTime && _gameStateController.levelStartInitiated && _levelLoader.CurrentLoadingData != null)
-                _loadingControl.ShowLoading($"{_playersDataModel.Count(x => _entitlementChecker.GetUserEntitlementStatusWithoutRequest(x.Key, _levelLoader.CurrentLoadingData.beatmapLevel.beatmapLevel.levelID) == EntitlementsStatus.Ok)} of {_playersDataModel.Count} players ready...");
+                _loadingControl.ShowLoading($"{_playersDataModel.Count(x => _entitlementChecker.GetUserEntitlementStatusWithoutRequest(x.Key, _levelLoader.CurrentLoadingData.beatmapLevel.beatmapLevel.levelID) == EntitlementsStatus.Ok) + 1} of {_playersDataModel.Count - 1} players ready...");
             else
                 _loadingControl.Hide();
         }
