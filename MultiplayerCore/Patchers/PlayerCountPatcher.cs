@@ -65,12 +65,33 @@ namespace MultiplayerCore.Patchers
         }
 
         [HarmonyPrefix]
+        [HarmonyPatch(typeof(AvatarPoseRestrictions), nameof(AvatarPoseRestrictions.HandleAvatarPoseControllerPositionsWillBeSet))]
+        private static bool DisableAvatarRestrictions(AvatarPoseRestrictions __instance, Vector3 headPosition, Vector3 leftHandPosition, Vector3 rightHandPosition, out Vector3 newHeadPosition, out Vector3 newLeftHandPosition, out Vector3 newRightHandPosition)
+        {
+            newHeadPosition = headPosition;
+            newLeftHandPosition = __instance.LimitHandPositionRelativeToHead(leftHandPosition, headPosition);
+            newRightHandPosition = __instance.LimitHandPositionRelativeToHead(rightHandPosition, headPosition);
+            return false;
+        }
+
+        [HarmonyPrefix]
         [HarmonyPatch(typeof(MultiplayerLobbyController), nameof(MultiplayerLobbyController.ActivateMultiplayerLobby))]
         private static void LoadLobby(ref float ____innerCircleRadius, ref float ____minOuterCircleRadius)
         {
             // Fix circle for bigger player counts
             ____innerCircleRadius = 1f;
             ____minOuterCircleRadius = 4.4f;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(MultiplayerLobbyController), nameof(MultiplayerLobbyController.ActivateMultiplayerLobby))]
+        private void LoadLobby_Post(ref float ____innerCircleRadius, ref float ____minOuterCircleRadius, ref MultiplayerLobbyCenterStageManager ____multiplayerLobbyCenterStageManager)
+        {
+            float angleBetweenPlayersWithEvenAdjustment = MultiplayerPlayerPlacement.GetAngleBetweenPlayersWithEvenAdjustment(MaxPlayers, MultiplayerPlayerLayout.Circle);
+            float outerCircleRadius = Mathf.Max(MultiplayerPlayerPlacement.GetOuterCircleRadius(angleBetweenPlayersWithEvenAdjustment, ____innerCircleRadius));
+
+            float centerScreenScale = outerCircleRadius / ____minOuterCircleRadius;
+            ____multiplayerLobbyCenterStageManager.transform.localScale = new Vector3(centerScreenScale, centerScreenScale, centerScreenScale);
         }
 
         [AffinityTranspiler]
