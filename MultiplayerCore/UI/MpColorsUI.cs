@@ -4,6 +4,7 @@ using System.Reflection;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
+using BeatSaberMarkupLanguage.Components.Settings;
 using HMUI;
 using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Helpers;
@@ -22,6 +23,15 @@ namespace MultiplayerCore.UI
 
         private readonly LobbySetupViewController _lobbySetupViewController;
 
+        [UIComponent("noteColorsToggle")]
+        private ToggleSetting noteColorToggle;
+
+        [UIComponent("environmentColorsToggle")]
+        private ToggleSetting environmentColorToggle;
+
+        [UIComponent("obstacleColorsToggle")]
+        private ToggleSetting obstacleColorsToggle;
+
         internal MpColorsUI(
             LobbySetupViewController lobbySetupViewController)
         {
@@ -36,11 +46,25 @@ namespace MultiplayerCore.UI
         [UIComponent("selected-color")]
         private readonly RectTransform selectedColorTransform = null!;
 
-        [UIValue("colors")]
-        public bool Colors
+        [UIValue("noteColors")]
+        public bool NoteColors
         {
-            get => SongCoreConfig.AnyCustomSongColors;
-            set => SongCoreConfig.AnyCustomSongColors = value;
+            get => SongCoreConfig.CustomSongNoteColors;
+            set => SongCoreConfig.CustomSongNoteColors = value;
+        }
+
+        [UIValue("obstacleColors")]
+        public bool ObstacleColors
+        {
+            get => SongCoreConfig.CustomSongObstacleColors;
+            set => SongCoreConfig.CustomSongObstacleColors = value;
+        }
+
+        [UIValue("environmentColors")]
+        public bool EnvironmentColors
+        {
+            get => SongCoreConfig.CustomSongEnvironmentColors;
+            set => SongCoreConfig.CustomSongEnvironmentColors = value;
         }
 
         internal void ShowColors(DifficultyColors colors)
@@ -48,6 +72,11 @@ namespace MultiplayerCore.UI
             Parse();
             _modal.Show(true);
             SetColors(colors);
+
+            // We do this to apply any changes to the toggles that might have been made from within SongCores UI
+            noteColorToggle.Value = SongCoreConfig.CustomSongNoteColors;
+            obstacleColorsToggle.Value = SongCoreConfig.CustomSongObstacleColors;
+            environmentColorToggle.Value = SongCoreConfig.CustomSongEnvironmentColors;
         }
 
         private void Parse()

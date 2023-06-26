@@ -26,7 +26,7 @@ namespace MultiplayerCore.Objects
             _logger = logger;
         }
 
-        public override void Activate()
+        public new void Activate()
         {
             _packetSerializer.RegisterCallback<MpBeatmapPacket>(HandleMpexBeatmapPacket);
             base.Activate();
@@ -36,7 +36,7 @@ namespace MultiplayerCore.Objects
             _menuRpcManager.recommendBeatmapEvent += this.HandleMenuRpcManagerRecommendBeatmap;
         }
 
-        public override void Deactivate()
+        public new void Deactivate()
         {
             _packetSerializer.UnregisterCallback<MpBeatmapPacket>();
             _menuRpcManager.getRecommendedBeatmapEvent -= this.HandleMenuRpcManagerGetRecommendedBeatmap;
@@ -57,7 +57,7 @@ namespace MultiplayerCore.Objects
             base.SetPlayerBeatmapLevel(player.userId, new PreviewDifficultyBeatmap(preview, characteristic, packet.difficulty));
         }
 
-        public override void HandleMenuRpcManagerGetRecommendedBeatmap(string userId)
+        public new void HandleMenuRpcManagerGetRecommendedBeatmap(string userId)
         {
             ILobbyPlayerData localPlayerData = _playersData[localUserId];
             string? levelId = localPlayerData.beatmapLevel?.beatmapLevel?.levelID;
@@ -70,14 +70,14 @@ namespace MultiplayerCore.Objects
             base.HandleMenuRpcManagerGetRecommendedBeatmap(userId);
         }
 
-        public override void HandleMenuRpcManagerRecommendBeatmap(string userId, BeatmapIdentifierNetSerializable beatmapId)
+        public new void HandleMenuRpcManagerRecommendBeatmap(string userId, BeatmapIdentifierNetSerializable beatmapId)
         {
             if (!string.IsNullOrEmpty(Utilities.HashForLevelID(beatmapId.levelID)))
                 return;
             base.HandleMenuRpcManagerRecommendBeatmap(userId, beatmapId);
         }
 
-        public override async void SetLocalPlayerBeatmapLevel(PreviewDifficultyBeatmap beatmapLevel)
+        public new async void SetLocalPlayerBeatmapLevel(PreviewDifficultyBeatmap beatmapLevel)
         {
             _logger.Debug($"Local player selected song '{beatmapLevel.beatmapLevel.levelID}'");
             string? levelHash = Utilities.HashForLevelID(beatmapLevel.beatmapLevel.levelID);
