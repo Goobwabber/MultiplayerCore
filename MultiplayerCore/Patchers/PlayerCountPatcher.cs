@@ -30,7 +30,7 @@ namespace MultiplayerCore.Patchers
         public bool AddEmptyPlayerSlotForEvenCount { get; set; } = false;
 
         private readonly INetworkConfig _networkConfig;
-        private readonly SiraLog _logger;
+        private static SiraLog _logger;
 
         internal PlayerCountPatcher(
             INetworkConfig networkConfig,
@@ -85,14 +85,18 @@ namespace MultiplayerCore.Patchers
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(MultiplayerLobbyController), nameof(MultiplayerLobbyController.ActivateMultiplayerLobby))]
-        private void LoadLobby_Post(ref float ____innerCircleRadius, ref float ____minOuterCircleRadius, ref MultiplayerLobbyCenterStageManager ____multiplayerLobbyCenterStageManager)
+        private static void LoadLobby_Post(float ____innerCircleRadius, float ____minOuterCircleRadius, ref MultiplayerLobbyCenterStageManager ____multiplayerLobbyCenterStageManager)
         {
-            float angleBetweenPlayersWithEvenAdjustment = MultiplayerPlayerPlacement.GetAngleBetweenPlayersWithEvenAdjustment(MaxPlayers, MultiplayerPlayerLayout.Circle);
-            float outerCircleRadius = Mathf.Max(MultiplayerPlayerPlacement.GetOuterCircleRadius(angleBetweenPlayersWithEvenAdjustment, ____innerCircleRadius));
+            var maxPlayers = ____multiplayerLobbyCenterStageManager._lobbyStateDataModel.configuration.maxPlayerCount;
+            float angleBetweenPlayersWithEvenAdjustment = MultiplayerPlayerPlacement.GetAngleBetweenPlayersWithEvenAdjustment(maxPlayers, MultiplayerPlayerLayout.Circle);
+            float outerCircleRadius = Mathf.Max(MultiplayerPlayerPlacement.GetOuterCircleRadius(angleBetweenPlayersWithEvenAdjustment, ____innerCircleRadius), ____innerCircleRadius);
 
-            float centerScreenScale = outerCircleRadius / ____minOuterCircleRadius;
+            float centerScreenScale = Mathf.Max(outerCircleRadius / ____minOuterCircleRadius, ____innerCircleRadius);
+            _logger.Info($"innerCircleRadius is {____innerCircleRadius}, minOuterCircleRadius is {____minOuterCircleRadius}, maxPlayers is {maxPlayers}, angleBetweenPlayersWithEvenAdjustment is {angleBetweenPlayersWithEvenAdjustment}, outerCircleRadius is {outerCircleRadius}, centerScreenScale is {centerScreenScale}");
+
             ____multiplayerLobbyCenterStageManager.transform.localScale = new Vector3(centerScreenScale, centerScreenScale, centerScreenScale);
         }
+
 
         [AffinityTranspiler]
         [AffinityPatch(typeof(MultiplayerPlayerPlacement), nameof(MultiplayerPlayerPlacement.GetAngleBetweenPlayersWithEvenAdjustment))]
