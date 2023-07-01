@@ -27,6 +27,7 @@ namespace MultiplayerCore.Beatmaps.Abstractions
         public virtual float songDuration { get; protected set; }
         public virtual float previewStartTime { get; protected set; }
         public virtual float previewDuration { get; protected set; }
+        public virtual EnvironmentInfoSO[] environmentInfos { get; private set; }
         public virtual IReadOnlyList<PreviewDifficultyBeatmapSet>? previewDifficultyBeatmapSets { get; protected set; }
 
         public virtual float songTimeOffset { get; protected set; } // Not needed
