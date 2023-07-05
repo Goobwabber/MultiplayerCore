@@ -53,6 +53,11 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
+    <Reference Include="BGNet">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Ignorance.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="BGNetLogging">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNetLogging.dll</HintPath>
       <Private>False</Private>
