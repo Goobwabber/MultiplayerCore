@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BeatSaber.AvatarCore;
+using HarmonyLib;
 using SiraUtil.Affinity;
 using SiraUtil.Logging;
 using System.Collections.Generic;
@@ -64,9 +65,10 @@ namespace MultiplayerCore.Patchers
             return codes.AsEnumerable();
         }
 
+        //TODO: Change from Harmony to Zenject since there's an interface available for this
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(AvatarPoseRestrictions), nameof(AvatarPoseRestrictions.HandleAvatarPoseControllerPositionsWillBeSet))]
-        private static bool DisableAvatarRestrictions(AvatarPoseRestrictions __instance, Vector3 headPosition, Vector3 leftHandPosition, Vector3 rightHandPosition, out Vector3 newHeadPosition, out Vector3 newLeftHandPosition, out Vector3 newRightHandPosition)
+        [HarmonyPatch(typeof(LimitAvatarPoseRestriction), nameof(LimitAvatarPoseRestriction.RestrictPose))]
+        private static bool DisableAvatarRestrictions(LimitAvatarPoseRestriction __instance, Vector3 headPosition, Vector3 leftHandPosition, Vector3 rightHandPosition, out Vector3 newHeadPosition, out Vector3 newLeftHandPosition, out Vector3 newRightHandPosition)
         {
             newHeadPosition = headPosition;
             newLeftHandPosition = __instance.LimitHandPositionRelativeToHead(leftHandPosition, headPosition);
