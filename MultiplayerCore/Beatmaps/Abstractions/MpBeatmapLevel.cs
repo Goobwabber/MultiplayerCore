@@ -36,7 +36,6 @@ namespace MultiplayerCore.Beatmaps.Abstractions
         public float shufflePeriod { get; private set; } // Not needed
         public EnvironmentInfoSO? environmentInfo => null; // Not needed, used for level load
         public EnvironmentInfoSO? allDirectionsEnvironmentInfo => null; // Not needed, used for level load
-        public EnvironmentInfoSO[]? environmentInfos => null; // Not needed, used for level load
 
         // SongCore stuff
         public virtual Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements { get; protected set; } = new();
