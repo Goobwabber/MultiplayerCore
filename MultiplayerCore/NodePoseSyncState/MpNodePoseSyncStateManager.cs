@@ -8,8 +8,8 @@ namespace MultiplayerCore.NodePoseSyncState
 {
     internal class MpNodePoseSyncStateManager : IInitializable, IDisposable, IAffinity
     {
-        public float? DeltaUpdateFrequency { get; private set; } = null;
-        public float? FullStateUpdateFrequency { get; private set; } = null;
+        public long? DeltaUpdateFrequency { get; private set; } = null;
+        public long? FullStateUpdateFrequency { get; private set; } = null;
 
         private readonly MpPacketSerializer _packetSerializer;
         MpNodePoseSyncStateManager(MpPacketSerializer packetSerializer) => _packetSerializer = packetSerializer;
@@ -28,8 +28,8 @@ namespace MultiplayerCore.NodePoseSyncState
         }
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(NodePoseSyncStateManager), "deltaUpdateFrequency", AffinityMethodType.Getter)]
-        private bool GetDeltaUpdateFrequency(ref float __result)
+        [AffinityPatch(typeof(NodePoseSyncStateManager), nameof(NodePoseSyncStateManager.deltaUpdateFrequencyMs), AffinityMethodType.Getter)]
+        private bool GetDeltaUpdateFrequency(ref long __result)
         {
             if (DeltaUpdateFrequency.HasValue)
             {
@@ -40,8 +40,8 @@ namespace MultiplayerCore.NodePoseSyncState
         }
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(NodePoseSyncStateManager), "fullStateUpdateFrequency", AffinityMethodType.Getter)]
-        private bool GetFullStateUpdateFrequency(ref float __result)
+        [AffinityPatch(typeof(NodePoseSyncStateManager), nameof(NodePoseSyncStateManager.fullStateUpdateFrequencyMs), AffinityMethodType.Getter)]
+        private bool GetFullStateUpdateFrequency(ref long __result)
         {
             if (FullStateUpdateFrequency.HasValue)
             {

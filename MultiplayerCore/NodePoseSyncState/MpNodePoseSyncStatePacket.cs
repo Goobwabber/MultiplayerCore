@@ -5,8 +5,8 @@ namespace MultiplayerCore.NodePoseSyncState
 {
     internal class MpNodePoseSyncStatePacket : MpPacket
     {
-        public float deltaUpdateFrequency = 0.01f;
-        public float fullStateUpdateFrequency = 0.1f;
+        public long deltaUpdateFrequency = 10L;
+        public long fullStateUpdateFrequency = 100L;
         public override void Serialize(NetDataWriter writer)
         {
             writer.Put(deltaUpdateFrequency);
@@ -15,8 +15,8 @@ namespace MultiplayerCore.NodePoseSyncState
 
         public override void Deserialize(NetDataReader reader)
         {
-            deltaUpdateFrequency = reader.GetFloat();
-            fullStateUpdateFrequency = reader.GetFloat();
+            deltaUpdateFrequency = reader.GetLong();
+            fullStateUpdateFrequency = reader.GetLong();
         }
     }
 }
