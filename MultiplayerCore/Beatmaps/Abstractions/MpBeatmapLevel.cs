@@ -29,12 +29,14 @@ namespace MultiplayerCore.Beatmaps.Abstractions
         public virtual float previewDuration { get; protected set; }
         public virtual EnvironmentInfoSO[] environmentInfos { get; private set; }
         public virtual IReadOnlyList<PreviewDifficultyBeatmapSet>? previewDifficultyBeatmapSets { get; protected set; }
+        public PlayerSensitivityFlag contentRating { get; }  // Not needed
 
         public virtual float songTimeOffset { get; protected set; } // Not needed
         public float shuffle { get; private set; } // Not needed
         public float shufflePeriod { get; private set; } // Not needed
         public EnvironmentInfoSO? environmentInfo => null; // Not needed, used for level load
         public EnvironmentInfoSO? allDirectionsEnvironmentInfo => null; // Not needed, used for level load
+        public EnvironmentInfoSO[]? environmentInfos => null; // Not needed, used for level load
 
         // SongCore stuff
         public virtual Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements { get; protected set; } = new();
