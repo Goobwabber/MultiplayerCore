@@ -10,7 +10,7 @@ namespace MultiplayerCore.Patches
     internal class LoggingPatch
     {
         [HarmonyTranspiler]
-        [HarmonyPatch(typeof(ConnectedPlayerManager), "HandleNetworkReceive")]
+        [HarmonyPatch(typeof(ConnectedPlayerManager), nameof(ConnectedPlayerManager.HandleNetworkReceive))]
         private static IEnumerable<CodeInstruction> PacketErrorLogger(IEnumerable<CodeInstruction> instructions, ILGenerator gen)
         {
             LocalBuilder localException = gen.DeclareLocal(typeof(Exception));
@@ -25,7 +25,7 @@ namespace MultiplayerCore.Patches
                     yield return current; // Store exception in local
                     current = new CodeInstruction(OpCodes.Ldarg_2);
                     yield return current; // Load packet onto stack
-                    current = new CodeInstruction(OpCodes.Ldloc_2);
+                    current = new CodeInstruction(OpCodes.Ldloc_3);
                     yield return current; // Load player onto stack
                     current = new CodeInstruction(OpCodes.Ldloc, localException);
                     yield return current; // Load exception onto stack
