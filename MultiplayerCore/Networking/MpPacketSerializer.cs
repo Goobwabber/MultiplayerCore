@@ -64,6 +64,9 @@ namespace MultiplayerCore.Networking
             Action<NetDataReader, int, IConnectedPlayer> action;
             if (packetHandlers.TryGetValue(packetId, out action) && action != null)
             {
+#if DEBUG
+                _logger.Debug($"Found MessageHandler for Packet identifier '{packetId}'");
+#endif
                 try
                 {
                     action(reader, length, data);
@@ -74,6 +77,10 @@ namespace MultiplayerCore.Networking
                     _logger.Debug(ex);
                 }
             }
+#if DEBUG
+            else
+                _logger.Error($"Received unknown packet type '{packetId}' from player '{data?.userName ?? "<NULL>"}|{data?.userId ?? " < NULL > "}'");
+#endif
 
             // skip any unprocessed bytes (or rewind the reader if too many bytes were read)
             int processedBytes = reader.Position - prevPosition;
