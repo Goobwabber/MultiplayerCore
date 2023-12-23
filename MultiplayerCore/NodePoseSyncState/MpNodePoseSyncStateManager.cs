@@ -2,6 +2,7 @@
 using System;
 using Zenject;
 using SiraUtil.Affinity;
+using SiraUtil.Logging;
 
 
 namespace MultiplayerCore.NodePoseSyncState
@@ -12,7 +13,12 @@ namespace MultiplayerCore.NodePoseSyncState
         public long? FullStateUpdateFrequency { get; private set; } = null;
 
         private readonly MpPacketSerializer _packetSerializer;
-        MpNodePoseSyncStateManager(MpPacketSerializer packetSerializer) => _packetSerializer = packetSerializer;
+        private readonly SiraLog _logger;
+        MpNodePoseSyncStateManager(MpPacketSerializer packetSerializer, SiraLog logger)
+        {
+            _packetSerializer = packetSerializer;
+            _logger = logger;
+        }
         
         public void Initialize() => _packetSerializer.RegisterCallback<MpNodePoseSyncStatePacket>(HandleUpdateFrequencyUpdated);
         
@@ -24,6 +30,7 @@ namespace MultiplayerCore.NodePoseSyncState
             {
                 DeltaUpdateFrequency = data.deltaUpdateFrequency;
                 FullStateUpdateFrequency = data.fullStateUpdateFrequency;
+                _logger.Debug($"Update frequency updated to DeltaUpdateFrequency {DeltaUpdateFrequency} and FullStateUpdateFrequency {FullStateUpdateFrequency}.");
             }
         }
 
