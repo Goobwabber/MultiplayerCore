@@ -30,7 +30,7 @@ namespace MultiplayerCore.Patchers
         public bool AddEmptyPlayerSlotForEvenCount { get; set; } = false;
 
         private readonly INetworkConfig _networkConfig;
-        private readonly SiraLog _logger;
+        private static SiraLog _logger;
 
         internal PlayerCountPatcher(
             INetworkConfig networkConfig,
@@ -65,6 +65,16 @@ namespace MultiplayerCore.Patchers
         }
 
         [HarmonyPrefix]
+        [HarmonyPatch(typeof(AvatarPoseRestrictions), nameof(AvatarPoseRestrictions.HandleAvatarPoseControllerPositionsWillBeSet))]
+        private static bool DisableAvatarRestrictions(AvatarPoseRestrictions __instance, Vector3 headPosition, Vector3 leftHandPosition, Vector3 rightHandPosition, out Vector3 newHeadPosition, out Vector3 newLeftHandPosition, out Vector3 newRightHandPosition)
+        {
+            newHeadPosition = headPosition;
+            newLeftHandPosition = __instance.LimitHandPositionRelativeToHead(leftHandPosition, headPosition);
+            newRightHandPosition = __instance.LimitHandPositionRelativeToHead(rightHandPosition, headPosition);
+            return false;
+        }
+
+        [HarmonyPrefix]
         [HarmonyPatch(typeof(MultiplayerLobbyController), nameof(MultiplayerLobbyController.ActivateMultiplayerLobby))]
         private static void LoadLobby(ref float ____innerCircleRadius, ref float ____minOuterCircleRadius)
         {
@@ -72,6 +82,21 @@ namespace MultiplayerCore.Patchers
             ____innerCircleRadius = 1f;
             ____minOuterCircleRadius = 4.4f;
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(MultiplayerLobbyController), nameof(MultiplayerLobbyController.ActivateMultiplayerLobby))]
+        private static void LoadLobby_Post(float ____innerCircleRadius, float ____minOuterCircleRadius, ref MultiplayerLobbyCenterStageManager ____multiplayerLobbyCenterStageManager)
+        {
+            var maxPlayers = ____multiplayerLobbyCenterStageManager._lobbyStateDataModel.configuration.maxPlayerCount;
+            float angleBetweenPlayersWithEvenAdjustment = MultiplayerPlayerPlacement.GetAngleBetweenPlayersWithEvenAdjustment(maxPlayers, MultiplayerPlayerLayout.Circle);
+            float outerCircleRadius = Mathf.Max(MultiplayerPlayerPlacement.GetOuterCircleRadius(angleBetweenPlayersWithEvenAdjustment, ____innerCircleRadius), ____innerCircleRadius);
+
+            float centerScreenScale = Mathf.Max(outerCircleRadius / ____minOuterCircleRadius, ____innerCircleRadius);
+            _logger.Info($"innerCircleRadius is {____innerCircleRadius}, minOuterCircleRadius is {____minOuterCircleRadius}, maxPlayers is {maxPlayers}, angleBetweenPlayersWithEvenAdjustment is {angleBetweenPlayersWithEvenAdjustment}, outerCircleRadius is {outerCircleRadius}, centerScreenScale is {centerScreenScale}");
+
+            ____multiplayerLobbyCenterStageManager.transform.localScale = new Vector3(centerScreenScale, centerScreenScale, centerScreenScale);
+        }
+
 
         [AffinityTranspiler]
         [AffinityPatch(typeof(MultiplayerPlayerPlacement), nameof(MultiplayerPlayerPlacement.GetAngleBetweenPlayersWithEvenAdjustment))]

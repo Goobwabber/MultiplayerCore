@@ -34,7 +34,7 @@ namespace MultiplayerCore.Objects
             _logger = logger;
         }
 
-        public override void Start()
+        public new void Start()
         {
             base.Start();
 
@@ -43,7 +43,7 @@ namespace MultiplayerCore.Objects
             _rpcManager.setIsEntitledToLevelEvent += HandleSetIsEntitledToLevel;
         }
 
-        public override void OnDestroy()
+        public new void OnDestroy()
         {
             _rpcManager.getIsEntitledToLevelEvent -= HandleGetIsEntitledToLevel;
             _rpcManager.getIsEntitledToLevelEvent += base.HandleGetIsEntitledToLevel;
@@ -81,7 +81,7 @@ namespace MultiplayerCore.Objects
         /// </summary>
         /// <param name="levelId">Level to check entitlement</param>
         /// <returns>Level entitlement status</returns>
-        public override Task<EntitlementsStatus> GetEntitlementStatus(string levelId)
+        public new Task<EntitlementsStatus> GetEntitlementStatus(string levelId)
         {
             //_logger.Debug($"Checking level entitlement for '{levelId}'");
 

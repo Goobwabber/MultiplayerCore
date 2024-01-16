@@ -1,10 +1,10 @@
+using System;
+using System.Threading.Tasks;
+using HarmonyLib;
 using MultiplayerCore.Beatmaps;
 using SiraUtil.Affinity;
 using SiraUtil.Logging;
 using UnityEngine.UI;
-using System;
-using System.Threading.Tasks;
-using HarmonyLib;
 
 namespace MultiplayerCore.Patchers
 {
@@ -27,7 +27,7 @@ namespace MultiplayerCore.Patchers
         private bool CustomLevelsEnabled(ref bool __result, SongPackMask ____songPackMask)
         {
             __result = 
-                _networkConfig.MasterServerEndPoint != null 
+                _networkConfig.IsOverridingApi 
                 && ____songPackMask.Contains(new SongPackMask("custom_levelpack_CustomLevels"));
             return false;
         }
@@ -52,7 +52,7 @@ namespace MultiplayerCore.Patchers
         [AffinityPatch(typeof(JoinQuickPlayViewController), nameof(JoinQuickPlayViewController.Setup))]
         private void SetupPre(JoinQuickPlayViewController __instance, ref BeatmapDifficultyDropdown ____beatmapDifficultyDropdown)
         {
-            if (_networkConfig.MasterServerEndPoint != null) ____beatmapDifficultyDropdown.includeAllDifficulties = true;
+            if (_networkConfig.IsOverridingApi) ____beatmapDifficultyDropdown.includeAllDifficulties = true;
         }
 
         [HarmonyPostfix]
@@ -66,7 +66,7 @@ namespace MultiplayerCore.Patchers
         [AffinityPatch(typeof(QuickPlaySetupModel), nameof(QuickPlaySetupModel.IsQuickPlaySetupTaskValid))]
         private void IsQuickPlaySetupTaskValid(QuickPlaySetupModel __instance, ref bool __result, Task<QuickPlaySetupData> ____request, DateTime ____lastRequestTime)
         {
-            if (_networkConfig.MasterServerEndPoint != null) __result = false;
+            if (_networkConfig.IsOverridingApi) __result = false;
         }
 
         //[AffinityPostfix]

@@ -33,7 +33,7 @@ namespace MultiplayerCore.Objects
             _logger = logger;
         }
 
-        public override void LoadLevel(ILevelGameplaySetupData gameplaySetupData, float initialStartTime)
+        public new void LoadLevel(ILevelGameplaySetupData gameplaySetupData, float initialStartTime)
         {
             string levelHash = Utilities.HashForLevelID(gameplaySetupData.beatmapLevel.beatmapLevel.levelID);
             _logger.Debug($"Loading level {gameplaySetupData.beatmapLevel.beatmapLevel.levelID}");
@@ -42,7 +42,7 @@ namespace MultiplayerCore.Objects
                 _getBeatmapLevelResultTask = DownloadBeatmapLevelAsync(gameplaySetupData.beatmapLevel.beatmapLevel.levelID, _getBeatmapCancellationTokenSource.Token);
         }
 
-        public override void Tick()
+        public new void Tick()
         {
             if (_loaderState == MultiplayerBeatmapLoaderState.LoadingBeatmap)
             {

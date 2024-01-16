@@ -1,14 +1,14 @@
-﻿using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Components;
-using HMUI;
-using MultiplayerCore.Beatmaps.Abstractions;
-using SongCore.UI;
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
+using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
+using BeatSaberMarkupLanguage.Components.Settings;
+using HMUI;
+using MultiplayerCore.Beatmaps.Abstractions;
+using MultiplayerCore.Helpers;
 using UnityEngine;
-using Zenject;
 
 namespace MultiplayerCore.UI
 {
@@ -18,10 +18,19 @@ namespace MultiplayerCore.UI
 
         public event Action dismissedEvent = null!;
 
-        private BoostedColorSchemeView boostedColorSchemeView = null!;
+        private ColorSchemeView colorSchemeView = null!;
         private readonly Color voidColor = new Color(0.5f, 0.5f, 0.5f, 0.25f);
 
         private readonly LobbySetupViewController _lobbySetupViewController;
+
+        [UIComponent("noteColorsToggle")]
+        private ToggleSetting noteColorToggle;
+
+        [UIComponent("environmentColorsToggle")]
+        private ToggleSetting environmentColorToggle;
+
+        [UIComponent("obstacleColorsToggle")]
+        private ToggleSetting obstacleColorsToggle;
 
         internal MpColorsUI(
             LobbySetupViewController lobbySetupViewController)
@@ -37,19 +46,25 @@ namespace MultiplayerCore.UI
         [UIComponent("selected-color")]
         private readonly RectTransform selectedColorTransform = null!;
 
-        [UIValue("colors")]
-        public bool Colors
+        [UIValue("noteColors")]
+        public bool NoteColors
         {
-            get
-            {
-                object sConfiguration = typeof(SongCore.Plugin).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
-                return (bool)typeof(SongCore.Plugin).Assembly.GetType("SongCore.SConfiguration").GetProperty("CustomSongColors").GetValue(sConfiguration);
-            }
-            set
-            {
-                object sConfiguration = typeof(SongCore.Plugin).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
-                typeof(SongCore.Plugin).Assembly.GetType("SongCore.SConfiguration").GetProperty("CustomSongColors").SetValue(sConfiguration, value);
-            }
+            get => SongCoreConfig.CustomSongNoteColors;
+            set => SongCoreConfig.CustomSongNoteColors = value;
+        }
+
+        [UIValue("obstacleColors")]
+        public bool ObstacleColors
+        {
+            get => SongCoreConfig.CustomSongObstacleColors;
+            set => SongCoreConfig.CustomSongObstacleColors = value;
+        }
+
+        [UIValue("environmentColors")]
+        public bool EnvironmentColors
+        {
+            get => SongCoreConfig.CustomSongEnvironmentColors;
+            set => SongCoreConfig.CustomSongEnvironmentColors = value;
         }
 
         internal void ShowColors(DifficultyColors colors)
@@ -57,6 +72,11 @@ namespace MultiplayerCore.UI
             Parse();
             _modal.Show(true);
             SetColors(colors);
+
+            // We do this to apply any changes to the toggles that might have been made from within SongCores UI
+            noteColorToggle.Value = SongCoreConfig.CustomSongNoteColors;
+            obstacleColorsToggle.Value = SongCoreConfig.CustomSongObstacleColors;
+            environmentColorToggle.Value = SongCoreConfig.CustomSongEnvironmentColors;
         }
 
         private void Parse()
@@ -69,10 +89,9 @@ namespace MultiplayerCore.UI
         [UIAction("#post-parse")]
         private void PostParse()
         {
-            ColorSchemeView colorSchemeView = GameObject.Instantiate(Resources.FindObjectsOfTypeAll<ColorSchemeView>().First(), selectedColorTransform);
-            boostedColorSchemeView = IPA.Utilities.ReflectionUtil.CopyComponent<BoostedColorSchemeView>(colorSchemeView, colorSchemeView.gameObject);
-            GameObject.DestroyImmediate(colorSchemeView);
-            boostedColorSchemeView.Setup();
+            ColorSchemeView colorSchemeViewPrefab = GameObject.Instantiate(Resources.FindObjectsOfTypeAll<ColorSchemeView>().First(), selectedColorTransform);
+            colorSchemeView = IPA.Utilities.ReflectionUtil.CopyComponent<ColorSchemeView>(colorSchemeViewPrefab, colorSchemeViewPrefab.gameObject);
+            GameObject.DestroyImmediate(colorSchemeViewPrefab);
             _modalPosition = _modal.transform.localPosition;
             _modal.blockerClickedEvent += Dismiss;
         }
@@ -90,7 +109,7 @@ namespace MultiplayerCore.UI
             Color envRightBoost = colors._envColorRightBoost == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors._envColorRightBoost);
             Color obstacle = colors._obstacleColor == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors._obstacleColor);
 
-            boostedColorSchemeView.SetColors(saberLeft, saberRight, envLeft, envRight, envLeftBoost, envRightBoost, obstacle);
+            colorSchemeView.SetColors(saberLeft, saberRight, envLeft, envRight, envLeftBoost, envRightBoost, obstacle);
         }
     }
 }

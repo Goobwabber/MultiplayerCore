@@ -1,15 +1,16 @@
-﻿using BeatSaberMarkupLanguage;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using HMUI;
 using IPA.Utilities;
 using MultiplayerCore.Beatmaps;
 using MultiplayerCore.Beatmaps.Abstractions;
+using MultiplayerCore.Helpers;
 using SiraUtil.Logging;
-using System;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
 using Zenject;
 using static BeatSaberMarkupLanguage.Components.CustomListTableData;
@@ -185,12 +186,11 @@ namespace MultiplayerCore.UI
                     }
 
                 // Colors
-                object sConfiguration = typeof(SongCore.Plugin).GetProperty("Configuration", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
-                bool customSongColors = (bool)typeof(SongCore.Plugin).Assembly.GetType("SongCore.SConfiguration").GetProperty("CustomSongColors").GetValue(sConfiguration);
+                var customColorsEnabled = SongCoreConfig.AnyCustomSongColors;
                 if (mpLevel.difficultyColors.TryGetValue(characteristicName, out var difficultyColors) && difficultyColors.TryGetValue(level.beatmapDifficulty, out var colors) && (colors.AnyAreNotNull))
-                    customListTableData.data.Add(new CustomCellInfo($"<size=75%>Custom Colors Available", $"Click here to preview & {(customSongColors ? "disable" : "enable")} it.", ColorsIcon));
+                    customListTableData.data.Add(new CustomCellInfo($"<size=75%>Custom Colors Available", $"Click here to preview & {(customColorsEnabled ? "disable" : "enable")} it.", ColorsIcon));
                 else if (mpLevel is BeatSaverBeatmapLevel)
-                    customListTableData.data.Add(new CustomCellInfo($"<size=75%>Custom Colors", $"Click here to preview & {(customSongColors ? "disable" : "enable")} it.", ColorsIcon));
+                    customListTableData.data.Add(new CustomCellInfo($"<size=75%>Custom Colors", $"Click here to preview & {(customColorsEnabled ? "disable" : "enable")} it.", ColorsIcon));
 
                 customListTableData.tableView.ReloadData();
                 customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);

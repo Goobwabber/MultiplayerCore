@@ -1,5 +1,10 @@
-﻿using SiraUtil.Affinity;
+﻿using IgnoranceCore;
+using SiraUtil.Affinity;
 using SiraUtil.Logging;
+
+// ReSharper disable RedundantAssignment
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable InconsistentNaming
 
 namespace MultiplayerCore.Patchers
 {
@@ -7,14 +12,19 @@ namespace MultiplayerCore.Patchers
     {
         public const int OfficialMaxPartySize = 5;
 
-        public DnsEndPoint? MasterServerEndPoint { get; set; }
+        public string? GraphUrl { get; set; }
         public string? MasterServerStatusUrl { get; set; }
         public string? QuickPlaySetupUrl { get; set; }
         public int? MaxPartySize { get; set; }
         public int? DiscoveryPort { get; set; }
         public int? PartyPort { get; set; }
         public int? MultiplayerPort { get; set; }
-        public bool DisableGameLift { get; set; }
+        /// <summary>
+        /// If set: disable SSL and certificate validation for all Ignorance/ENet client connections.
+        /// </summary>
+        public bool DisableSsl { get; set; } = false;
+
+        public bool IsOverridingApi => GraphUrl != null;
 
         private readonly SiraLog _logger;
 
@@ -25,69 +35,52 @@ namespace MultiplayerCore.Patchers
         }
 
         /// <summary>
-        /// Uses a custom master server
+        /// Override official servers with a custom API server.
         /// </summary>
-        /// <param name="endPoint"></param>
-        /// <param name="statusUrl"></param>
-        /// <param name="maxPartySize"></param>
-        public void UseMasterServer(DnsEndPoint endPoint, string statusUrl, int? maxPartySize = null)
+        public void UseCustomApiServer(string graphUrl, string statusUrl, int? maxPartySize = null,
+            string? quickPlaySetupUrl = null, bool disableSsl = true)
         {
-            _logger.Debug($"Master server set to '{endPoint}'");
-            MasterServerEndPoint = endPoint;
+            _logger.Debug($"Overriding multiplayer API server (graphUrl={graphUrl}, statusUrl={statusUrl}, " +
+                          $"maxPartySize={maxPartySize}, quickPlaySetupUrl={quickPlaySetupUrl})");
+
+            GraphUrl = graphUrl;
             MasterServerStatusUrl = statusUrl;
             MaxPartySize = maxPartySize;
-            QuickPlaySetupUrl = statusUrl + "/mp_override.json";
-            DisableGameLift = true;
+            QuickPlaySetupUrl = quickPlaySetupUrl ?? statusUrl + "/mp_override.json";
+            DisableSsl = disableSsl;
         }
 
         /// <summary>
-        /// Uses a custom master server
-        /// </summary>
-        /// <param name="endPoint"></param>
-        /// <param name="statusUrl"></param>
-        /// <param name="maxPartySize"></param>
-        /// <param name="quickPlaySetupUrl"></param>
-        public void UseMasterServer(DnsEndPoint endPoint, string statusUrl, int? maxPartySize = null, string? quickPlaySetupUrl = null)
-        {
-            _logger.Debug($"Master server set to '{endPoint}'");
-            MasterServerEndPoint = endPoint;
-            MasterServerStatusUrl = statusUrl;
-            MaxPartySize = maxPartySize;
-            QuickPlaySetupUrl = quickPlaySetupUrl != null ? quickPlaySetupUrl : statusUrl + "/mp_override.json";
-            DisableGameLift = true;
-        }
-
-        /// <summary>
-        /// Uses the official servers.
+        /// Use the official API server and disable any network overrides.
         /// </summary>
         public void UseOfficialServer()
         {
-            _logger.Debug($"Master server set to 'official'");
-            MasterServerEndPoint = null;
+            _logger.Debug($"Removed multiplayer API server override");
+
+            GraphUrl = null;
             MasterServerStatusUrl = null;
             MaxPartySize = null;
             QuickPlaySetupUrl = null;
-            DisableGameLift = false;
+            DisableSsl = false;
         }
 
-        [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.masterServerEndPoint), AffinityMethodType.Getter)]
-        private void GetMasterServerEndPoint(ref DnsEndPoint __result)
+        [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.graphUrl), AffinityMethodType.Getter)]
+        private void GetGraphUrl(ref string __result)
         {
-            if (MasterServerEndPoint == null)
+            if (!IsOverridingApi)
                 return;
 
-            __result = MasterServerEndPoint;
-            //_logger.Debug($"Patching masterServerEndPoint with '{__result}'.");
+            __result = GraphUrl!;
         }
 
-        [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.multiplayerStatusUrl), AffinityMethodType.Getter)]
+        [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.multiplayerStatusUrl),
+            AffinityMethodType.Getter)]
         private void GetMasterServerStatusUrl(ref string __result)
         {
             if (MasterServerStatusUrl == null)
                 return;
 
-            __result = MasterServerStatusUrl;
-            //_logger.Debug($"Patching multiplayerStatusUrl with '{__result}'.");
+            __result = MasterServerStatusUrl!;
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.maxPartySize), AffinityMethodType.Getter)]
@@ -99,23 +92,16 @@ namespace MultiplayerCore.Patchers
                 return;
             }
 
-            __result = (int)MaxPartySize;
-            //_logger.Debug($"Patching master server max party size with '{__result}'.");
+            __result = MaxPartySize.Value;
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.quickPlaySetupUrl), AffinityMethodType.Getter)]
         private void GetQuickPlaySetupUrl(ref string __result)
         {
-            //_logger.Debug("Get quickPlaySetupUrl called.");
-
             if (QuickPlaySetupUrl == null)
-            {
-                //_logger.Debug($"quickPlaySetupUrl is null.");
                 return;
-            }
 
             __result = QuickPlaySetupUrl;
-            //_logger.Debug($"Patching quickPlaySetupUrl with '{__result}'.");
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.discoveryPort), AffinityMethodType.Getter)]
@@ -124,8 +110,7 @@ namespace MultiplayerCore.Patchers
             if (DiscoveryPort == null)
                 return;
 
-            __result = (int)DiscoveryPort;
-            //_logger.Debug($"Patching network config discovery port with '{__result}'.");
+            __result = DiscoveryPort.Value;
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.partyPort), AffinityMethodType.Getter)]
@@ -134,8 +119,7 @@ namespace MultiplayerCore.Patchers
             if (PartyPort == null)
                 return;
 
-            __result = (int)PartyPort;
-            //_logger.Debug($"Patching network config party port with '{__result}'.");
+            __result = PartyPort.Value;
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.multiplayerPort), AffinityMethodType.Getter)]
@@ -144,42 +128,45 @@ namespace MultiplayerCore.Patchers
             if (MultiplayerPort == null)
                 return;
 
-            __result = (int)MultiplayerPort;
-            //_logger.Debug($"Patching network config multiplayer port with '{__result}'.");
+            __result = MultiplayerPort.Value;
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.forceGameLift), AffinityMethodType.Getter)]
         private void GetForceGameLift(ref bool __result)
         {
-            if (!DisableGameLift)
-                return;
-
-            __result = false;
-            //_logger.Debug($"Patching network config forceGameLift with '{__result}'.");
+            // If we're overriding the API, the game should always use GameLift connection manager flow
+            __result = !IsOverridingApi;
         }
-        
+
         [AffinityPrefix]
-        [AffinityPatch(typeof(UnifiedNetworkPlayerModel), nameof(UnifiedNetworkPlayerModel.SetActiveNetworkPlayerModelType))]
-        private void PrefixSetActiveNetworkPlayerModelType(ref UnifiedNetworkPlayerModel.ActiveNetworkPlayerModelType activeNetworkPlayerModelType)
+        [AffinityPatch(typeof(UnifiedNetworkPlayerModel),
+            nameof(UnifiedNetworkPlayerModel.SetActiveNetworkPlayerModelType))]
+        private void PrefixSetActiveNetworkPlayerModelType(
+            ref UnifiedNetworkPlayerModel.ActiveNetworkPlayerModelType activeNetworkPlayerModelType)
         {
-            if (!DisableGameLift)
+            if (!IsOverridingApi)
                 return;
 
-            activeNetworkPlayerModelType = UnifiedNetworkPlayerModel.ActiveNetworkPlayerModelType.MasterServer;
-            //_logger.Debug($"Patching activeNetworkPlayerModelType with '{activeNetworkPlayerModelType}'.");
+            // If we're overriding the API, the game should always use GameLift connection manager flow
+            activeNetworkPlayerModelType = UnifiedNetworkPlayerModel.ActiveNetworkPlayerModelType.GameLift;
         }
 
         [AffinityPrefix]
         [AffinityPatch(typeof(ClientCertificateValidator), "ValidateCertificateChainInternal")]
         private bool ValidateCertificateChain()
         {
-            if (MasterServerEndPoint == null)
-                return true;
-
-            // TODO
-            // It'd be best if we do certificate validation here...
-            // but for now we'll just skip it.
-            return false;
+            return !IsOverridingApi;
+        }
+        
+        [AffinityPrefix]
+        [AffinityPatch(typeof(IgnoranceClient), "Start")]
+        private void PrefixIgnoranceClientStart(IgnoranceClient __instance)
+        {
+            if (!DisableSsl)
+                return;
+            
+            __instance.UseSsl = false;
+            __instance.ValidateCertificate = false;
         }
     }
 }
