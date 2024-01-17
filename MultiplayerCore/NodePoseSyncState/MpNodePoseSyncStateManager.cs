@@ -28,24 +28,24 @@ namespace MultiplayerCore.NodePoseSyncState
         }
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(NodePoseSyncStateManager), "deltaUpdateFrequency", AffinityMethodType.Getter)]
-        private bool GetDeltaUpdateFrequency(ref float __result)
+        [AffinityPatch(typeof(NodePoseSyncStateManager), "deltaUpdateFrequencyMs", AffinityMethodType.Getter)]
+        private bool GetDeltaUpdateFrequencyMs(ref long __result)
         {
             if (DeltaUpdateFrequency.HasValue)
             {
-                __result = DeltaUpdateFrequency.Value;
+                __result = (long)(DeltaUpdateFrequency.Value * 1000);
                 return false;
             }
             return true;
         }
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(NodePoseSyncStateManager), "fullStateUpdateFrequency", AffinityMethodType.Getter)]
-        private bool GetFullStateUpdateFrequency(ref float __result)
+        [AffinityPatch(typeof(NodePoseSyncStateManager), "fullStateUpdateFrequencyMs", AffinityMethodType.Getter)]
+        private bool GetFullStateUpdateFrequencyMs(ref long __result)
         {
             if (FullStateUpdateFrequency.HasValue)
             {
-                __result = FullStateUpdateFrequency.Value;
+                __result = (long)(FullStateUpdateFrequency.Value * 1000);
                 return false;
             }
             return true;

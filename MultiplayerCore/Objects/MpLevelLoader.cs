@@ -33,7 +33,7 @@ namespace MultiplayerCore.Objects
             _logger = logger;
         }
 
-        public new void LoadLevel(ILevelGameplaySetupData gameplaySetupData, float initialStartTime)
+        public new void LoadLevel(ILevelGameplaySetupData gameplaySetupData, long initialStartTime)
         {
             string levelHash = Utilities.HashForLevelID(gameplaySetupData.beatmapLevel.beatmapLevel.levelID);
             _logger.Debug($"Loading level {gameplaySetupData.beatmapLevel.beatmapLevel.levelID}");
