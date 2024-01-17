@@ -48,7 +48,11 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="BGNet">
+	<Reference Include="BGLib.UnityExtension">
+	  <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.UnityExtension.dll</HintPath>
+	  <Private>False</Private>
+	</Reference>
+	  <Reference Include="BGNet">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGNet.dll</HintPath>
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
@@ -116,7 +120,19 @@
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="HMLib">
+	<Reference Include="Menu.ColorSettings">
+	  <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Menu.ColorSettings.dll</HintPath>
+	  <Private>False</Private>
+	</Reference>
+	<Reference Include="Networking" Publicize="true">
+	  <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Networking.dll</HintPath>
+	  <Private>False</Private>
+	</Reference>
+	<Reference Include="PlatformUserModel">
+	  <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\PlatformUserModel.dll</HintPath>
+	  <Private>False</Private>
+	</Reference>
+	<Reference Include="HMLib">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
@@ -158,7 +174,11 @@
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+	<Reference Include="UnityEngine.JSONSerializeModule">
+	  <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+	  <Private>False</Private>
+    </Reference>
+	  <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
@@ -232,7 +252,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+	<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="BeforeBuild" Condition="'$(NCRUNCH)' != '1'">
     <Error Text="The BeatSaberModdingTools.Tasks nuget package doesn't seem to be installed." Condition="'$(BSMTTaskAssembly)' == ''" />
