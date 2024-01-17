@@ -19,10 +19,10 @@ namespace MultiplayerCore
         public const string CustomLevelsPath = "CustomMultiplayerLevels";
 
         internal static IPALogger Logger = null!;
+        internal static BeatSaver _beatsaver = null!;
 
         private readonly Harmony _harmony;
         private readonly PluginMetadata _metadata;
-        private readonly BeatSaver _beatsaver;
 
         [Init]
         public Plugin(IPALogger logger, PluginMetadata pluginMetadata, Zenjector zenjector)
