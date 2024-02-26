@@ -41,6 +41,8 @@ namespace MultiplayerCore.Beatmaps.Abstractions
         public virtual Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> difficultyColors { get; protected set; } = new();
         public virtual Contributor[]? contributors { get; protected set; } = null!;
 
+        public virtual PlayerSensitivityFlag contentRating { get; protected set; } = PlayerSensitivityFlag.Unknown;
+
         public virtual Task<Sprite> GetCoverImageAsync(CancellationToken cancellationToken)
             => Task.FromResult<Sprite>(null!);
     }
