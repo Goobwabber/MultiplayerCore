@@ -27,6 +27,7 @@ namespace MultiplayerCore.Beatmaps.Abstractions
         public virtual float songDuration { get; protected set; }
         public virtual float previewStartTime { get; protected set; }
         public virtual float previewDuration { get; protected set; }
+        public virtual EnvironmentInfoSO[] environmentInfos { get; private set; }
         public virtual IReadOnlyList<PreviewDifficultyBeatmapSet>? previewDifficultyBeatmapSets { get; protected set; }
 
         public virtual float songTimeOffset { get; protected set; } // Not needed
@@ -39,6 +40,8 @@ namespace MultiplayerCore.Beatmaps.Abstractions
         public virtual Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements { get; protected set; } = new();
         public virtual Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> difficultyColors { get; protected set; } = new();
         public virtual Contributor[]? contributors { get; protected set; } = null!;
+
+        public virtual PlayerSensitivityFlag contentRating { get; protected set; } = PlayerSensitivityFlag.Unknown;
 
         public virtual Task<Sprite> GetCoverImageAsync(CancellationToken cancellationToken)
             => Task.FromResult<Sprite>(null!);

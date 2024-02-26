@@ -5,6 +5,7 @@ using MultiplayerCore.NodePoseSyncState;
 using MultiplayerCore.Objects;
 using MultiplayerCore.Patchers;
 using MultiplayerCore.Players;
+using MultiplayerCore.Repositories;
 using SiraUtil.Zenject;
 using Zenject;
 
@@ -33,6 +34,7 @@ namespace MultiplayerCore.Installers
             Container.BindInterfacesAndSelfTo<ModeSelectionPatcher>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlayerCountPatcher>().AsSingle();
             Container.Bind<BGNetDebugLogger>().ToSelf().AsSingle();
+            Container.BindInterfacesAndSelfTo<MpStatusRepository>().AsSingle();
         }
     }
 }

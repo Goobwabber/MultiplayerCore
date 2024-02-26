@@ -25,6 +25,7 @@ namespace MultiplayerCore.Beatmaps
         public override float songDuration => _preview.songDuration;
         public override float previewStartTime => _preview.previewStartTime;
         public override float previewDuration => _preview.previewDuration;
+        public override EnvironmentInfoSO[] environmentInfos => _preview.environmentInfos;
         public override IReadOnlyList<PreviewDifficultyBeatmapSet>? previewDifficultyBeatmapSets => _preview.previewDifficultyBeatmapSets;
 
         public override Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements

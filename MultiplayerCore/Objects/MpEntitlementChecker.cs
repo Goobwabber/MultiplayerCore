@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Zenject;
+using IPALogger = IPA.Logging.Logger;
 
 namespace MultiplayerCore.Objects
 {
@@ -21,17 +22,15 @@ namespace MultiplayerCore.Objects
 
         private IMultiplayerSessionManager _sessionManager = null!;
         private BeatSaver _beatsaver = null!;
-        private SiraLog _logger = null!;
+        private IPALogger _logger = null!;
 
         [Inject]
         internal void Inject(
-            IMultiplayerSessionManager sessionManager,
-            [InjectOptional] UBinder<Plugin, BeatSaver> beatsaver,
-            [InjectOptional] SiraLog logger)
+            IMultiplayerSessionManager sessionManager)
         {
             _sessionManager = sessionManager;
-            _beatsaver = beatsaver.Value;
-            _logger = logger;
+            _beatsaver = Plugin._beatsaver;
+            _logger = Plugin.Logger;
         }
 
         public new void Start()
