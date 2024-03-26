@@ -1,12 +1,11 @@
-﻿using BeatSaverSharp;
+﻿using System;
+using System.IO;
+using BeatSaverSharp;
 using HarmonyLib;
 using IPA;
-using IPA.Config;
 using IPA.Loader;
 using MultiplayerCore.Installers;
 using SiraUtil.Zenject;
-using System;
-using System.IO;
 using UnityEngine;
 using IPALogger = IPA.Logging.Logger;
 
@@ -43,7 +42,7 @@ namespace MultiplayerCore
         [OnEnable]
         public void OnEnable()
         {
-            SongCore.Collections.AddSeperateSongFolder("Multiplayer", Path.Combine(Application.dataPath, CustomLevelsPath), SongCore.Data.FolderLevelPack.CustomLevels);
+            SongCore.Collections.AddSeparateSongFolder("Multiplayer", Path.Combine(Application.dataPath, CustomLevelsPath), SongCore.Data.FolderLevelPack.CustomLevels);
             _harmony.PatchAll(_metadata.Assembly);
         }
 

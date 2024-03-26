@@ -1,8 +1,8 @@
 ﻿namespace MultiplayerCore
 {
-    internal class Utilities
+    internal static class Utilities
     {
-        public static string HashForLevelID(string? levelId)
+        internal static string? HashForLevelID(string? levelId)
         {
             if (string.IsNullOrWhiteSpace(levelId))
                 return null!;
@@ -12,7 +12,7 @@
                 hash = ary[2];
             if ((hash?.Length ?? 0) == 40)
                 return hash!;
-            return null!;
+            return null;
         }
     }
 }

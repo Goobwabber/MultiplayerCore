@@ -1,39 +1,34 @@
-﻿using MultiplayerCore.Beatmaps.Abstractions;
-using SongCore.Data;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using MultiplayerCore.Beatmaps.Abstractions;
+using MultiplayerCore.Beatmaps.Serializable;
 using UnityEngine;
 using static SongCore.Data.ExtraSongData;
 
 namespace MultiplayerCore.Beatmaps
 {
     /// <summary>
-    /// An <see cref="IPreviewBeatmapLevel"/> created from a local preview.
+    /// Beatmap level data that was loaded locally by SongCore.
     /// </summary>
-    public class LocalBeatmapLevel : MpBeatmapLevel
+    public class LocalBeatmapLevel : MpBeatmap
     {
-        public override string levelHash { get; protected set; }
+        public override string LevelHash { get; protected set; }
 
-        public override string songName => _preview.songName;
-        public override string songSubName => _preview.songSubName;
-        public override string songAuthorName => _preview.songAuthorName;
-        public override string levelAuthorName => _preview.levelAuthorName;
+        public override string SongName => _localBeatmapLevel.songName;
+        public override string SongSubName => _localBeatmapLevel.songSubName;
+        public override string SongAuthorName => _localBeatmapLevel.songAuthorName;
+        public override string LevelAuthorName => string.Join(", ", _localBeatmapLevel.allMappers);
 
-        public override float beatsPerMinute => _preview.beatsPerMinute;
-        public override float songDuration => _preview.songDuration;
-        public override float previewStartTime => _preview.previewStartTime;
-        public override float previewDuration => _preview.previewDuration;
-        public override EnvironmentInfoSO[] environmentInfos => _preview.environmentInfos;
-        public override IReadOnlyList<PreviewDifficultyBeatmapSet>? previewDifficultyBeatmapSets => _preview.previewDifficultyBeatmapSets;
-
-        public override Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements
+        public override float BeatsPerMinute => _localBeatmapLevel.beatsPerMinute;
+        public override float SongDuration => _localBeatmapLevel.songDuration;
+        
+        public override Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> Requirements
         {
             get
             {
                 Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> reqs = new();
-                var difficulties = SongCore.Collections.RetrieveExtraSongData(levelHash)?._difficulties;
+                var difficulties = SongCore.Collections.RetrieveExtraSongData(LevelHash)?._difficulties;
                 if (difficulties == null)
                     return new();
                 foreach (var difficulty in difficulties)
@@ -46,12 +41,12 @@ namespace MultiplayerCore.Beatmaps
             }
         }
 
-        public override Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> difficultyColors
+        public override Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> DifficultyColors
         {
             get
             {
                 Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> colors = new();
-                var difficulties = SongCore.Collections.RetrieveExtraSongData(levelHash)?._difficulties;
+                var difficulties = SongCore.Collections.RetrieveExtraSongData(LevelHash)?._difficulties;
                 if (difficulties == null)
                     return new();
                 foreach (var difficulty in difficulties)
@@ -65,17 +60,17 @@ namespace MultiplayerCore.Beatmaps
             }
         }
 
-        public override Contributor[] contributors => SongCore.Collections.RetrieveExtraSongData(levelHash)?.contributors ?? new Contributor[0];
+        public override Contributor[] Contributors => SongCore.Collections.RetrieveExtraSongData(LevelHash)?.contributors ?? new Contributor[0];
 
-        private readonly IPreviewBeatmapLevel _preview;
+        private readonly BeatmapLevel _localBeatmapLevel;
 
-        public LocalBeatmapLevel(string hash, IPreviewBeatmapLevel preview)
+        public LocalBeatmapLevel(string hash, BeatmapLevel localBeatmapLevel)
         {
-            levelHash = hash;
-            _preview = preview;
+            LevelHash = hash;
+            _localBeatmapLevel = localBeatmapLevel;
         }
 
-        public override Task<Sprite> GetCoverImageAsync(CancellationToken cancellationToken)
-            => _preview.GetCoverImageAsync(cancellationToken);
+        public override Task<Sprite> TryGetCoverSpriteAsync(CancellationToken cancellationToken)
+            => _localBeatmapLevel.previewMediaData.GetCoverSpriteAsync(cancellationToken);
     }
 }

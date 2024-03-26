@@ -1,9 +1,8 @@
-﻿using BeatSaverSharp;
-using BeatSaverSharp.Models;
+﻿using System.Threading.Tasks;
+using BeatSaverSharp;
+using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Beatmaps.Packets;
-using SiraUtil.Logging;
 using SiraUtil.Zenject;
-using System.Threading.Tasks;
 
 namespace MultiplayerCore.Beatmaps.Providers
 {
@@ -22,7 +21,7 @@ namespace MultiplayerCore.Beatmaps.Providers
         /// </summary>
         /// <param name="levelHash">The hash of the level to get</param>
         /// <returns>An <see cref="IPreviewBeatmapLevel"/> with a matching level hash</returns>
-        public async Task<IPreviewBeatmapLevel?> GetBeatmap(string levelHash)
+        public async Task<MpBeatmap?> GetBeatmap(string levelHash)
             => GetBeatmapFromLocalBeatmaps(levelHash)
             ?? await GetBeatmapFromBeatSaver(levelHash);
 
@@ -31,12 +30,13 @@ namespace MultiplayerCore.Beatmaps.Providers
         /// </summary>
         /// <param name="levelHash">The hash of the level to get</param>
         /// <returns>An <see cref="IPreviewBeatmapLevel"/> with a matching level hash, or null if none was found.</returns>
-        public IPreviewBeatmapLevel? GetBeatmapFromLocalBeatmaps(string levelHash)
+        public MpBeatmap? GetBeatmapFromLocalBeatmaps(string levelHash)
         {
-            IPreviewBeatmapLevel? preview = SongCore.Loader.GetLevelByHash(levelHash);
-            if (preview == null)
+            var localBeatmapLevel = SongCore.Loader.GetLevelByHash(levelHash);
+            if (localBeatmapLevel == null)
                 return null;
-            return new LocalBeatmapLevel(levelHash, preview);
+            
+            return new LocalBeatmapLevel(levelHash, localBeatmapLevel);
         }
 
         /// <summary>
@@ -44,11 +44,12 @@ namespace MultiplayerCore.Beatmaps.Providers
         /// </summary>
         /// <param name="levelHash">The hash of the level to get</param>
         /// <returns>An <see cref="IPreviewBeatmapLevel"/> with a matching level hash, or null if none was found.</returns>
-        public async Task<IPreviewBeatmapLevel?> GetBeatmapFromBeatSaver(string levelHash)
+        public async Task<MpBeatmap?> GetBeatmapFromBeatSaver(string levelHash)
         {
-            Beatmap? beatmap = await _beatsaver.BeatmapByHash(levelHash);
+            var beatmap = await _beatsaver.BeatmapByHash(levelHash);
             if (beatmap == null)
                 return null;
+            
             return new BeatSaverBeatmapLevel(levelHash, beatmap);
         }
 
@@ -57,7 +58,7 @@ namespace MultiplayerCore.Beatmaps.Providers
         /// </summary>
         /// <param name="packet">The packet to get preview data from</param>
         /// <returns>An <see cref="IPreviewBeatmapLevel"/> with a cover from BeatSaver.</returns>
-        public IPreviewBeatmapLevel GetBeatmapFromPacket(MpBeatmapPacket packet)
+        public MpBeatmap GetBeatmapFromPacket(MpBeatmapPacket packet)
             => new NetworkBeatmapLevel(packet, _beatsaver);
     }
 }

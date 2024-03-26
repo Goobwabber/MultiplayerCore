@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using HarmonyLib;
-using MultiplayerCore.Beatmaps;
 using SiraUtil.Affinity;
 using SiraUtil.Logging;
 using UnityEngine.UI;
@@ -40,14 +39,6 @@ namespace MultiplayerCore.Patchers
                 __instance.SetStartGameEnabled(CannotStartGameReason.DoNotOwnSong);
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(BeatmapIdentifierNetSerializableHelper), nameof(BeatmapIdentifierNetSerializableHelper.ToPreviewDifficultyBeatmap))]
-        private static void BeatmapIdentifierToPreviewDifficultyBeatmap(BeatmapIdentifierNetSerializable beatmapId, ref PreviewDifficultyBeatmap __result)
-        {
-            if (__result.beatmapLevel == null)
-                __result.beatmapLevel = new NoInfoBeatmapLevel(Utilities.HashForLevelID(beatmapId.levelID));
-        }
-
         [AffinityPrefix]
         [AffinityPatch(typeof(JoinQuickPlayViewController), nameof(JoinQuickPlayViewController.Setup))]
         private void SetupPre(JoinQuickPlayViewController __instance, ref BeatmapDifficultyDropdown ____beatmapDifficultyDropdown)
@@ -68,13 +59,5 @@ namespace MultiplayerCore.Patchers
         {
             if (_networkConfig.IsOverridingApi) __result = false;
         }
-
-        //[AffinityPostfix]
-        //[AffinityPatch(typeof(MultiplayerModeSelectionFlowCoordinator), nameof(MultiplayerModeSelectionFlowCoordinator.HandleJoinQuickPlayViewControllerDidFinish))]
-        //private void HandleJoinQuickPlayViewControllerDidFinish(MultiplayerModeSelectionFlowCoordinator __instance, ref bool __result, Task<QuickPlaySetupData> ____request, DateTime ____lastRequestTime)
-        //{
-        //    // TODO: Possibly add warning screen.
-        //}
-
     }
 }
