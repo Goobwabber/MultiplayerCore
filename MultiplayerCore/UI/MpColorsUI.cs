@@ -6,7 +6,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Components.Settings;
 using HMUI;
-using MultiplayerCore.Beatmaps.Abstractions;
+using MultiplayerCore.Beatmaps.Serializable;
 using MultiplayerCore.Helpers;
 using UnityEngine;
 
@@ -101,13 +101,13 @@ namespace MultiplayerCore.UI
 
         private void SetColors(DifficultyColors colors)
         {
-            Color saberLeft = colors._colorLeft == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors._colorLeft);
-            Color saberRight = colors._colorRight == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors._colorRight);
-            Color envLeft = colors._envColorLeft == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors._envColorLeft);
-            Color envRight = colors._envColorRight == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors._envColorRight);
-            Color envLeftBoost = colors._envColorLeftBoost == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors._envColorLeftBoost);
-            Color envRightBoost = colors._envColorRightBoost == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors._envColorRightBoost);
-            Color obstacle = colors._obstacleColor == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors._obstacleColor);
+            Color saberLeft = colors.ColorLeft == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors.ColorLeft);
+            Color saberRight = colors.ColorRight == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors.ColorRight);
+            Color envLeft = colors.EnvColorLeft == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors.EnvColorLeft);
+            Color envRight = colors.EnvColorRight == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors.EnvColorRight);
+            Color envLeftBoost = colors.EnvColorLeftBoost == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors.EnvColorLeftBoost);
+            Color envRightBoost = colors.EnvColorRightBoost == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors.EnvColorRightBoost);
+            Color obstacle = colors.ObstacleColor == null ? voidColor : SongCore.Utilities.Utils.ColorFromMapColor(colors.ObstacleColor);
 
             colorSchemeView.SetColors(saberLeft, saberRight, envLeft, envRight, envLeftBoost, envRightBoost, obstacle);
         }

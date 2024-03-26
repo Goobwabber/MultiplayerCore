@@ -1,7 +1,8 @@
-﻿using LiteNetLib.Utils;
+﻿using System.Collections.Generic;
+using LiteNetLib.Utils;
 using MultiplayerCore.Beatmaps.Abstractions;
+using MultiplayerCore.Beatmaps.Serializable;
 using MultiplayerCore.Networking.Abstractions;
-using System.Collections.Generic;
 using static SongCore.Data.ExtraSongData;
 
 namespace MultiplayerCore.Beatmaps.Packets
@@ -16,7 +17,7 @@ namespace MultiplayerCore.Beatmaps.Packets
         public float beatsPerMinute;
         public float songDuration;
 
-        public string characteristic = null!;
+        public string characteristicName = null!;
         public BeatmapDifficulty difficulty;
 
         public Dictionary<BeatmapDifficulty, string[]> requirements = new();
@@ -25,27 +26,20 @@ namespace MultiplayerCore.Beatmaps.Packets
 
         public MpBeatmapPacket() { }
 
-        public MpBeatmapPacket(PreviewDifficultyBeatmap beatmap)
+        public MpBeatmapPacket(MpBeatmap beatmap, BeatmapKey beatmapKey)
         {
-            levelHash = Utilities.HashForLevelID(beatmap.beatmapLevel.levelID);
-            songName = beatmap.beatmapLevel.songName;
-            songSubName = beatmap.beatmapLevel.songSubName;
-            songAuthorName = beatmap.beatmapLevel.songAuthorName;
-            levelAuthorName = beatmap.beatmapLevel.levelAuthorName;
-            beatsPerMinute = beatmap.beatmapLevel.beatsPerMinute;
-            songDuration = beatmap.beatmapLevel.songDuration;
-
-            characteristic = beatmap.beatmapCharacteristic.serializedName;
-            difficulty = beatmap.beatmapDifficulty;
-
-            if (beatmap.beatmapLevel is MpBeatmapLevel mpBeatmapLevel)
-            {
-                if (mpBeatmapLevel.requirements.ContainsKey(beatmap.beatmapCharacteristic.name))
-                    requirements = mpBeatmapLevel.requirements[beatmap.beatmapCharacteristic.name];
-                if (mpBeatmapLevel.requirements.ContainsKey(beatmap.beatmapCharacteristic.serializedName))
-                    requirements = mpBeatmapLevel.requirements[beatmap.beatmapCharacteristic.serializedName];
-                contributors = mpBeatmapLevel.contributors!;
-            }
+            levelHash = Utilities.HashForLevelID(beatmap.LevelID);
+            songName = beatmap.SongName;
+            songSubName = beatmap.SongSubName;
+            songAuthorName = beatmap.SongAuthorName;
+            levelAuthorName = beatmap.LevelAuthorName;
+            beatsPerMinute = beatmap.BeatsPerMinute;
+            songDuration = beatmap.SongDuration;
+            characteristicName = beatmapKey.beatmapCharacteristic.serializedName;
+            difficulty = beatmapKey.difficulty;
+            if (beatmap.Requirements.TryGetValue(characteristicName, out var requirementSet))
+                requirements = requirementSet;
+            contributors = beatmap.Contributors!;
         }
 
         public override void Serialize(NetDataWriter writer)
@@ -58,7 +52,7 @@ namespace MultiplayerCore.Beatmaps.Packets
             writer.Put(beatsPerMinute);
             writer.Put(songDuration);
 
-            writer.Put(characteristic);
+            writer.Put(characteristicName);
             writer.Put((uint)difficulty);
 
             writer.Put((byte)requirements.Count);
@@ -101,7 +95,7 @@ namespace MultiplayerCore.Beatmaps.Packets
             beatsPerMinute = reader.GetFloat();
             songDuration = reader.GetFloat();
 
-            characteristic = reader.GetString();
+            characteristicName = reader.GetString();
             difficulty = (BeatmapDifficulty)reader.GetUInt();
 
             try
