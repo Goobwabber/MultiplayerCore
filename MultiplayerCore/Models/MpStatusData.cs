@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace MultiplayerCore.Models
 {
@@ -59,8 +59,19 @@ namespace MultiplayerCore.Models
         [Serializable]
         public class RequiredMod
         {
+            /// <summary> 
+            /// BSIPA Mod ID.
+            /// </summary>
             public string id = null!;
+            /// <summary>
+            /// Minimum version of the mod required.
+            /// </summary>
             public string version = null!;
+            /// <summary>
+            /// Indicates whether the mod is required or not.
+            /// If false, only minimum versions are enforced.
+            /// </summary>
+            public bool required = false;
         }
     }
 }
