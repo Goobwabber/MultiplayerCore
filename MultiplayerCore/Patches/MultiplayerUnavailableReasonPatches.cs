@@ -64,7 +64,7 @@ namespace MultiplayerCore.Patches
             if (multiplayerUnavailableReason == (MultiplayerUnavailableReason)5)
             {
                 var metadata = PluginManager.GetPluginFromId(_requiredMod);
-                __result = $"Multiplayer Unavailable\nMod {metadata.Name} is out of date.\nPlease update to version {_requiredVersion} or newer.";
+                __result = $"Multiplayer Unavailable\nMod {metadata.Name} is missing or out of date\nPlease install version {_requiredVersion} or newer";
                 return false;
             } else if (multiplayerUnavailableReason == (MultiplayerUnavailableReason)6)
             {
