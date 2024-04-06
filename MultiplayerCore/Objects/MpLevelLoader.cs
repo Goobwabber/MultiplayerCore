@@ -76,8 +76,11 @@ namespace MultiplayerCore.Objects
 
                 // Ready check: player returned OK entitlement (load finished) OR already transitioned to gameplay
                 var allPlayersReady = _sessionManager.connectedPlayers.All(p =>
-                    _entitlementChecker.GetKnownEntitlement(p.userId, levelId) == EntitlementsStatus.Ok ||
-                    p.HasState("in_gameplay"));
+                    _entitlementChecker.GetKnownEntitlement(p.userId, levelId) == EntitlementsStatus.Ok // level loaded
+                    || p.HasState("in_gameplay") // already playing
+                    || p.HasState("backgrounded") // not actively in game
+                    || !p.HasState("wants_to_play_next_level") // doesn't want to play (spectator)
+                );
 
                 if (!allPlayersReady)
                     return;
