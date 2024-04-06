@@ -71,7 +71,7 @@ namespace MultiplayerCore.Objects
                 // Loader: level is loaded locally, waiting for countdown to transition to level
                 // Modded behavior: wait until all players are ready before we transition
 
-                if (_startTime <= _sessionManager.syncTime)
+                if (_sessionManager.syncTime < _startTime)
                     return;
 
                 // Ready check: player returned OK entitlement (load finished) OR already transitioned to gameplay
