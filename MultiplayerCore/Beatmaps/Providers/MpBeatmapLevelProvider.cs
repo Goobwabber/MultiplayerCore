@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Diagnostics.Tracing;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using BeatSaverSharp;
 using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Beatmaps.Packets;
@@ -9,6 +12,8 @@ namespace MultiplayerCore.Beatmaps.Providers
     public class MpBeatmapLevelProvider
     {
         private readonly BeatSaver _beatsaver;
+        private readonly Dictionary<string, MpBeatmap> _hashToNetworkMaps = new();
+        private readonly Dictionary<string, MpBeatmap> _hashToBeatsaverMaps = new();
 
         internal MpBeatmapLevelProvider(
             UBinder<Plugin, BeatSaver> beatsaver)
@@ -46,11 +51,16 @@ namespace MultiplayerCore.Beatmaps.Providers
         /// <returns>An <see cref="IPreviewBeatmapLevel"/> with a matching level hash, or null if none was found.</returns>
         public async Task<MpBeatmap?> GetBeatmapFromBeatSaver(string levelHash)
         {
+            if (_hashToBeatsaverMaps.TryGetValue(levelHash, out var map)) return map;
             var beatmap = await _beatsaver.BeatmapByHash(levelHash);
-            if (beatmap == null)
-                return null;
-            
-            return new BeatSaverBeatmapLevel(levelHash, beatmap);
+            if (beatmap != null)
+            {
+                map = new BeatSaverBeatmapLevel(levelHash, beatmap);
+                _hashToBeatsaverMaps.Add(levelHash, map);
+                return map;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -59,6 +69,11 @@ namespace MultiplayerCore.Beatmaps.Providers
         /// <param name="packet">The packet to get preview data from</param>
         /// <returns>An <see cref="IPreviewBeatmapLevel"/> with a cover from BeatSaver.</returns>
         public MpBeatmap GetBeatmapFromPacket(MpBeatmapPacket packet)
-            => new NetworkBeatmapLevel(packet, _beatsaver);
+        {
+            if (_hashToNetworkMaps.TryGetValue(packet.levelHash, out var map)) return map;
+            map = new NetworkBeatmapLevel(packet);
+            _hashToNetworkMaps.Add(packet.levelHash, map);
+            return map;
+        }
     }
 }

@@ -1,13 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using HMUI;
 using IPA.Utilities;
+using MultiplayerCore.Beatmaps.Packets;
+using MultiplayerCore.Objects;
 using SiraUtil.Logging;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Zenject;
+using static IPA.Logging.Logger;
 
 namespace MultiplayerCore.UI
 {
@@ -33,17 +39,23 @@ namespace MultiplayerCore.UI
         private readonly LobbySetupViewController _lobbySetupViewController;
         private readonly ILobbyPlayersDataModel _playersDataModel;
         private readonly MpColorsUI _colorsUI;
+        private readonly BeatmapLevelsModel _beatmapLevelsModel;
         private readonly SiraLog _logger;
+
+        private readonly List<CustomListTableData.CustomCellInfo> _unusedCells;
+        private readonly List<CustomListTableData.CustomCellInfo> _levelInfoCells;
 
         internal MpRequirementsUI(
             LobbySetupViewController lobbySetupViewController,
             ILobbyPlayersDataModel playersDataModel,
             MpColorsUI colorsUI,
+            BeatmapLevelsModel beatmapLevelsModel,
             SiraLog logger)
         {
             _lobbySetupViewController = lobbySetupViewController;
             _playersDataModel = playersDataModel;
             _colorsUI = colorsUI;
+            _beatmapLevelsModel = beatmapLevelsModel;
             _logger = logger;
         }
 
@@ -95,6 +107,9 @@ namespace MultiplayerCore.UI
 
             _playersDataModel.didChangeEvent += BeatmapSelected;
             _colorsUI.dismissedEvent += ColorsDismissed;
+
+            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), ResourcePath), _root.gameObject, this);
+            _modalPosition = _modal!.transform.localPosition;
         }
 
         public void Dispose()
@@ -103,94 +118,181 @@ namespace MultiplayerCore.UI
             _colorsUI.dismissedEvent -= ColorsDismissed;
         }
 
-        private void BeatmapSelected(string a)
+        private void BeatmapSelected(string _)
         {
-            var beatmapLevel = _playersDataModel[_playersDataModel.localUserId].beatmapKey;
-            // TODO: Load MpBeatmap data from somewhere
-            // if (beatmapLevel?.beatmapLevel is MpBeatmap mpLevel)
-            // {
-            //     string characteristicName = null!;
-            //     if (mpLevel.DifficultyColors.ContainsKey(beatmapLevel.beatmapCharacteristic.name))
-            //         characteristicName = beatmapLevel.beatmapCharacteristic.name;
-            //     else if (mpLevel.DifficultyColors.ContainsKey(beatmapLevel.beatmapCharacteristic.serializedName))
-            //         characteristicName = beatmapLevel.beatmapCharacteristic.serializedName;
-            //     if (characteristicName != null && mpLevel.DifficultyColors[characteristicName].TryGetValue(beatmapLevel.beatmapDifficulty, out var colors))
-            //         ButtonInteractable = colors.AnyAreNotNull;
-            //     else
-            //         ButtonInteractable = (characteristicName != null && mpLevel.Requirements[characteristicName].Any()) || (mpLevel.Contributors?.Any() ?? false);
-            // }
-            // else
-                ButtonInteractable = false;
+            var key = _playersDataModel[_playersDataModel.localUserId].beatmapKey;
+            if (!key.IsValid()) return;
+
+            var levelId = key.levelId;
+            var localLevel = _beatmapLevelsModel.GetBeatmapLevel(levelId);
+            if (localLevel != null) // we have a local level to set info from
+            {
+                SetRequirementsFromLevel(localLevel, key);
+                return;
+            }
+
+            if (_playersDataModel is MpPlayersDataModel mpPlayersDataModel)
+            {
+                var levelHash = Utilities.HashForLevelID(levelId);
+                var packet = mpPlayersDataModel.FindLevelPacket(levelHash);
+                if (packet != null) // we have a packet to set info from
+                {
+                    SetRequirementsFromPacket(packet);
+                    return;
+                }
+            }
+
+            SetNoRequirementsFound(); // nothing found
         }
 
-        private void ColorsDismissed()
-            => ShowRequirements();
+        private void SetRequirementsFromLevel(BeatmapLevel level, in BeatmapKey key)
+        {
+            ClearCells(_levelInfoCells);
+
+            var levelHash = Utilities.HashForLevelID(key.levelId);
+            if (!string.IsNullOrEmpty(levelHash))
+            {
+                var extraSongData = SongCore.Collections.RetrieveExtraSongData(levelHash!);
+                if (extraSongData != null)
+                {
+                    var diffData = SongCore.Collections.RetrieveDifficultyData(level, key);
+                    if (diffData != null && diffData.additionalDifficultyData != null && diffData.additionalDifficultyData._requirements != null)
+                    {
+                        foreach (var req in diffData.additionalDifficultyData._requirements)
+                        {
+                            var cell = GetCellInfo();
+                            bool installed = SongCore.Collections.capabilities.Contains(req);
+                            cell.text = $"<size=75%>{req}";
+                            cell.subtext = installed ? "Requirement found" : "Requirement missing";
+                            cell.icon = installed ? HaveReqIcon : MissingReqIcon;
+                            _levelInfoCells.Add(cell);
+                        }
+                    }
+
+                    foreach (var contributor in extraSongData.contributors) 
+                    {
+                        var cell = GetCellInfo();
+                        cell.text = $"<size=75%>{contributor._name}";
+                        cell.subtext = contributor._role;
+                        cell.icon = InfoIcon;
+                        _levelInfoCells.Add(cell);
+                    }
+
+                    if (diffData != null && 
+                            !( // check all colors for null, if all are null just ignore
+                                diffData._colorLeft != null ||
+                                diffData._colorRight != null ||
+                                diffData._envColorLeft != null ||
+                                diffData._envColorLeftBoost != null ||
+                                diffData._envColorRight != null ||
+                                diffData._envColorRightBoost != null ||
+                                diffData._obstacleColor != null
+                            )
+                        )
+                    {
+                        var cell = GetCellInfo();
+                        cell.text = "<size=75%>Custom Colors Available";
+                        cell.subtext = "Click here to preview";
+                        cell.icon = ColorsIcon;
+                        _levelInfoCells.Add(cell);
+
+                        _colorsUI.AcceptColors(
+                            diffData._colorLeft,
+                            diffData._colorRight,
+                            diffData._envColorLeft,
+                            diffData._envColorLeftBoost,
+                            diffData._envColorRight,
+                            diffData._envColorRightBoost,
+                            diffData._obstacleColor
+                        );
+                    }
+                }
+            }
+
+            UpdateData();
+        }
+
+        private void SetRequirementsFromPacket(MpBeatmapPacket packet)
+        {
+            ClearCells(_levelInfoCells);
+
+            var diff = packet.difficulty;
+            foreach (var req in packet.requirements[diff])
+            {
+                var cell = GetCellInfo();
+                bool installed = SongCore.Collections.capabilities.Contains(req);
+                cell.text = $"<size=75%>{req}";
+                cell.subtext = installed ? "Requirement found" : "Requirement missing";
+                cell.icon = installed ? HaveReqIcon : MissingReqIcon;
+                _levelInfoCells.Add(cell);
+            }
+
+            foreach (var contributor in packet.contributors)
+            {
+                var cell = GetCellInfo();
+                cell.text = $"<size=75%>{contributor._name}";
+                cell.subtext = contributor._role;
+                cell.icon = InfoIcon;
+                _levelInfoCells.Add(cell);
+            }
+
+            if (packet.mapColors.TryGetValue(diff, out var mapColors) && mapColors.AnyAreNotNull) 
+            {
+                var cell = GetCellInfo();
+                cell.text = "<size=75%>Custom Colors Available";
+                cell.subtext = "Click here to preview";
+                cell.icon = ColorsIcon;
+                _levelInfoCells.Add(cell);
+
+                _colorsUI.AcceptColors(mapColors);
+            }
+
+            UpdateData();
+        }
+
+        private void SetNoRequirementsFound()
+        {
+            ClearCells(_levelInfoCells);
+
+            UpdateData();
+        }
+
+        private void ClearCells(List<CustomListTableData.CustomCellInfo> cells)
+        {
+            foreach (var cell in cells) _unusedCells.Add(cell);
+            cells.Clear();
+        }
+
+        private CustomListTableData.CustomCellInfo GetCellInfo()
+        {
+            if (_unusedCells.Count == 0) return new CustomListTableData.CustomCellInfo(String.Empty, String.Empty, null);
+            var cell = _unusedCells[0];
+            _unusedCells.RemoveAt(0);
+            return cell;
+        }
+
+        private void UpdateData()
+        {
+            customListTableData.data.Clear();
+
+            foreach (var cell in _levelInfoCells) customListTableData.data.Add(cell);
+
+            customListTableData.tableView.ReloadData();
+            customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
+
+            UpdateRequirementButton();
+        }
+
+        // if there is data, we should have the button be active
+        private void UpdateRequirementButton() => ButtonInteractable = customListTableData.data.Count > 0;
+
+        private void ColorsDismissed() => ShowRequirements();
 
         [UIAction("button-click")]
         internal void ShowRequirements()
         {
-            if (_modal == null)
-            {
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), ResourcePath), _root.gameObject, this);
-                _modalPosition = _modal!.transform.localPosition;
-            }
-
             _modal.transform.localPosition = _modalPosition;
             _modal.Show(true);
-            customListTableData.data.Clear();
-
-            var localUserId = _playersDataModel.localUserId;
-            if (!_playersDataModel.ContainsKey(localUserId))
-                return;
-            var localPlayerDataModel = _playersDataModel[localUserId];
-            var level = localPlayerDataModel.beatmapKey;
-
-            // TODO: Load MpBeatmap data from somewhere
-            // if (level.beatmapLevel is MpBeatmap mpLevel)
-            // {
-            //     string characteristicName = null!;
-            //     if (mpLevel.Requirements.ContainsKey(level.beatmapCharacteristic.name) || mpLevel.DifficultyColors.ContainsKey(level.beatmapCharacteristic.name))
-            //         characteristicName = level.beatmapCharacteristic.name;
-            //     else if (mpLevel.Requirements.ContainsKey(level.beatmapCharacteristic.serializedName) || mpLevel.DifficultyColors.ContainsKey(level.beatmapCharacteristic.serializedName))
-            //         characteristicName = level.beatmapCharacteristic.serializedName;
-            //
-            //     // Requirements
-            //     if (mpLevel.Requirements.TryGetValue(characteristicName, out var difficultiesRequirements))
-            //         if (difficultiesRequirements.TryGetValue(level.beatmapDifficulty, out var difficultyRequirements) && difficultyRequirements.Any())
-            //             foreach (string req in difficultyRequirements)
-            //                 customListTableData.data.Add(!SongCore.Collections.capabilities.Contains(req)
-            //                     ? new CustomCellInfo($"<size=75%>{req}", "Missing Requirement", MissingReqIcon)
-            //                     : new CustomCellInfo($"<size=75%>{req}", "Requirement", HaveReqIcon));
-            //
-            //     // Contributors
-            //     if (mpLevel.Contributors != null)
-            //         foreach (var contributor in mpLevel.Contributors)
-            //         {
-            //             if (contributor.icon == null)
-            //             {
-            //                 if (!string.IsNullOrWhiteSpace(contributor._iconPath) && !string.IsNullOrEmpty(contributor._iconPath) && SongCore.Collections.songWithHashPresent(mpLevel.LevelHash))
-            //                 {
-            //                     var songCoreLevel = SongCore.Loader.GetLevelByHash(mpLevel.LevelHash);
-            //                     contributor.icon = SongCore.Utilities.Utils.LoadSpriteFromFile(Path.Combine(songCoreLevel!.customLevelPath, contributor._iconPath));
-            //                     customListTableData.data.Add(new CustomCellInfo(contributor._name, contributor._role, contributor.icon != null ? contributor.icon : InfoIcon));
-            //                 }
-            //                 else
-            //                     customListTableData.data.Add(new CustomCellInfo(contributor._name, contributor._role, InfoIcon));
-            //             }
-            //             else
-            //                 customListTableData.data.Add(new CustomCellInfo(contributor._name, contributor._role, contributor.icon));
-            //         }
-            //
-            //     // Colors
-            //     var customColorsEnabled = SongCoreConfig.AnyCustomSongColors;
-            //     if (mpLevel.DifficultyColors.TryGetValue(characteristicName, out var difficultyColors) && difficultyColors.TryGetValue(level.beatmapDifficulty, out var colors) && (colors.AnyAreNotNull))
-            //         customListTableData.data.Add(new CustomCellInfo($"<size=75%>Custom Colors Available", $"Click here to preview & {(customColorsEnabled ? "disable" : "enable")} it.", ColorsIcon));
-            //     else if (mpLevel is BeatSaverBeatmapLevel)
-            //         customListTableData.data.Add(new CustomCellInfo($"<size=75%>Custom Colors", $"Click here to preview & {(customColorsEnabled ? "disable" : "enable")} it.", ColorsIcon));
-            //
-            //     customListTableData.tableView.ReloadData();
-            //     customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
-            // }
         }
 
         [UIAction("list-select")]
@@ -199,19 +301,10 @@ namespace MultiplayerCore.UI
             var localUserData = _playersDataModel[_playersDataModel.localUserId];
             var beatmapLevel = localUserData.beatmapKey;
 
-            // TODO: Load MpBeatmap data from somewhere
-            // if (beatmapLevel.beatmapLevel is MpBeatmap mpLevel)
-            // {
-            //     string characteristicName = null!;
-            //     if (mpLevel.Requirements.ContainsKey(beatmapLevel.beatmapCharacteristic.name) || mpLevel.DifficultyColors.ContainsKey(beatmapLevel.beatmapCharacteristic.name))
-            //         characteristicName = beatmapLevel.beatmapCharacteristic.name;
-            //     else if (mpLevel.Requirements.ContainsKey(beatmapLevel.beatmapCharacteristic.serializedName) || mpLevel.DifficultyColors.ContainsKey(beatmapLevel.beatmapCharacteristic.serializedName))
-            //         characteristicName = beatmapLevel.beatmapCharacteristic.serializedName;
-            //
-            //     customListTableData.tableView.ClearSelection();
-            //     if (customListTableData.data[index].icon == ColorsIcon)
-            //         _modal.Hide(false, () => _colorsUI.ShowColors(mpLevel.DifficultyColors[characteristicName][beatmapLevel.beatmapDifficulty]));
-            // }
+            var cell = customListTableData.data[index];
+            if (cell.icon == ColorsIcon) _modal.Hide(false, () => _colorsUI.ShowColors());
+
+            customListTableData.tableView.ClearSelection();
         }
     }
 }
