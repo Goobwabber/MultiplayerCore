@@ -42,8 +42,8 @@ namespace MultiplayerCore.UI
         private readonly BeatmapLevelsModel _beatmapLevelsModel;
         private readonly SiraLog _logger;
 
-        private readonly List<CustomListTableData.CustomCellInfo> _unusedCells;
-        private readonly List<CustomListTableData.CustomCellInfo> _levelInfoCells;
+        private readonly List<CustomListTableData.CustomCellInfo> _unusedCells = new();
+        private readonly List<CustomListTableData.CustomCellInfo> _levelInfoCells = new();
 
         internal MpRequirementsUI(
             LobbySetupViewController lobbySetupViewController,
