@@ -63,6 +63,8 @@ namespace MultiplayerCore.Beatmaps.Providers
             return null;
         }
 
+        public BeatSaverPreviewMediaData MakeBeatSaverPreviewMediaData(string levelHash) => new BeatSaverPreviewMediaData(_beatsaver, levelHash);
+
         /// <summary>
         /// Gets an <see cref="IPreviewBeatmapLevel"/> from the information in the provided packet.
         /// </summary>

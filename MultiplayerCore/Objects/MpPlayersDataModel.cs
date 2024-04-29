@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -99,27 +99,46 @@ namespace MultiplayerCore.Objects
         private async Task SendMpBeatmapPacket(BeatmapKey beatmapKey)
         {
             var levelId = beatmapKey.levelId;
-            
+            _logger.Debug($"Sending beatmap packet for level {levelId}");
+
             var levelHash = Utilities.HashForLevelID(levelId);
             if (levelHash == null)
+            {
+                _logger.Debug("Not a custom level, returning...");
                 return;
+            }
             
             var levelData = await _beatmapLevelProvider.GetBeatmap(levelHash);
             if (levelData == null)
+            {
+                _logger.Debug("Could not get level data for beatmap, returning!");
                 return;
+            }
 
             var packet = new MpBeatmapPacket(levelData, beatmapKey);
+            _logger.Debug("Actually sending packet");
             _multiplayerSessionManager.Send(packet);
         }
 
         public MpBeatmapPacket? GetPlayerPacket(string playerId)
         {
             _lastPlayerBeatmapPackets.TryGetValue(playerId, out var packet);
+            _logger.Debug($"Got player packet for {playerId} with levelHash: {packet?.levelHash ?? "NULL"}");
             return packet;
         }
 
-        private void PutPlayerPacket(string playerId, MpBeatmapPacket packet) => _lastPlayerBeatmapPackets[playerId] = packet;
-        public MpBeatmapPacket? FindLevelPacket(string levelHash) => _lastPlayerBeatmapPackets.Values.FirstOrDefault(packet => packet.levelHash == levelHash);
+        private void PutPlayerPacket(string playerId, MpBeatmapPacket packet)
+        {
+            _logger.Debug($"Putting packet for player {playerId} with levelHash: {packet.levelHash}");
+            _lastPlayerBeatmapPackets[playerId] = packet;
+        }
+
+        public MpBeatmapPacket? FindLevelPacket(string levelHash)
+        {
+            var packet = _lastPlayerBeatmapPackets.Values.FirstOrDefault(packet => packet.levelHash == levelHash);
+            _logger.Debug($"Found packet: {packet?.levelHash ?? "NULL"}");
+            return packet;
+        }
 
     }
 }
