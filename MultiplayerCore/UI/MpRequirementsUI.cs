@@ -217,6 +217,7 @@ namespace MultiplayerCore.UI
             ClearCells(_levelInfoCells);
 
             var diff = packet.difficulty;
+            if (!packet.requirements.ContainsKey(diff)) { return; }
             foreach (var req in packet.requirements[diff])
             {
                 var cell = GetCellInfo();
