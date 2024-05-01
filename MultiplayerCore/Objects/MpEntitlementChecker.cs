@@ -97,7 +97,7 @@ namespace MultiplayerCore.Objects
                     .Distinct().ToArray();
 
                 bool hasRequirements = requirements.All(x => string.IsNullOrEmpty(x) || SongCore.Collections.capabilities.Contains(x));
-                return Task.FromResult(hasRequirements ? EntitlementsStatus.Ok : EntitlementsStatus.NotOwned);
+				return Task.FromResult(hasRequirements ? EntitlementsStatus.Ok : EntitlementsStatus.NotOwned);
             }
 
             return _beatsaver.BeatmapByHash(levelHash).ContinueWith<EntitlementsStatus>(r =>
@@ -124,7 +124,9 @@ namespace MultiplayerCore.Objects
                         .ToArray()); // Damn this looks really cringe
 
                 bool hasRequirements = requirements.All(x => string.IsNullOrEmpty(x) || SongCore.Collections.capabilities.Contains(x));
-                return hasRequirements ? EntitlementsStatus.NotDownloaded : EntitlementsStatus.NotOwned;
+				if (hasRequirements) _logger.Debug($"Level hash {levelHash} found on BeatSaver!");
+				else _logger.Warn($"Level hash {levelHash} requirements not fullfilled! {string.Join(", ", requirements)}");
+				return hasRequirements ? EntitlementsStatus.NotDownloaded : EntitlementsStatus.NotOwned;
             });
         }
 
