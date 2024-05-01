@@ -52,7 +52,7 @@ namespace MultiplayerCore.Objects
         public new void Dispose()
             => Deactivate();
 
-        private new void SetPlayerBeatmapLevel(string userId, in BeatmapKey beatmapKey)
+        internal void SetPlayerBeatmapLevel_override(string userId, in BeatmapKey beatmapKey)
         {
             // Game: A player (can be the local player!) has selected / recommended a beatmap
 
@@ -60,7 +60,7 @@ namespace MultiplayerCore.Objects
                 // If local player: send extended beatmap info to other players
                 _ = SendMpBeatmapPacket(beatmapKey);
             
-            base.SetPlayerBeatmapLevel(userId, in beatmapKey);
+            //base.SetPlayerBeatmapLevel(userId, in beatmapKey);
         }
         
         private void HandleMpCoreBeatmapPacket(MpBeatmapPacket packet, IConnectedPlayer player)
