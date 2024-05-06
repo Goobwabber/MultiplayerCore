@@ -24,7 +24,7 @@ namespace MultiplayerCore.Patches.OverridePatches
 
 		[HarmonyPrefix]
 		[HarmonyPatch(nameof(MultiplayerLevelLoader.Tick))]
-		private static bool Tick_override_Pre(MultiplayerLevelLoader __instance, ValueTuple<bool, string> __state)
+		private static bool Tick_override_Pre(MultiplayerLevelLoader __instance/*, ValueTuple<bool, string> __state*/)
 		{
 			MpLevelLoader instance = (MpLevelLoader)__instance;
 			if (instance._loaderState == MultiplayerBeatmapLoaderState.NotLoading)
@@ -34,7 +34,7 @@ namespace MultiplayerCore.Patches.OverridePatches
 			}
 
 			var levelId = instance._gameplaySetupData.beatmapKey.levelId;
-			__state = (false, levelId);
+			//__state = (false, levelId);
 
 			if (instance._loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown)
 			{
@@ -61,7 +61,7 @@ namespace MultiplayerCore.Patches.OverridePatches
 			}
 
 			// Loader main: pending load
-			__state.Item1 = true;
+			//__state.Item1 = true;
 			return true;
 			//base.Tick();
 			//var loadDidFinish = (_loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown);
@@ -77,11 +77,12 @@ namespace MultiplayerCore.Patches.OverridePatches
 
 		[HarmonyPostfix]
 		[HarmonyPatch(nameof(MultiplayerLevelLoader.Tick))]
-		private static void Tick_override_Post(MultiplayerLevelLoader __instance, ValueTuple<bool, string> __state)
+		private static void Tick_override_Post(MultiplayerLevelLoader __instance/*, ValueTuple<bool, string> __state*/)
 		{
 			MpLevelLoader instance = (MpLevelLoader)__instance;
 
-			if (!__state.Item1)
+			//if (!__state.Item1)
+			if (instance._loaderState == MultiplayerBeatmapLoaderState.NotLoading)
 			{
 				// Loader: not doing anything
 				return;
