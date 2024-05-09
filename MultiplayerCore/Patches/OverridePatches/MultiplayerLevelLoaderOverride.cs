@@ -24,9 +24,10 @@ namespace MultiplayerCore.Patches.OverridePatches
 
 		[HarmonyPrefix]
 		[HarmonyPatch(nameof(MultiplayerLevelLoader.Tick))]
-		private static bool Tick_override_Pre(MultiplayerLevelLoader __instance/*, ValueTuple<bool, string> __state*/)
+		private static bool Tick_override_Pre(MultiplayerLevelLoader __instance, ref MultiplayerBeatmapLoaderState __state)
 		{
 			MpLevelLoader instance = (MpLevelLoader)__instance;
+			__state = instance._loaderState;
 			if (instance._loaderState == MultiplayerBeatmapLoaderState.NotLoading)
 			{
 				// Loader: not doing anything
@@ -77,28 +78,19 @@ namespace MultiplayerCore.Patches.OverridePatches
 
 		[HarmonyPostfix]
 		[HarmonyPatch(nameof(MultiplayerLevelLoader.Tick))]
-		private static void Tick_override_Post(MultiplayerLevelLoader __instance/*, ValueTuple<bool, string> __state*/)
+		private static void Tick_override_Post(MultiplayerLevelLoader __instance, MultiplayerBeatmapLoaderState __state)
 		{
 			MpLevelLoader instance = (MpLevelLoader)__instance;
 
-			//if (!__state.Item1)
-			if (instance._loaderState == MultiplayerBeatmapLoaderState.NotLoading)
-			{
-				// Loader: not doing anything
-				return;
-			}
+			bool loadJustFinished = __state == MultiplayerBeatmapLoaderState.LoadingBeatmap && instance._loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown;
+			if (!loadJustFinished) return;
 
 			// Loader main: pending load
 			var levelId = instance._gameplaySetupData.beatmapKey.levelId;
-			var loadDidFinish = (instance._loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown);
-			if (!loadDidFinish)
-				return;
-
 			instance._rpcManager.SetIsEntitledToLevel(levelId, EntitlementsStatus.Ok);
 			instance._logger.Debug($"Loaded level: {levelId}");
 
 			instance.UnloadLevelIfRequirementsNotMet();
-
 		}
 	}
 }
