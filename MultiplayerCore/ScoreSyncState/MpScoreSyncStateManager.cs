@@ -33,7 +33,7 @@ namespace MultiplayerCore.NodePoseSyncState
         {
             if (DeltaUpdateFrequency.HasValue)
             {
-                __result = (long)(DeltaUpdateFrequency.Value * 1000);
+                __result = (long)(DeltaUpdateFrequency.Value);
                 return false;
             }
             return true;
@@ -45,7 +45,7 @@ namespace MultiplayerCore.NodePoseSyncState
         {
             if (FullStateUpdateFrequency.HasValue)
             {
-                __result = (long)(FullStateUpdateFrequency.Value * 1000);
+                __result = (long)(FullStateUpdateFrequency.Value);
                 return false;
             }
             return true;
