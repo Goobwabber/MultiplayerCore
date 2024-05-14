@@ -3,10 +3,10 @@ using LiteNetLib.Utils;
 
 namespace MultiplayerCore.NodePoseSyncState
 {
-    internal class MpNodePoseSyncStatePacket : MpPacket
+    internal class MpScoreSyncStatePacket : MpPacket
     {
-        public long deltaUpdateFrequency = 10L;
-        public long fullStateUpdateFrequency = 100L;
+        public long deltaUpdateFrequency = 100L;
+        public long fullStateUpdateFrequency = 500L;
         public override void Serialize(NetDataWriter writer)
         {
             writer.Put(deltaUpdateFrequency);
