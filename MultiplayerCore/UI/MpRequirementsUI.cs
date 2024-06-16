@@ -217,18 +217,20 @@ namespace MultiplayerCore.UI
             ClearCells(_levelInfoCells);
 
             var diff = packet.difficulty;
-            if (!packet.requirements.ContainsKey(diff)) { return; }
-            foreach (var req in packet.requirements[diff])
+            if (packet.requirements.ContainsKey(diff))
             {
-                var cell = GetCellInfo();
-                bool installed = SongCore.Collections.capabilities.Contains(req);
-                cell.text = $"<size=75%>{req}";
-                cell.subtext = installed ? "Requirement found" : "Requirement missing";
-                cell.icon = installed ? HaveReqIcon : MissingReqIcon;
-                _levelInfoCells.Add(cell);
-            }
+				foreach (var req in packet.requirements[diff])
+				{
+					var cell = GetCellInfo();
+					bool installed = SongCore.Collections.capabilities.Contains(req);
+					cell.text = $"<size=75%>{req}";
+					cell.subtext = installed ? "Requirement found" : "Requirement missing";
+					cell.icon = installed ? HaveReqIcon : MissingReqIcon;
+					_levelInfoCells.Add(cell);
+				}
+			}
 
-            foreach (var contributor in packet.contributors)
+			foreach (var contributor in packet.contributors)
             {
                 var cell = GetCellInfo();
                 cell.text = $"<size=75%>{contributor._name}";
