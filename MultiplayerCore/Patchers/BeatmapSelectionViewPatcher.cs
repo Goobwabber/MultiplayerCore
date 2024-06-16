@@ -42,8 +42,8 @@ namespace MultiplayerCore.Patchers
             __instance._levelBar.hide = false;
 
             var level = _mpBeatmapLevelProvider.GetBeatmapFromPacket(packet).MakeBeatmapLevel(beatmapKey, _mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(packet.levelHash));
-            __instance._levelBar.Setup(level, beatmapKey.beatmapCharacteristic, beatmapKey.difficulty);
-            return false;
+			__instance._levelBar.SetupData(level, beatmapKey.difficulty, beatmapKey.beatmapCharacteristic);
+			return false;
         }
 
         [AffinityPrefix]
@@ -64,7 +64,7 @@ namespace MultiplayerCore.Patchers
             __instance._levelBar.hide = false;
 
             var level = _mpBeatmapLevelProvider.GetBeatmapFromPacket(packet).MakeBeatmapLevel(beatmapKey, _mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(packet.levelHash));
-            __instance._levelBar.Setup(level, beatmapKey.beatmapCharacteristic, beatmapKey.difficulty);
+            __instance._levelBar.SetupData(level, beatmapKey.difficulty, beatmapKey.beatmapCharacteristic);
             return false;
         }
     }
@@ -87,6 +87,7 @@ namespace MultiplayerCore.Patchers
             );
 
             return new BeatmapLevel(
+                0,
                 false,
                 mpBeatmap.LevelID,
                 mpBeatmap.SongName,
