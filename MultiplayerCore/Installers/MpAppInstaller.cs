@@ -27,6 +27,7 @@ namespace MultiplayerCore.Installers
             Container.BindInterfacesAndSelfTo<MpPacketSerializer>().AsSingle();
             Container.BindInterfacesAndSelfTo<MpPlayerManager>().AsSingle();
             Container.BindInterfacesAndSelfTo<MpNodePoseSyncStateManager>().AsSingle();
+            Container.BindInterfacesAndSelfTo<MpScoreSyncStateManager>().AsSingle();
             Container.Bind<MpLevelDownloader>().ToSelf().AsSingle();
             Container.Bind<MpBeatmapLevelProvider>().ToSelf().AsSingle();
             Container.BindInterfacesAndSelfTo<CustomLevelsPatcher>().AsSingle();
