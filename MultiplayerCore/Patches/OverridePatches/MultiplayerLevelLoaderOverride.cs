@@ -35,7 +35,6 @@ namespace MultiplayerCore.Patches.OverridePatches
 			}
 
 			var levelId = instance._gameplaySetupData.beatmapKey.levelId;
-			//__state = (false, levelId);
 
 			if (instance._loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown)
 			{
@@ -57,22 +56,10 @@ namespace MultiplayerCore.Patches.OverridePatches
 					return false;
 
 				instance._logger.Debug($"All players finished loading");
-				//base.Tick(); // calling Tick() now will cause base level loader to transition to gameplay
-				//return true;
 			}
 
 			// Loader main: pending load
-			//__state.Item1 = true;
 			return true;
-			//base.Tick();
-			//var loadDidFinish = (_loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown);
-			//if (!loadDidFinish)
-			//	return false;
-
-			//_rpcManager.SetIsEntitledToLevel(levelId, EntitlementsStatus.Ok);
-			//_logger.Debug($"Loaded level: {levelId}");
-
-			//UnloadLevelIfRequirementsNotMet();
 		}
 
 
