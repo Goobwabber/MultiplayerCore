@@ -13,11 +13,11 @@ namespace MultiplayerCore.Patches.OverridePatches
 	{
 
 		[HarmonyPrefix]
-		[HarmonyPatch(nameof(LobbyPlayersDataModel.SetPlayerBeatmapLevel))]
-		private static void SetPlayerBeatmapLevel_override(LobbyPlayersDataModel __instance, string userId, in BeatmapKey beatmapKey)
+		[HarmonyPatch(nameof(LobbyPlayersDataModel.SetLocalPlayerBeatmapLevel))]
+		private static void SetLocalPlayerBeatmapLevel_override(LobbyPlayersDataModel __instance, in BeatmapKey beatmapKey)
 		{
-			Plugin.Logger.Debug("Called LobbyPlayersDataModel.SetPlayerBeatmapLevel Override Patch");
-			((MpPlayersDataModel)__instance).SetPlayerBeatmapLevel_override(userId, beatmapKey);
+			Plugin.Logger.Debug("Called LobbyPlayersDataModel.SetLocalPlayerBeatmapLevel Override Patch");
+			((MpPlayersDataModel)__instance).SetLocalPlayerBeatmapLevel_override(beatmapKey);
 		}
 	}
 }

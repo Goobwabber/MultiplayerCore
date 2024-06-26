@@ -52,15 +52,14 @@ namespace MultiplayerCore.Objects
         public new void Dispose()
             => Deactivate();
 
-        internal void SetPlayerBeatmapLevel_override(string userId, in BeatmapKey beatmapKey)
+        internal void SetLocalPlayerBeatmapLevel_override(in BeatmapKey beatmapKey)
         {
-            // Game: A player (can be the local player!) has selected / recommended a beatmap
+            // Game: The local player has selected / recommended a beatmap
 
-            if (userId == _multiplayerSessionManager.localPlayer.userId)
-                // If local player: send extended beatmap info to other players
-                _ = SendMpBeatmapPacket(beatmapKey);
+            // send extended beatmap info to other players
+            SendMpBeatmapPacket(beatmapKey);
             
-            //base.SetPlayerBeatmapLevel(userId, in beatmapKey);
+            //base.SetLocalPlayerBeatmapLevel(userId, in beatmapKey);
         }
         
         private void HandleMpCoreBeatmapPacket(MpBeatmapPacket packet, IConnectedPlayer player)
@@ -81,7 +80,7 @@ namespace MultiplayerCore.Objects
             // RPC: The server / another player has asked us to send our recommended beatmap
             
             var selectedBeatmapKey = _playersData[localUserId].beatmapKey;
-            _ = SendMpBeatmapPacket(selectedBeatmapKey);
+            SendMpBeatmapPacket(selectedBeatmapKey);
 
             base.HandleMenuRpcManagerGetRecommendedBeatmap(userId);
         }
@@ -96,7 +95,7 @@ namespace MultiplayerCore.Objects
             base.HandleMenuRpcManagerRecommendBeatmap(userId, beatmapKeySerializable);
         }
 
-        private async Task SendMpBeatmapPacket(BeatmapKey beatmapKey)
+        private void SendMpBeatmapPacket(BeatmapKey beatmapKey)
         {
             var levelId = beatmapKey.levelId;
             _logger.Debug($"Sending beatmap packet for level {levelId}");
@@ -108,7 +107,7 @@ namespace MultiplayerCore.Objects
                 return;
             }
             
-            var levelData = await _beatmapLevelProvider.GetBeatmap(levelHash);
+            var levelData = _beatmapLevelProvider.GetBeatmapFromLocalBeatmaps(levelHash);
             if (levelData == null)
             {
                 _logger.Debug("Could not get level data for beatmap, returning!");
