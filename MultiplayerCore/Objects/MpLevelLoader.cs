@@ -38,8 +38,6 @@ namespace MultiplayerCore.Objects
         {
             var levelHash = Utilities.HashForLevelID(levelId);
             
-            //base.LoadLevel(gameplaySetupData, initialStartTime);
-
             if (levelHash == null)
             {
                 _logger.Debug($"Ignoring level (not a custom level hash): {levelId}");
@@ -53,53 +51,6 @@ namespace MultiplayerCore.Objects
             if (downloadNeeded)
                 _getBeatmapLevelResultTask = DownloadBeatmapLevelAsync(levelId, _getBeatmapCancellationTokenSource.Token);
         }
-
-        //[UsedImplicitly]
-        //public void Tick_override()
-        //{
-        //    if (_loaderState == MultiplayerBeatmapLoaderState.NotLoading)
-        //    {
-        //        // Loader: not doing anything
-        //        return;
-        //    }
-
-        //    var levelId = _gameplaySetupData.beatmapKey.levelId;
-
-        //    if (_loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown)
-        //    {
-        //        // Loader: level is loaded locally, waiting for countdown to transition to level
-        //        // Modded behavior: wait until all players are ready before we transition
-
-        //        if (_sessionManager.syncTime < _startTime)
-        //            return;
-
-        //        // Ready check: player returned OK entitlement (load finished) OR already transitioned to gameplay
-        //        var allPlayersReady = _sessionManager.connectedPlayers.All(p =>
-        //            _entitlementChecker.GetKnownEntitlement(p.userId, levelId) == EntitlementsStatus.Ok // level loaded
-        //            || p.HasState("in_gameplay") // already playing
-        //            || p.HasState("backgrounded") // not actively in game
-        //            || !p.HasState("wants_to_play_next_level") // doesn't want to play (spectator)
-        //        );
-
-        //        if (!allPlayersReady)
-        //            return;
-                
-        //        _logger.Debug($"All players finished loading");
-        //        base.Tick(); // calling Tick() now will cause base level loader to transition to gameplay
-        //    }
-            
-        //    // Loader main: pending load
-        //    //base.Tick();
-
-        //    var loadDidFinish = (_loaderState == MultiplayerBeatmapLoaderState.WaitingForCountdown);
-        //    if (!loadDidFinish)
-        //        return false;
-            
-        //    _rpcManager.SetIsEntitledToLevel(levelId, EntitlementsStatus.Ok);
-        //    _logger.Debug($"Loaded level: {levelId}");
-            
-        //    UnloadLevelIfRequirementsNotMet();
-        //}
 
         internal void UnloadLevelIfRequirementsNotMet()
         {
@@ -156,15 +107,13 @@ namespace MultiplayerCore.Objects
 
             // Reload custom level set
             _logger.Debug("Reloading custom level collection...");
-            //SongCore.Loader.Instance.RefreshSongs(false);
-            //await _beatmapLevelsModel.ReloadCustomLevelPackCollectionAsync(cancellationToken);
             while (!SongCore.Loader.AreSongsLoaded)
             {
                 await Task.Delay(25);
 			}
-
+            
 			// Load level data
-			var loadResult = await _beatmapLevelsModel.LoadBeatmapLevelDataAsync(levelId, cancellationToken);
+			var loadResult = await _beatmapLevelsModel.LoadBeatmapLevelDataAsync(levelId, BeatmapLevelDataVersion.Original, cancellationToken);
 			if (loadResult.isError)
 				_logger.Error($"Custom level data could not be loaded after download: {levelId}");
 			return loadResult;

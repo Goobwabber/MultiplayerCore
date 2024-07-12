@@ -5,6 +5,7 @@ using MultiplayerCore.Objects;
 using SiraUtil.Affinity;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace MultiplayerCore.Patchers
 {
@@ -14,15 +15,27 @@ namespace MultiplayerCore.Patchers
         private MpBeatmapLevelProvider _mpBeatmapLevelProvider;
         private BeatmapLevelsModel _beatmapLevelsModel;
 
+        private static MethodInfo _lbarInfo;
+        private static bool _newlbarInfo;
+
 
         BeatmapSelectionViewPatcher(ILobbyPlayersDataModel playersDataModel, MpBeatmapLevelProvider mpBeatmapLevelProvider, BeatmapLevelsModel beatmapLevelsModel)
         {
             _mpPlayersDataModel = playersDataModel as MpPlayersDataModel;
             _mpBeatmapLevelProvider = mpBeatmapLevelProvider;
             _beatmapLevelsModel = beatmapLevelsModel;
-        }
 
-        [AffinityPrefix]
+            _lbarInfo = AccessTools.Method(typeof(LevelBar), "SetupData",
+	            new Type[] { typeof(BeatmapLevel), typeof(BeatmapDifficulty), typeof(BeatmapCharacteristicSO) });
+            if (_lbarInfo != null) _newlbarInfo = true;
+			else _lbarInfo = AccessTools.Method(typeof(LevelBar), "Setup", new Type[] { typeof(BeatmapLevel), typeof(BeatmapCharacteristicSO), typeof(BeatmapDifficulty) });
+			if (_lbarInfo == null)
+			{
+				Plugin.Logger.Critical("Can't find a fitting LevelBar Method, is your game version supported?");
+			}
+		}
+
+		[AffinityPrefix]
         [AffinityPatch(typeof(EditableBeatmapSelectionView), nameof(EditableBeatmapSelectionView.SetBeatmap))]
         public bool EditableBeatmapSelectionView_SetBeatmap(ref EditableBeatmapSelectionView __instance, in BeatmapKey beatmapKey)
         {
@@ -42,18 +55,15 @@ namespace MultiplayerCore.Patchers
 
             var level = _mpBeatmapLevelProvider.GetBeatmapFromPacket(packet).MakeBeatmapLevel(beatmapKey, _mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(packet.levelHash));
 
-			// For 1.35
-			var mInfo = __instance._levelBar.GetType().GetMethod("Setup", new Type[] { level.GetType(), beatmapKey.beatmapCharacteristic.GetType(), beatmapKey.difficulty.GetType() });
-			if (mInfo != null)
-	            mInfo.Invoke(__instance._levelBar, new object[] { level, beatmapKey.beatmapCharacteristic, beatmapKey.difficulty });
-            else
-            {
-				// For 1.37
-	            mInfo = __instance._levelBar.GetType().GetMethod("SetupData", new Type[] { level.GetType(), beatmapKey.difficulty.GetType(), beatmapKey.beatmapCharacteristic.GetType() });
-	            if (mInfo != null)
-		            mInfo.Invoke(__instance._levelBar, new object[] { level, beatmapKey.difficulty, beatmapKey.beatmapCharacteristic });
-	            else Plugin.Logger.Critical("Can't find a fitting LevelBar Method, is your game version supported?");
-            }
+			Plugin.Logger.Debug($"Calling Setup/SetupData with level type: {level.GetType().Name}, beatmapCharacteristic type: {beatmapKey.beatmapCharacteristic.GetType().Name}, difficulty type: {beatmapKey.difficulty.GetType().Name} ");
+			if (_newlbarInfo)
+			{
+				_lbarInfo.Invoke(__instance._levelBar, new object[] { level, beatmapKey.difficulty, beatmapKey.beatmapCharacteristic });
+			}
+			else
+			{
+				_lbarInfo.Invoke(__instance._levelBar, new object[] { level, beatmapKey.beatmapCharacteristic, beatmapKey.difficulty });
+			}
 			return false;
         }
 
@@ -76,22 +86,20 @@ namespace MultiplayerCore.Patchers
 
             var level = _mpBeatmapLevelProvider.GetBeatmapFromPacket(packet).MakeBeatmapLevel(beatmapKey, _mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(packet.levelHash));
 
-
-			var mInfo = __instance._levelBar.GetType().GetMethod("Setup", new Type[] { level.GetType(), beatmapKey.beatmapCharacteristic.GetType(), beatmapKey.difficulty.GetType() });
-			if (mInfo != null)
-				mInfo.Invoke(__instance._levelBar, new object[] { level, beatmapKey.beatmapCharacteristic, beatmapKey.difficulty });
-			else
-			{
-	            mInfo = __instance._levelBar.GetType().GetMethod("SetupData", new Type[] { level.GetType(), beatmapKey.difficulty.GetType(), beatmapKey.beatmapCharacteristic.GetType() });
-				if (mInfo != null)
-				   mInfo.Invoke(__instance._levelBar, new object[] { level, beatmapKey.difficulty, beatmapKey.beatmapCharacteristic });
-                else Plugin.Logger.Critical("Can't find a fitting LevelBar Method, is your game version supported?");
-			}
+            Plugin.Logger.Debug($"Calling Setup/SetupData with level type: {level.GetType().Name}, beatmapCharacteristic type: {beatmapKey.beatmapCharacteristic.GetType().Name}, difficulty type: {beatmapKey.difficulty.GetType().Name} ");
+            if (_newlbarInfo)
+            {
+	            _lbarInfo.Invoke(__instance._levelBar, new object[] { level, beatmapKey.difficulty, beatmapKey.beatmapCharacteristic });
+            }
+            else
+            {
+	            _lbarInfo.Invoke(__instance._levelBar, new object[] { level, beatmapKey.beatmapCharacteristic, beatmapKey.difficulty });
+            }
 			return false;
         }
     }
 
-    static internal class PacketExt
+	internal static class PacketExt
     {
         public static BeatmapLevel MakeBeatmapLevel(this MpBeatmap mpBeatmap, in BeatmapKey key, IPreviewMediaData previewMediaData) 
         {
