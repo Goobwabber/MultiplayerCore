@@ -9,8 +9,8 @@ namespace MultiplayerCore.NodePoseSyncState
         public long fullStateUpdateFrequency = 100L;
         public override void Serialize(NetDataWriter writer)
         {
-            writer.Put(deltaUpdateFrequency);
-            writer.Put(fullStateUpdateFrequency);
+            writer.PutVarLong(deltaUpdateFrequency);
+            writer.PutVarLong(fullStateUpdateFrequency);
         }
 
         public override void Deserialize(NetDataReader reader)
