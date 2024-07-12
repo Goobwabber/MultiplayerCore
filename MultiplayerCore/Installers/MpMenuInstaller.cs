@@ -4,7 +4,7 @@ using Zenject;
 
 namespace MultiplayerCore.Installers
 {
-    internal class MpMenuInstaller : Installer
+    internal class MpMenuInstaller : MonoInstaller
     {
         public override void InstallBindings()
         {
@@ -17,5 +17,15 @@ namespace MultiplayerCore.Installers
             // Inject sira stuff that didn't get injected on appinit
             Container.Inject(Container.Resolve<NetworkPlayerEntitlementChecker>());
         }
-    }
+
+        public override void Start()
+        {
+	        Plugin.Logger?.Info("Installing Interface");
+
+	        LobbySetupViewController lobbySetupViewController = Container.Resolve<LobbySetupViewController>();
+	        Container.InstantiateComponent<LobbySetupPanel>(lobbySetupViewController.gameObject);
+
+	        Plugin.Logger?.Info("Installed Interface");
+		}
+	}
 }

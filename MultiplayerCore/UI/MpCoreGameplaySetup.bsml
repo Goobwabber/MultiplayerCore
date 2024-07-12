@@ -1,0 +1,6 @@
+﻿<vertical id='vert'>
+	<text text='MultiplayerCore' pad-bottom='0' align='Bottom' size-delta-y='10'/>
+  <toggle-setting value='per-player-diffs' apply-on-change='true' text='Per Player Difficulty' hover-hint='Allows each player to select their own difficulty!' bind-value='true'/>
+  <toggle-setting value='per-player-modifiers' apply-on-change='true' text='Per Player Modifiers' hover-hint="Allows each player to select their own modifiers!" bind-value='true'/>
+  <!--<button text='Preferences' on-click='preferences-click'/>-->
+</vertical>
