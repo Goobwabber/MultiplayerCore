@@ -34,6 +34,22 @@ namespace MultiplayerCore.UI
 
 			_lobbyViewController.didActivateEvent += DidActivate;
 			_lobbyViewController.didDeactivateEvent += DidDeactivate;
+
+			var cgubPos = _lobbyViewController._cancelGameUnreadyButton.transform.position;
+			cgubPos.y -= 0.4f;
+			_lobbyViewController._cancelGameUnreadyButton.transform.position = cgubPos;
+
+			var sgrbPos = _lobbyViewController._startGameReadyButton.transform.position;
+			sgrbPos.y -= 0.4f;
+			_lobbyViewController._startGameReadyButton.transform.position = sgrbPos;
+
+			var csgHH = _lobbyViewController._cantStartGameHoverHint.transform.position;
+			csgHH.y -= 0.4f;
+			_lobbyViewController._cantStartGameHoverHint.transform.position = csgHH;
+
+			//var stwParentPos = _lobbyViewController._spectatorWarningTextWrapper.transform.position;
+			//stwParentPos.y -= 0.5f;
+			//_lobbyViewController._spectatorWarningTextWrapper.transform.position = stwParentPos;
 		}
 
 		protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
