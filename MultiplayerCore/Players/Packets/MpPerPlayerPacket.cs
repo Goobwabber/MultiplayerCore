@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using LiteNetLib.Utils;
 using MultiplayerCore.Networking.Abstractions;
+using MultiplayerCore.Networking.Attributes;
 
 namespace MultiplayerCore.Players.Packets
 {
-    internal class PerPlayer : MpPacket
+    internal class MpPerPlayerPacket : MpPacket
     {
         public bool PPDEnabled;
         public bool PPMEnabled;

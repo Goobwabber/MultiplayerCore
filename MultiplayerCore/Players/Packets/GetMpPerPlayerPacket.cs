@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MultiplayerCore.Networking.Attributes;
 
 namespace MultiplayerCore.Players.Packets
 {
-	internal class GetPerPlayer : MpPacket
+	internal class GetMpPerPlayerPacket : MpPacket
 	{
 		public override void Deserialize(NetDataReader reader) { }
 
