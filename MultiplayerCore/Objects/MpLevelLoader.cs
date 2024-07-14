@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using HarmonyLib;
 using JetBrains.Annotations;
 using SiraUtil.Logging;
 
@@ -113,8 +114,20 @@ namespace MultiplayerCore.Objects
 			}
             
 			// Load level data
-			var loadResult = await _beatmapLevelsModel.LoadBeatmapLevelDataAsync(levelId, BeatmapLevelDataVersion.Original, cancellationToken);
-			if (loadResult.isError)
+			var method = AccessTools.Method(_beatmapLevelsModel.GetType(), nameof(_beatmapLevelsModel.LoadBeatmapLevelDataAsync));
+			LoadBeatmapLevelDataResult loadResult;
+			if (method != null)
+			{
+				if (method.GetParameters().Length > 2)
+					loadResult = await (Task<LoadBeatmapLevelDataResult>)method.Invoke(_beatmapLevelsModel,
+						new object[] { levelId, BeatmapLevelDataVersion.Original, cancellationToken });
+                else if (method.GetParameters().Length == 2)
+	                loadResult = await (Task<LoadBeatmapLevelDataResult>)method.Invoke(_beatmapLevelsModel,
+		                new object[] { levelId, cancellationToken });
+                else throw new NotSupportedException("Game version not supported");
+			}
+            //var loadResult = await _beatmapLevelsModel.LoadBeatmapLevelDataAsync(levelId, BeatmapLevelDataVersion.Original, cancellationToken);
+            if (loadResult.isError)
 				_logger.Error($"Custom level data could not be loaded after download: {levelId}");
 			return loadResult;
 		}
