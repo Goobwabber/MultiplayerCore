@@ -115,7 +115,7 @@ namespace MultiplayerCore.Objects
             
 			// Load level data
 			var method = AccessTools.Method(_beatmapLevelsModel.GetType(), nameof(_beatmapLevelsModel.LoadBeatmapLevelDataAsync));
-			LoadBeatmapLevelDataResult loadResult;
+			LoadBeatmapLevelDataResult loadResult = LoadBeatmapLevelDataResult.Error;
 			if (method != null)
 			{
 				if (method.GetParameters().Length > 2)
