@@ -7,6 +7,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
+using IPA.Utilities.Async;
 using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Beatmaps.Providers;
 using MultiplayerCore.Networking;
@@ -33,6 +34,7 @@ namespace MultiplayerCore.UI
 		private bool _perPlayerDiffs = false;
 		private bool _perPlayerModifiers = false;
 		private List<string> _allowedDiffs;
+		private CanvasGroup? _difficultyCanvasGroup;
 
 		//BeatSaberMarkupLanguage.Tags.TextSegmentedControlTag
 
@@ -61,11 +63,20 @@ namespace MultiplayerCore.UI
 			sgrbPos.y -= 0.4f;
 			_lobbyViewController._startGameReadyButton.transform.position = sgrbPos;
 
-			var csgHH = _lobbyViewController._cantStartGameHoverHint.transform.position;
-			csgHH.y -= 0.4f;
-			_lobbyViewController._cantStartGameHoverHint.transform.position = csgHH;
+			var csgHHPos = _lobbyViewController._cantStartGameHoverHint.transform.position;
+			csgHHPos.y -= 0.4f;
+			_lobbyViewController._cantStartGameHoverHint.transform.position = csgHHPos;
 
-			_packetSerializer.RegisterType<MpPerPlayerPacket>();
+			//if (!_lobbyViewController._isPartyOwner)
+			//{
+			//	var diffPos = difficulty.transform.position;
+			//	diffPos.y -= -0.2f;
+
+			//}
+
+			// TODO: Proper registration
+			_packetSerializer.RegisterCallback<MpPerPlayerPacket>(HandleMpPerPlayerPacket);
+			_packetSerializer.RegisterType<GetMpPerPlayerPacket>();
 
 			//var stwParentPos = _lobbyViewController._spectatorWarningTextWrapper.transform.position;
 			//stwParentPos.y -= 0.5f;
@@ -84,21 +95,38 @@ namespace MultiplayerCore.UI
 				return;
 			}
 			// Make sure to only allow selecting difficulties that are enabled for the lobby
-			//var lobbyPlayersDataModel = _gameServerLobbyFlowCoordinator._lobbyPlayersDataModel as LobbyPlayersDataModel;
-			//LobbyPlayerData? playerData =
-			//	lobbyPlayersDataModel?.GetOrCreateLobbyPlayerDataModel(lobbyPlayersDataModel.localUserId,
-			//		out _);
-			//if (playerData != null && playerData.beatmapKey.IsValid())
-			//	_currentBeatmapKey = playerData.beatmapKey;
+			if (!firstActivation)
+			{
+				var lobbyPlayersDataModel = _gameServerLobbyFlowCoordinator._lobbyPlayersDataModel as LobbyPlayersDataModel;
+				LobbyPlayerData? playerData =
+					lobbyPlayersDataModel?.GetOrCreateLobbyPlayerDataModel(lobbyPlayersDataModel.localUserId,
+						out _);
+				if (playerData != null)
+					UpdateDifficultyList(playerData.beatmapKey);
+			}
+			
+			if (!firstActivation && addedToHierarchy)
+			{
+				// Reset our buttons
+				_perPlayerDiffs = false;
+				_perPlayerModifiers = false;
+				UpdateButtonValues();
+				// Request Updated state
+				_multiplayerSessionManager.Send(new GetMpPerPlayerPacket());
+			}
 			//else if (_gameStateController.selectedLevelGameplaySetupData.beatmapKey.IsValid())
 			//	_currentBeatmapKey = _gameStateController.selectedLevelGameplaySetupData.beatmapKey;
 			//if (_currentBeatmapKey.IsValid()) UpdateDifficultyList(_currentBeatmapKey);
 			//else segmentVert.gameObject.SetActive(false);
 
-			// We register the callbacks after setting the initial values
+			// We register the callbacks
 			_gameStateController.lobbyStateChangedEvent += SetLobbyState;
 			//_gameStateController.selectedLevelGameplaySetupDataChangedEvent += HostSelectedBeatmap;
 			_gameServerLobbyFlowCoordinator._multiplayerLevelSelectionFlowCoordinator.didSelectLevelEvent += LocalSelectedBeatmap;
+			_gameServerLobbyFlowCoordinator._serverPlayerListViewController.selectSuggestedBeatmapEvent += UpdateDifficultyList;
+			_lobbyViewController.clearSuggestedBeatmapEvent += ClearLocalSelectedBeatmap;
+			_gameServerLobbyFlowCoordinator._lobbyPlayerPermissionsModel.permissionsChangedEvent +=
+				UpdateButtonsEnabled;
 
 			//else UpdateDifficultyList(Enum.GetValues(typeof(BeatmapDifficulty)).Cast<BeatmapDifficulty>().ToList());
 
@@ -136,11 +164,42 @@ namespace MultiplayerCore.UI
 				_gameStateController.lobbyStateChangedEvent -= SetLobbyState;
 				//_gameStateController.selectedLevelGameplaySetupDataChangedEvent -= HostSelectedBeatmap;
 				_gameServerLobbyFlowCoordinator._multiplayerLevelSelectionFlowCoordinator.didSelectLevelEvent -= LocalSelectedBeatmap;
+				_gameServerLobbyFlowCoordinator._serverPlayerListViewController.selectSuggestedBeatmapEvent -= UpdateDifficultyList;
+				_lobbyViewController.clearSuggestedBeatmapEvent -= ClearLocalSelectedBeatmap;
+				_gameServerLobbyFlowCoordinator._lobbyPlayerPermissionsModel.permissionsChangedEvent -=
+					UpdateButtonsEnabled;
 			}
 		}
 
+		private void HandleMpPerPlayerPacket(MpPerPlayerPacket packet, IConnectedPlayer player)
+		{
+			Plugin.Logger.Debug($"Got MpPerPlayerPacket from {player.userName}|{player.userId} with values PPDEnabled={packet.PPDEnabled}, PPMEnabled={packet.PPMEnabled}");
+			if (packet.PPDEnabled != PerPlayerDifficulty || packet.PPMEnabled != _perPlayerModifiers)
+			{
+				_perPlayerDiffs = packet.PPDEnabled;
+				_perPlayerModifiers = packet.PPMEnabled;
+				//perPlayerDiffsToggle.Value = _perPlayerDiffs;
+				//perPlayerModifiersToggle.Value = _perPlayerModifiers;
+				UpdateButtonValues();
+			}
+		}
+
+		public string DiffToStr(BeatmapDifficulty difficulty)
+		{
+			return difficulty == BeatmapDifficulty.ExpertPlus ? "Expert+" : difficulty.ToString();
+		}
+
+		//public List<string> DiffsToStrs(BeatmapDifficulty[] difficulties) =>
+		//	difficulties.Select(diff => DiffToStr(diff)).ToList();
+
 		private void UpdateDifficultyList(BeatmapKey beatmapKey)
 		{
+			_currentBeatmapKey = beatmapKey;
+			if (!_currentBeatmapKey.IsValid())
+			{
+				segmentVert.gameObject.SetActive(false);
+				return;
+			}
 			var levelHash = Utilities.HashForLevelID(beatmapKey.levelId);
 			if (levelHash != null)
 			{
@@ -160,52 +219,77 @@ namespace MultiplayerCore.UI
 			else
 			{
 				Plugin.Logger.Debug($"LevelId not custom: {beatmapKey.levelId}, getting difficulties from basegame");
-				UpdateDifficultyList(_beatmapLevelsModel.GetBeatmapLevel(beatmapKey.levelId).GetDifficulties(beatmapKey.beatmapCharacteristic).ToList());
+				var diffList = _beatmapLevelsModel.GetBeatmapLevel(beatmapKey.levelId)
+					?.GetDifficulties(beatmapKey.beatmapCharacteristic).ToList();
+				if (diffList != null) UpdateDifficultyList(diffList);
 			}
 		}
 
 		private void UpdateDifficultyList(IReadOnlyList<BeatmapDifficulty> difficulties)
 		{
-			_allowedDiffs = (from diff in difficulties
-							 where _gameServerLobbyFlowCoordinator._unifiedNetworkPlayerModel.selectionMask.difficulties
-								 .Contains(diff)
-							 select diff.ToString().Replace("ExpertPlus", "Expert+")
-							 ).ToList();
-			foreach (var difficulty in _allowedDiffs)
-				Plugin.Logger.Debug($"Allowed difficulty='{difficulty}'");
+			// Ensure that we run on the UnityMainThread here
+			UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+				{
+					_allowedDiffs = (from diff in difficulties
+							where _gameServerLobbyFlowCoordinator._unifiedNetworkPlayerModel.selectionMask.difficulties
+								.Contains(diff)
+							select DiffToStr(diff)
+						).ToList();
+					foreach (var difficultyStr in _allowedDiffs)
+						Plugin.Logger.Debug($"Allowed difficulty='{difficultyStr}'");
 
-			if (_allowedDiffs.Count > 1)
-			{
-				Plugin.Logger.Debug($"Setting texts");
-				difficulty.SetTexts(_allowedDiffs);
-				Plugin.Logger.Debug("Enabling gameObject");
-				segmentVert.gameObject.SetActive(true);
-			}
-			else segmentVert.gameObject.SetActive(false);
+					if (_allowedDiffs.Count > 1)
+					{
+						segmentVert.gameObject.SetActive(true);
+						difficulty.SetTexts(_allowedDiffs);
+						int index = _allowedDiffs.IndexOf(DiffToStr(_currentBeatmapKey.difficulty));
+						if (index > 0)
+							difficulty.SelectCellWithNumber(index);
+					}
+					else segmentVert.gameObject.SetActive(false);
+				}
+			);
 		}
 
 		private void SetLobbyState(MultiplayerLobbyState lobbyState)
 		{
+			Plugin.Logger.Debug($"Current Lobby State {lobbyState}");
+			enableUserInteractions = lobbyState == MultiplayerLobbyState.LobbySetup;
+
+			if (_difficultyCanvasGroup == null)
+				_difficultyCanvasGroup = difficulty?.gameObject.AddComponent<CanvasGroup>();
+			if (_difficultyCanvasGroup != null)
+				_difficultyCanvasGroup.alpha = lobbyState == MultiplayerLobbyState.LobbySetup ? 1f : 0.25f;
+			//var canvasGroup = segmentVert.GetComponentInParent<CanvasGroup>();
+			//var ourCanvasGroup = GetComponent<CanvasGroup>();
+			//if (ourCanvasGroup != null)
+			//	Plugin.Logger.Debug($"CanvasGroup found in parent");
+			//else Plugin.Logger.Error($"CanvasGroup was null!");
+			//if (ourCanvasGroup != null)
+			//	//UnityMainThreadTaskScheduler.Factory.StartNew(async () =>
+			//	//{
+			//		//await Task.Delay(2000);
+			//	ourCanvasGroup.alpha = lobbyState == MultiplayerLobbyState.LobbySetup ? 1f : 0.25f;
+			//	//});
+			//segmentVert. = (lobbyState == MultiplayerLobbyState.LobbySetup);
 			if (_lobbyViewController == null)
 				return;
 
 			if (_lobbyViewController._isPartyOwner)
 			{
-				perPlayerDiffsToggle.interactable = true;
-				perPlayerDiffsToggle.gameObject.SetActive(lobbyState == MultiplayerLobbyState.LobbySetup);
+				perPlayerDiffsToggle.interactable = lobbyState == MultiplayerLobbyState.LobbySetup;
+				//perPlayerDiffsToggle.gameObject.SetActive(lobbyState == MultiplayerLobbyState.LobbySetup);
 
-				perPlayerModifiersToggle.interactable = true;
-				perPlayerModifiersToggle.gameObject.SetActive(lobbyState == MultiplayerLobbyState.LobbySetup);
+				perPlayerModifiersToggle.interactable = lobbyState == MultiplayerLobbyState.LobbySetup;
+				//perPlayerModifiersToggle.gameObject.SetActive(lobbyState == MultiplayerLobbyState.LobbySetup);
+
 			}
-			difficulty.enabled = lobbyState == MultiplayerLobbyState.LobbySetup ||
-			                     lobbyState == MultiplayerLobbyState.LobbyCountdown;
 		}
 
 		private void LocalSelectedBeatmap(LevelSelectionFlowCoordinator.State state)
 		{
 			_currentBeatmapKey = state.beatmapKey;
 			UpdateDifficultyList(state.beatmapLevel.GetDifficulties(state.beatmapKey.beatmapCharacteristic).ToList());
-			difficulty.SelectCellWithNumber(_allowedDiffs.IndexOf(_currentBeatmapKey.difficulty.ToString().Replace("ExpertPlus", "Expert+")));
 			//var lobbyPlayersDataModel = _gameServerLobbyFlowCoordinator._lobbyPlayersDataModel as LobbyPlayersDataModel;
 			//LobbyPlayerData? playerData =
 			//	lobbyPlayersDataModel?.GetOrCreateLobbyPlayerDataModel(lobbyPlayersDataModel.localUserId,
@@ -214,9 +298,35 @@ namespace MultiplayerCore.UI
 			//	UpdateDifficultyList(playerData.beatmapKey);
 		}
 
-		private void HostSelectedBeatmap(ILevelGameplaySetupData gameplaySetupData)
+		//private void HostSelectedBeatmap(ILevelGameplaySetupData gameplaySetupData)
+		//{
+		//	UpdateDifficultyList(gameplaySetupData.beatmapKey);
+		//}
+
+		private void ClearLocalSelectedBeatmap()
 		{
-			UpdateDifficultyList(gameplaySetupData.beatmapKey);
+			segmentVert.gameObject.SetActive(false);
+			_currentBeatmapKey = new BeatmapKey();
+		}
+
+		private void UpdateButtonsEnabled()
+		{
+			if (_lobbyViewController._isPartyOwner)
+			{
+				perPlayerDiffsToggle.gameObject.SetActive(true);
+				perPlayerModifiersToggle.gameObject.SetActive(true);
+			}
+			else
+			{
+				perPlayerDiffsToggle.gameObject.SetActive(false);
+				perPlayerModifiersToggle.gameObject.SetActive(false);
+			}
+		}
+
+		private void UpdateButtonValues()
+		{
+			perPlayerDiffsToggle.Value = _perPlayerDiffs;
+			perPlayerModifiersToggle.Value = _perPlayerModifiers;
 		}
 
 
@@ -250,7 +360,6 @@ namespace MultiplayerCore.UI
 					PPDEnabled = _perPlayerDiffs,
 					PPMEnabled = _perPlayerModifiers
 				});
-				Plugin.Logger.Debug($"Sending MpPerPlayerPacket Packet with values: PPDEnabled='{_perPlayerDiffs}', PPMEnabled='{_perPlayerModifiers}'");
 				NotifyPropertyChanged();
 			}
 		}
@@ -267,10 +376,34 @@ namespace MultiplayerCore.UI
 					PPDEnabled = _perPlayerDiffs,
 					PPMEnabled = _perPlayerModifiers
 				});
-				Plugin.Logger.Debug($"Sending MpPerPlayerPacket Packet with values: PPDEnabled='{_perPlayerDiffs}', PPMEnabled='{_perPlayerModifiers}'");
 				NotifyPropertyChanged();
 			}
 		}
+
+		//[UIAction("per-player-modifiers-changed")]
+		//public void OnPerPlayerModifiersChanged(bool value)
+		//{
+		//	_perPlayerModifiers = value;
+		//	_multiplayerSessionManager.Send(new MpPerPlayerPacket
+		//	{
+		//		PPDEnabled = _perPlayerDiffs,
+		//		PPMEnabled = _perPlayerModifiers
+		//	});
+		//	Plugin.Logger.Debug($"Sending MpPerPlayerPacket Packet with values: PPDEnabled='{_perPlayerDiffs}', PPMEnabled='{_perPlayerModifiers}'");
+		//}
+
+		//[UIAction("per-player-diffs-changed")]
+		//public void OnPerPlayerDifficultyChanged(bool value)
+		//{
+		//	_perPlayerDiffs = value;
+		//	_multiplayerSessionManager.Send(new MpPerPlayerPacket
+		//	{
+		//		PPDEnabled = _perPlayerDiffs,
+		//		PPMEnabled = _perPlayerModifiers
+		//	});
+		//	Plugin.Logger.Debug($"Sending MpPerPlayerPacket Packet with values: PPDEnabled='{_perPlayerDiffs}', PPMEnabled='{_perPlayerModifiers}'");
+		//}
+
 
 		[UIAction("difficulty-selected")]
 		public void SetSelectedDifficulty(TextSegmentedControl _, int index)
