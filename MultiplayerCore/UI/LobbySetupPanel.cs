@@ -254,12 +254,14 @@ namespace MultiplayerCore.UI
 		private void SetLobbyState(MultiplayerLobbyState lobbyState)
 		{
 			Plugin.Logger.Debug($"Current Lobby State {lobbyState}");
-			enableUserInteractions = lobbyState == MultiplayerLobbyState.LobbySetup;
+			enableUserInteractions = lobbyState == MultiplayerLobbyState.LobbySetup ||
+			                         lobbyState == MultiplayerLobbyState.LobbyCountdown;
 
 			if (_difficultyCanvasGroup == null)
 				_difficultyCanvasGroup = difficulty?.gameObject.AddComponent<CanvasGroup>();
 			if (_difficultyCanvasGroup != null)
-				_difficultyCanvasGroup.alpha = lobbyState == MultiplayerLobbyState.LobbySetup ? 1f : 0.25f;
+				_difficultyCanvasGroup.alpha = (lobbyState == MultiplayerLobbyState.LobbySetup || 
+				                                lobbyState == MultiplayerLobbyState.LobbyCountdown) ? 1f : 0.25f;
 			//var canvasGroup = segmentVert.GetComponentInParent<CanvasGroup>();
 			//var ourCanvasGroup = GetComponent<CanvasGroup>();
 			//if (ourCanvasGroup != null)
@@ -315,6 +317,8 @@ namespace MultiplayerCore.UI
 			{
 				perPlayerDiffsToggle.gameObject.SetActive(true);
 				perPlayerModifiersToggle.gameObject.SetActive(true);
+				// Request updated button states from server
+				_multiplayerSessionManager.Send(new GetMpPerPlayerPacket());
 			}
 			else
 			{
