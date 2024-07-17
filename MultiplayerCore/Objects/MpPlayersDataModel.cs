@@ -95,7 +95,7 @@ namespace MultiplayerCore.Objects
             base.HandleMenuRpcManagerRecommendBeatmap(userId, beatmapKeySerializable);
         }
 
-        private void SendMpBeatmapPacket(BeatmapKey beatmapKey)
+        private async void SendMpBeatmapPacket(BeatmapKey beatmapKey)
         {
             var levelId = beatmapKey.levelId;
             _logger.Debug($"Sending beatmap packet for level {levelId}");
@@ -107,7 +107,7 @@ namespace MultiplayerCore.Objects
                 return;
             }
             
-            var levelData = _beatmapLevelProvider.GetBeatmapFromLocalBeatmaps(levelHash);
+            var levelData = await _beatmapLevelProvider.GetBeatmap(levelHash);
             if (levelData == null)
             {
                 _logger.Debug("Could not get level data for beatmap, returning!");
