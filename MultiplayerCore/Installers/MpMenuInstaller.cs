@@ -10,6 +10,7 @@ namespace MultiplayerCore.Installers
         {
             Container.BindInterfacesAndSelfTo<MpColorsUI>().AsSingle();
             Container.BindInterfacesAndSelfTo<MpRequirementsUI>().AsSingle();
+            Container.BindInterfacesAndSelfTo<MpPerPlayerUI>().AsSingle();
             Container.BindInterfacesAndSelfTo<MpLoadingIndicator>().AsSingle();
             Container.BindInterfacesAndSelfTo<GameServerPlayerTableCellPatcher>().AsSingle();
             Container.BindInterfacesAndSelfTo<BeatmapSelectionViewPatcher>().AsSingle();
@@ -18,14 +19,5 @@ namespace MultiplayerCore.Installers
             Container.Inject(Container.Resolve<NetworkPlayerEntitlementChecker>());
         }
 
-        public override void Start()
-        {
-	        Plugin.Logger?.Info("Installing Interface");
-
-	        LobbySetupViewController lobbySetupViewController = Container.Resolve<LobbySetupViewController>();
-	        Container.InstantiateComponent<LobbySetupPanel>(lobbySetupViewController.gameObject);
-
-	        Plugin.Logger?.Info("Installed Interface");
-		}
 	}
 }
