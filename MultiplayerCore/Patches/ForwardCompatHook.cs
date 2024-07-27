@@ -36,7 +36,7 @@ namespace MultiplayerCore.Patches
 		}
 
 		[HarmonyPostfix]
-		[HarmonyPatch(typeof(LevelCompletionResults), nameof(INetImmutableSerializable<LevelCompletionResults>.CreateFromSerializedData))]
+		[HarmonyPatch(typeof(LevelCompletionResults), nameof(LevelCompletionResults.CreateFromSerializedData))]
 		private static void LevelCompletionResultsCreateFromSerializedData(ref NetDataReader reader)
 		{
 			try
