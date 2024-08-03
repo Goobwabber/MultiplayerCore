@@ -96,12 +96,12 @@ namespace MultiplayerCore.UI
 			_lobbyViewController.didDeactivateEvent += DidDeactivate;
 
 			_packetSerializer.RegisterCallback<MpPerPlayerPacket>(HandleMpPerPlayerPacket);
-			_packetSerializer.RegisterType<GetMpPerPlayerPacket>();
+			_packetSerializer.RegisterCallback<GetMpPerPlayerPacket>(HandleGetMpPerPlayerPacket);
 
 			// We register the callbacks
 			_gameStateController.lobbyStateChangedEvent += SetLobbyState;
 			_gameServerLobbyFlowCoordinator._multiplayerLevelSelectionFlowCoordinator.didSelectLevelEvent += LocalSelectedBeatmap;
-			_gameServerLobbyFlowCoordinator._serverPlayerListViewController.selectSuggestedBeatmapEvent += UpdateDifficultyList;
+			_gameServerLobbyFlowCoordinator._serverPlayerListViewController.selectSuggestedBeatmapEvent += UpdateDifficultyListWithBeatmapKey;
 			_lobbyViewController.clearSuggestedBeatmapEvent += ClearLocalSelectedBeatmap;
 			_gameServerLobbyFlowCoordinator._lobbyPlayerPermissionsModel.permissionsChangedEvent += UpdateButtonsEnabled;
 		}
@@ -112,6 +112,7 @@ namespace MultiplayerCore.UI
 			_lobbyViewController.didDeactivateEvent -= DidDeactivate;
 
 			_packetSerializer.UnregisterCallback<MpPerPlayerPacket>();
+			_packetSerializer.UnregisterCallback<GetMpPerPlayerPacket>();
 		}
 
 		public void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -137,7 +138,7 @@ namespace MultiplayerCore.UI
 					lobbyPlayersDataModel?.GetOrCreateLobbyPlayerDataModel(lobbyPlayersDataModel.localUserId,
 						out _);
 				if (playerData != null)
-					UpdateDifficultyList(playerData.beatmapKey);
+					UpdateDifficultyListWithBeatmapKey(playerData.beatmapKey);
 
 				if (addedToHierarchy)
 				{
@@ -177,7 +178,7 @@ namespace MultiplayerCore.UI
 			return difficulty == BeatmapDifficulty.ExpertPlus ? "Expert+" : difficulty.ToString();
 		}
 
-		private void UpdateDifficultyList(BeatmapKey beatmapKey)
+		private void UpdateDifficultyListWithBeatmapKey(BeatmapKey beatmapKey)
 		{
 			_currentBeatmapKey = beatmapKey;
 			if (!_currentBeatmapKey.IsValid())
@@ -200,6 +201,7 @@ namespace MultiplayerCore.UI
 						UpdateDifficultyList(level.Requirements[beatmapKey.beatmapCharacteristic.serializedName].Keys
 							.ToList());
 					}
+					else _logger.Error($"Failed to get level for hash {levelHash}");
 				});
 			}
 			else
@@ -234,7 +236,7 @@ namespace MultiplayerCore.UI
 				}
 				else
 				{
-					_logger.Debug("Only 1 Difficulty available disabling selector");
+					_logger.Debug("Less than 2 Difficulties available disabling selector");
 					segmentVert?.gameObject.SetActive(false);
 				}
 			}
@@ -245,12 +247,27 @@ namespace MultiplayerCore.UI
 		#region Callbacks
 		private void HandleMpPerPlayerPacket(MpPerPlayerPacket packet, IConnectedPlayer player)
 		{
-			_logger.Debug($"Got MpPerPlayerPacket from {player.userName}|{player.userId} with values PPDEnabled={packet.PPDEnabled}, PPMEnabled={packet.PPMEnabled}");
-			if (packet.PPDEnabled != PerPlayerDifficulty || packet.PPMEnabled != PerPlayerModifiers)
+			_logger.Debug($"Received MpPerPlayerPacket from {player.userName}|{player.userId} with values PPDEnabled={packet.PPDEnabled}, PPMEnabled={packet.PPMEnabled}");
+			if ((packet.PPDEnabled != PerPlayerDifficulty || packet.PPMEnabled != PerPlayerModifiers) && 
+			    ppdt != null && ppmt != null && player.isConnectionOwner)
 			{
 				ppdt.Value = packet.PPDEnabled;
 				ppmt.Value = packet.PPMEnabled;
 			}
+			else if (!player.isConnectionOwner)
+			{
+				_logger.Warn("Player is not Connection Owner, ignoring packet");
+			}
+		}
+
+		private void HandleGetMpPerPlayerPacket(GetMpPerPlayerPacket packet, IConnectedPlayer player)
+		{
+			_logger.Debug($"Received GetMpPerPlayerPacket from {player.userName}|{player.userId}");
+			// Send MpPerPlayerPacket
+			var ppPacket = new MpPerPlayerPacket();
+			ppPacket.PPDEnabled = ppdt.Value;
+			ppPacket.PPMEnabled = ppmt.Value;
+			_multiplayerSessionManager.Send(ppPacket);
 		}
 
 		private void UpdateButtonsEnabled()
@@ -312,7 +329,7 @@ namespace MultiplayerCore.UI
 		#endregion
 		#region UIValues
 
-		[UIValue("per-player-diffs")]
+		[UIValue("PerPlayerDifficulty")]
 		public bool PerPlayerDifficulty
 		{
 			get => ppdt.Value;
@@ -327,7 +344,7 @@ namespace MultiplayerCore.UI
 			}
 		}
 
-		[UIValue("per-player-modifiers")]
+		[UIValue("PerPlayerModifiers")]
 		public bool PerPlayerModifiers
 		{
 			get => ppmt.Value;
@@ -342,7 +359,7 @@ namespace MultiplayerCore.UI
 			}
 		}
 
-		[UIAction("difficulty-selected")]
+		[UIAction("SetSelectedDifficulty")]
 		public void SetSelectedDifficulty(TextSegmentedControl _, int index)
 		{
 			var diff = _allowedDiffs[index];

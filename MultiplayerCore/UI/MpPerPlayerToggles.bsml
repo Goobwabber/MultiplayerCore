@@ -5,7 +5,7 @@
   </vertical>-->
   <vertical min-width='45' horizontal-fit='MinSize'> </vertical>
   <vertical min-width='45' horizontal-fit='MinSize'>
-    <toggle-setting id='ppdt' value='per-player-diffs' apply-on-change='true' text='Per Player Difficulty' hover-hint='Allows each player to select their own difficulty!' bind-value='true'/>
-    <toggle-setting id='ppmt' value='per-player-modifiers' apply-on-change='true' text='Per Player Modifiers' hover-hint="Allows each player to select their own modifiers!" bind-value='true'/>
+    <toggle-setting id='ppdt' value='PerPlayerDifficulty' apply-on-change='true' text='Per Player Difficulty' hover-hint='Allows each player to select their own difficulty!' bind-value='true'/>
+    <toggle-setting id='ppmt' value='PerPlayerModifiers' apply-on-change='true' text='Per Player Modifiers' hover-hint="Allows each player to select their own modifiers!" bind-value='true'/>
   </vertical>
 </horizontal>
