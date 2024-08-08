@@ -60,6 +60,9 @@ namespace MultiplayerCore.UI
 		[UIComponent("segmentVert")]
 		private VerticalLayoutGroup? segmentVert;
 
+		[UIComponent("ppth")]
+		private HorizontalLayoutGroup? ppth;
+
 		[UIComponent("difficultyControl")]
 
 		private TextSegmentedControl? difficultyControl;
@@ -83,10 +86,10 @@ namespace MultiplayerCore.UI
 			// PerPlayerToggle
 			BSMLParser.instance.Parse(
 				BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(),
-					PerPlayerTogglesResourcePath), _lobbyViewController._startGameReadyButton.gameObject, this);
+					PerPlayerTogglesResourcePath), _lobbyViewController.gameObject, this);
 
 			// Check UI Elements
-			if (difficultyControl == null || ppmt == null || ppdt == null || segmentVert == null || _difficultyCanvasGroup == null)
+			if (difficultyControl == null || ppmt == null || ppdt == null || segmentVert == null || _difficultyCanvasGroup == null || ppth == null)
 			{
 				_logger.Critical("Error could not initialize UI");
 				return;
@@ -143,25 +146,22 @@ namespace MultiplayerCore.UI
 				if (addedToHierarchy)
 				{
 					// Reset our buttons
-					ppdt.Value = false;
-					ppmt.Value = false;
+					ppdt!.Value = false;
+					ppmt!.Value = false;
 
 					// Request Updated state
 					_multiplayerSessionManager.Send(new GetMpPerPlayerPacket());
 				}
 			}
 
+			ppdt!.interactable = _lobbyViewController._isPartyOwner;
+			ppdt!.text.alpha = _lobbyViewController._isPartyOwner ? 1f : 0.25f;
+			ppmt!.interactable = _lobbyViewController._isPartyOwner;
+			ppmt!.text.alpha = _lobbyViewController._isPartyOwner ? 1f : 0.25f;
 
-			if (_lobbyViewController._isPartyOwner)
-			{
-				ppdt?.gameObject.SetActive(true);
-				ppmt?.gameObject.SetActive(true);
-			}
-			else
-			{
-				ppdt?.gameObject.SetActive(false);
-				ppmt?.gameObject.SetActive(false);
-			}
+			// Move toggles to correct position
+			var locposition = _lobbyViewController._startGameReadyButton.gameObject.transform.localPosition;
+			ppth!.gameObject.transform.localPosition = locposition;
 		}
 
 		public void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -198,8 +198,19 @@ namespace MultiplayerCore.UI
 						var level = levelTask.Result;
 						_logger.Debug($"Got level {level.LevelHash}, {level.Requirements}, {level.Requirements[beatmapKey.beatmapCharacteristic.serializedName]}");
 						// Hacky we use requirements to get the available difficulties
-						UpdateDifficultyList(level.Requirements[beatmapKey.beatmapCharacteristic.serializedName].Keys
-							.ToList());
+						if (level.Requirements[beatmapKey.beatmapCharacteristic.serializedName].Count > 0)
+							UpdateDifficultyList(level.Requirements[beatmapKey.beatmapCharacteristic.serializedName].Keys
+								.ToList());
+						else
+						{
+							_logger.Debug(
+								$"Level {levelHash} has empty requirements, this should not happen, falling back to packet");
+							level = _beatmapLevelProvider.TryGetBeatmapFromPacketHash(levelHash);
+							if (level.Requirements[beatmapKey.beatmapCharacteristic.serializedName].Count > 0)
+								UpdateDifficultyList(level.Requirements[beatmapKey.beatmapCharacteristic.serializedName].Keys
+									.ToList());
+							else _logger.Debug($"Level packet {levelHash} also has empty requirements, this should not happen...");
+						}
 					}
 					else _logger.Error($"Failed to get level for hash {levelHash}");
 				});
@@ -265,52 +276,47 @@ namespace MultiplayerCore.UI
 			_logger.Debug($"Received GetMpPerPlayerPacket from {player.userName}|{player.userId}");
 			// Send MpPerPlayerPacket
 			var ppPacket = new MpPerPlayerPacket();
-			ppPacket.PPDEnabled = ppdt.Value;
-			ppPacket.PPMEnabled = ppmt.Value;
+			ppPacket.PPDEnabled = ppdt!.Value;
+			ppPacket.PPMEnabled = ppmt!.Value;
 			_multiplayerSessionManager.Send(ppPacket);
 		}
 
 		private void UpdateButtonsEnabled()
 		{
-			if (_lobbyViewController._isPartyOwner)
-			{
-				ppdt?.gameObject.SetActive(true);
-				ppmt?.gameObject.SetActive(true);
+			ppdt!.interactable = _lobbyViewController._isPartyOwner;
+			ppdt!.text.alpha = _lobbyViewController._isPartyOwner ? 1f : 0.25f;
+			ppmt!.interactable = _lobbyViewController._isPartyOwner;
+			ppmt!.text.alpha = _lobbyViewController._isPartyOwner ? 1f : 0.25f;
 
-				// Request updated button states from server
-				_multiplayerSessionManager.Send(new GetMpPerPlayerPacket());
-			}
-			else
-			{
-				ppdt?.gameObject.SetActive(false);
-				ppmt?.gameObject.SetActive(false);
-			}
+			// Request updated button states from server
+			_multiplayerSessionManager.Send(new GetMpPerPlayerPacket());
 		}
 
 		private void SetLobbyState(MultiplayerLobbyState lobbyState)
 		{
 			_logger.Debug($"Current Lobby State {lobbyState}");
-			if (_difficultyCanvasGroup != null)
-				_difficultyCanvasGroup.alpha = (lobbyState == MultiplayerLobbyState.LobbySetup ||
-												lobbyState == MultiplayerLobbyState.LobbyCountdown) ? 1f : 0.25f;
 
-			foreach (var cell in difficultyControl.cells)
+			_difficultyCanvasGroup!.alpha = (lobbyState == MultiplayerLobbyState.LobbySetup ||
+											lobbyState == MultiplayerLobbyState.LobbyCountdown) ? 1f : 0.25f;
+
+			foreach (var cell in difficultyControl!.cells)
 			{
 				cell.interactable = lobbyState == MultiplayerLobbyState.LobbySetup ||
 				                    lobbyState == MultiplayerLobbyState.LobbyCountdown;
 			}
 
-			if (_lobbyViewController == null)
-				return;
-
-			var raycaster = difficultyControl?.GetComponent<BaseRaycaster>();
-
 			if (_lobbyViewController._isPartyOwner)
 			{
-				ppdt.interactable = lobbyState == MultiplayerLobbyState.LobbySetup ||
-				                                     lobbyState == MultiplayerLobbyState.LobbyCountdown;
-				ppmt.interactable = lobbyState == MultiplayerLobbyState.LobbySetup || 
-				                                         lobbyState == MultiplayerLobbyState.LobbyCountdown;
+				ppdt!.interactable = lobbyState == MultiplayerLobbyState.LobbySetup ||
+				                              lobbyState == MultiplayerLobbyState.LobbyCountdown;
+				ppmt!.interactable = lobbyState == MultiplayerLobbyState.LobbySetup || 
+				                              lobbyState == MultiplayerLobbyState.LobbyCountdown;
+
+				ppdt!.text.alpha = (lobbyState == MultiplayerLobbyState.LobbySetup ||
+				                    lobbyState == MultiplayerLobbyState.LobbyCountdown) ? 1f : 0.25f;
+
+				ppmt!.text.alpha = (lobbyState == MultiplayerLobbyState.LobbySetup ||
+				                   lobbyState == MultiplayerLobbyState.LobbyCountdown) ? 1f : 0.25f;
 			}
 		}
 
