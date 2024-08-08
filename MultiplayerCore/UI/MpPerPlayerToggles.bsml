@@ -1,9 +1,8 @@
 <!--<horizontal min-height='25' pad-top='5'>-->
-<horizontal>
+<horizontal id="ppth">
   
-  <!--<vertical min-width='45' horizontal-fit='MinSize'>
-  </vertical>-->
-  <vertical min-width='45' horizontal-fit='MinSize'> </vertical>
+  <vertical min-width='45' horizontal-fit='MinSize'></vertical>
+  <vertical min-width='45' horizontal-fit='MinSize'></vertical>
   <vertical min-width='45' horizontal-fit='MinSize'>
     <toggle-setting id='ppdt' value='PerPlayerDifficulty' apply-on-change='true' text='Per Player Difficulty' hover-hint='Allows each player to select their own difficulty!' bind-value='true'/>
     <toggle-setting id='ppmt' value='PerPlayerModifiers' apply-on-change='true' text='Per Player Modifiers' hover-hint="Allows each player to select their own modifiers!" bind-value='true'/>
