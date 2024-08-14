@@ -77,5 +77,16 @@ namespace MultiplayerCore.Beatmaps.Providers
             _hashToNetworkMaps.Add(packet.levelHash, map);
             return map;
         }
-    }
+
+        /// <summary>
+        /// Gets an <see cref="MpBeatmap"/> from the information in the provided packet.
+        /// </summary>
+        /// <param name="hash">The hash of the packet we want</param>
+        /// <returns>An <see cref="MpBeatmap"/> with a cover from BeatSaver.</returns>
+        public MpBeatmap? TryGetBeatmapFromPacketHash(string hash)
+        {
+	        if (_hashToNetworkMaps.TryGetValue(hash, out var map)) return map;
+	        return null;
+        }
+	}
 }
