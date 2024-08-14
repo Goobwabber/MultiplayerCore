@@ -283,10 +283,11 @@ namespace MultiplayerCore.UI
 
 		private void UpdateButtonsEnabled()
 		{
-			ppdt!.interactable = _lobbyViewController._isPartyOwner;
-			ppdt!.text.alpha = _lobbyViewController._isPartyOwner ? 1f : 0.25f;
-			ppmt!.interactable = _lobbyViewController._isPartyOwner;
-			ppmt!.text.alpha = _lobbyViewController._isPartyOwner ? 1f : 0.25f;
+			bool isPartyOwner = _gameServerLobbyFlowCoordinator._lobbyPlayerPermissionsModel.isPartyOwner;
+			ppdt!.interactable = isPartyOwner;
+			ppdt!.text.alpha = isPartyOwner ? 1f : 0.25f;
+			ppmt!.interactable = isPartyOwner;
+			ppmt!.text.alpha = isPartyOwner ? 1f : 0.25f;
 
 			// Request updated button states from server
 			_multiplayerSessionManager.Send(new GetMpPerPlayerPacket());
