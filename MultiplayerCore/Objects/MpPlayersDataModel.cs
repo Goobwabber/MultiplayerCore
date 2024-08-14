@@ -37,6 +37,7 @@ namespace MultiplayerCore.Objects
             _menuRpcManager.getRecommendedBeatmapEvent += this.HandleMenuRpcManagerGetRecommendedBeatmap;
             _menuRpcManager.recommendBeatmapEvent -= base.HandleMenuRpcManagerRecommendBeatmap;
             _menuRpcManager.recommendBeatmapEvent += this.HandleMenuRpcManagerRecommendBeatmap;
+            _multiplayerSessionManager.playerConnectedEvent += HandlePlayerConnected;
         }
 
         public new void Deactivate()
@@ -46,13 +47,20 @@ namespace MultiplayerCore.Objects
             _menuRpcManager.getRecommendedBeatmapEvent += base.HandleMenuRpcManagerGetRecommendedBeatmap;
             _menuRpcManager.recommendBeatmapEvent -= this.HandleMenuRpcManagerRecommendBeatmap;
             _menuRpcManager.recommendBeatmapEvent += base.HandleMenuRpcManagerRecommendBeatmap;
-            base.Deactivate();
+            _multiplayerSessionManager.playerConnectedEvent -= HandlePlayerConnected;
+			base.Deactivate();
         }
 
         public new void Dispose()
             => Deactivate();
 
-        internal void SetLocalPlayerBeatmapLevel_override(in BeatmapKey beatmapKey)
+        internal void HandlePlayerConnected(IConnectedPlayer connectedPlayer)
+        {
+            // Send our MpBeatmapPacket again so they have it
+	        var selectedBeatmapKey = _playersData[localUserId].beatmapKey;
+	        SendMpBeatmapPacket(selectedBeatmapKey);
+		}
+		internal void SetLocalPlayerBeatmapLevel_override(in BeatmapKey beatmapKey)
         {
             // Game: The local player has selected / recommended a beatmap
 
