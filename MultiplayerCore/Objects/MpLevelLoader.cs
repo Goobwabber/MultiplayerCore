@@ -37,7 +37,7 @@ namespace MultiplayerCore.Objects
         [UsedImplicitly]
         public void LoadLevel_override(string levelId)
         {
-            var levelHash = Utilities.HashForLevelID(levelId);
+			var levelHash = Utilities.HashForLevelID(levelId);
             
             if (levelHash == null)
             {
@@ -120,7 +120,7 @@ namespace MultiplayerCore.Objects
 			{
 				if (method.GetParameters().Length > 2)
 					loadResult = await (Task<LoadBeatmapLevelDataResult>)method.Invoke(_beatmapLevelsModel,
-						new object[] { levelId, BeatmapLevelDataVersion.Original, cancellationToken });
+						new object[] { levelId, 0, cancellationToken });
                 else if (method.GetParameters().Length == 2)
 	                loadResult = await (Task<LoadBeatmapLevelDataResult>)method.Invoke(_beatmapLevelsModel,
 		                new object[] { levelId, cancellationToken });
