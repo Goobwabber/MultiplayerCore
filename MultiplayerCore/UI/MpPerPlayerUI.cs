@@ -96,7 +96,7 @@ namespace MultiplayerCore.UI
 			}
 
 			_lobbyViewController.didActivateEvent += DidActivate;
-			_lobbyViewController.didDeactivateEvent += DidDeactivate;
+			//_lobbyViewController.didDeactivateEvent += DidDeactivate;
 
 			_packetSerializer.RegisterCallback<MpPerPlayerPacket>(HandleMpPerPlayerPacket);
 			_packetSerializer.RegisterCallback<GetMpPerPlayerPacket>(HandleGetMpPerPlayerPacket);
@@ -112,7 +112,7 @@ namespace MultiplayerCore.UI
 		public void Dispose()
 		{
 			_lobbyViewController.didActivateEvent -= DidActivate;
-			_lobbyViewController.didDeactivateEvent -= DidDeactivate;
+			//_lobbyViewController.didDeactivateEvent -= DidDeactivate;
 
 			_packetSerializer.UnregisterCallback<MpPerPlayerPacket>();
 			_packetSerializer.UnregisterCallback<GetMpPerPlayerPacket>();
@@ -164,15 +164,16 @@ namespace MultiplayerCore.UI
 			ppth!.gameObject.transform.localPosition = locposition;
 		}
 
-		public void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
-		{
-			if (removedFromHierarchy)
-			{
+		//public void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+		//{
+		//	if (removedFromHierarchy)
+		//	{
 
-			}
-		}
+		//	}
+		//}
 
 		#region DiffListUpdater
+		// TODO: Possibly replace with BeatmapDifficultyMethods.Name ext method see BeatmapDifficultySegmentedControlController
 		public string DiffToStr(BeatmapDifficulty difficulty)
 		{
 			return difficulty == BeatmapDifficulty.ExpertPlus ? "Expert+" : difficulty.ToString();
@@ -288,6 +289,10 @@ namespace MultiplayerCore.UI
 			ppdt!.text.alpha = isPartyOwner ? 1f : 0.25f;
 			ppmt!.interactable = isPartyOwner;
 			ppmt!.text.alpha = isPartyOwner ? 1f : 0.25f;
+
+			// Move toggles to correct position
+			var locposition = _lobbyViewController._startGameReadyButton.gameObject.transform.localPosition;
+			ppth!.gameObject.transform.localPosition = locposition;
 
 			// Request updated button states from server
 			_multiplayerSessionManager.Send(new GetMpPerPlayerPacket());
