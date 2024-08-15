@@ -1,22 +1,25 @@
 ﻿using SiraUtil.Affinity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Collections;
 using System.Threading.Tasks;
-using MultiplayerCore.UI;
 using MultiplayerCore.Objects;
-using Zenject;
-using System.Diagnostics.Eventing.Reader;
 using BGLib.Polyglot;
+using MultiplayerCore.Beatmaps.Abstractions;
+using MultiplayerCore.Beatmaps.Providers;
 
 namespace MultiplayerCore.Patchers
 {
     internal class GameServerPlayerTableCellPatcher : IAffinity
     {
-        private MpPlayersDataModel _mpPlayersDataModel;
+        private MpPlayersDataModel? _mpPlayersDataModel;
+        private MpBeatmapLevelProvider _mpBeatmapLevelProvider;
+        private ICoroutineStarter _sharedCoroutineStarter;
 
-        GameServerPlayerTableCellPatcher(ILobbyPlayersDataModel playersDataModel) => _mpPlayersDataModel = playersDataModel as MpPlayersDataModel;
+        GameServerPlayerTableCellPatcher(ILobbyPlayersDataModel playersDataModel, MpBeatmapLevelProvider mpBeatmapLevelProvider, ICoroutineStarter sharedCoroutineStarter)
+        {
+			_mpPlayersDataModel = playersDataModel as MpPlayersDataModel;
+			_mpBeatmapLevelProvider = mpBeatmapLevelProvider;
+			_sharedCoroutineStarter = sharedCoroutineStarter;
+        }
 
         [AffinityPrefix]
         [AffinityPatch(typeof(GameServerPlayerTableCell), nameof(GameServerPlayerTableCell.SetData))]
@@ -38,58 +41,78 @@ namespace MultiplayerCore.Patchers
                 else statusView.sprite = __instance._spectatingIcon;
             }
 
-            var key = playerData.beatmapKey;
-            bool validKey = key.IsValid();
-            bool displayLevelText = validKey;
-            if (validKey)
-            {
-                var level = __instance._beatmapLevelsModel.GetBeatmapLevel(key.levelId);
-                var levelHash = Utilities.HashForLevelID(key.levelId);
-                __instance._suggestedLevelText.text = level?.songName;
-                displayLevelText = level != null;
+			var key = playerData.beatmapKey;
+			//if (!key.IsValid()) return true;
+			_sharedCoroutineStarter.StartCoroutine(SetDataCoroutine(__instance, connectedPlayer, playerData, key, hasKickPermissions,
+				allowSelection, getLevelEntitlementTask));
+			return false;
+		}
+		IEnumerator SetDataCoroutine(GameServerPlayerTableCell instance, IConnectedPlayer connectedPlayer, ILobbyPlayerData playerData, BeatmapKey key, bool hasKickPermissions, bool allowSelection, Task<EntitlementStatus>? getLevelEntitlementTask)
+        {
+			Plugin.Logger.Debug($"Start SetDataCoroutine with key {key.levelId} diff {key.difficulty.Name()}");
+	        bool displayLevelText = key.IsValid();
+			if (displayLevelText)
+			{
+				Plugin.Logger.Debug("displayLevelText if check start");
+				var level = instance._beatmapLevelsModel.GetBeatmapLevel(key.levelId);
+				var levelHash = Utilities.HashForLevelID(key.levelId);
+				instance._suggestedLevelText.text = level?.songName;
+				displayLevelText = level != null;
 
-                if (level == null && _mpPlayersDataModel != null && !string.IsNullOrEmpty(levelHash)) // we didn't have the level, but we can attempt to get the packet
-                {
-                    var packet = _mpPlayersDataModel.FindLevelPacket(levelHash);
-                    __instance._suggestedLevelText.text = packet?.songName;
-                    displayLevelText = packet != null;
-                }
+				if (level == null && _mpPlayersDataModel != null && !string.IsNullOrEmpty(levelHash)) // we didn't have the level, but we can attempt to get the packet
+				{
+					Plugin.Logger.Debug("FindLevelPacket running");
+					var packet = _mpPlayersDataModel.FindLevelPacket(levelHash);
+					instance._suggestedLevelText.text = packet?.songName;
 
-                __instance._suggestedCharacteristicIcon.sprite = key.beatmapCharacteristic.icon;
-                __instance._suggestedDifficultyText.text = key.difficulty.ShortName();
-            }
-            SetLevelFoundValues(__instance, displayLevelText);
-            bool anyModifiers = !(playerData?.gameplayModifiers?.IsWithoutModifiers() ?? true);
-            __instance._suggestedModifiersList.gameObject.SetActive(anyModifiers);
-            __instance._emptySuggestedModifiersText.gameObject.SetActive(!anyModifiers);
+					Task<MpBeatmap?>? mpLevelTask = null;
+					if (packet == null)
+					{
+						Plugin.Logger.Debug("Could not find packet, trying beatsaver");
+						mpLevelTask = _mpBeatmapLevelProvider.GetBeatmap(levelHash);
+						yield return IPA.Utilities.Async.Coroutines.WaitForTask(mpLevelTask);
+						Plugin.Logger.Debug($"Task finished SongName={mpLevelTask.Result?.SongName}");
+						instance._suggestedLevelText.text = mpLevelTask.Result?.SongName;
+					}
 
-            if (anyModifiers)
-            {
-                var modifiers = __instance._gameplayModifiers.CreateModifierParamsList(playerData.gameplayModifiers);
-                __instance._emptySuggestedModifiersText.gameObject.SetActive(modifiers.Count == 0);
-                if (modifiers.Count > 0)
-                {
-                    __instance._suggestedModifiersList.SetData(modifiers.Count, (int id, GameplayModifierInfoListItem listItem) => listItem.SetModifier(modifiers[id], false));
-                }
-            }
+					displayLevelText = packet != null || mpLevelTask?.Result != null;
+					Plugin.Logger.Debug($"Will display level text? {displayLevelText}");
+				}
 
-            __instance._useModifiersButton.interactable = !connectedPlayer.isMe && anyModifiers && allowSelection;
-            __instance._kickPlayerButton.interactable = !connectedPlayer.isMe && hasKickPermissions && allowSelection;
-            __instance._mutePlayerButton.gameObject.SetActive(false);
-            if (getLevelEntitlementTask != null && !connectedPlayer.isMe)
-            {
-                __instance._useBeatmapButtonHoverHint.text = Localization.Get("LABEL_CANT_START_GAME_DO_NOT_OWN_SONG");
-                __instance.SetBeatmapUseButtonEnabledAsync(getLevelEntitlementTask);
-                return false;
-            }
+				instance._suggestedCharacteristicIcon.sprite = key.beatmapCharacteristic.icon;
+				instance._suggestedDifficultyText.text = key.difficulty.ShortName();
+			} else Plugin.Logger.Debug("Player key was invalid");
+			SetLevelFoundValues(instance, displayLevelText);
+			bool anyModifiers = !(playerData?.gameplayModifiers?.IsWithoutModifiers() ?? true);
+			instance._suggestedModifiersList.gameObject.SetActive(anyModifiers);
+			instance._emptySuggestedModifiersText.gameObject.SetActive(!anyModifiers);
 
-            __instance._useBeatmapButton.interactable = false;
-            __instance._useBeatmapButtonHoverHint.enabled = false;
+			if (anyModifiers)
+			{
+				var modifiers = instance._gameplayModifiers.CreateModifierParamsList(playerData.gameplayModifiers);
+				instance._emptySuggestedModifiersText.gameObject.SetActive(modifiers.Count == 0);
+				if (modifiers.Count > 0)
+				{
+					instance._suggestedModifiersList.SetData(modifiers.Count, (int id, GameplayModifierInfoListItem listItem) => listItem.SetModifier(modifiers[id], false));
+				}
+			}
 
-            return false;
-        }
+			instance._useModifiersButton.interactable = !connectedPlayer.isMe && anyModifiers && allowSelection;
+			instance._kickPlayerButton.interactable = !connectedPlayer.isMe && hasKickPermissions && allowSelection;
+			instance._mutePlayerButton.gameObject.SetActive(false);
+			if (getLevelEntitlementTask != null && !connectedPlayer.isMe)
+			{
+				instance._useBeatmapButtonHoverHint.text = Localization.Get("LABEL_CANT_START_GAME_DO_NOT_OWN_SONG");
+				instance.SetBeatmapUseButtonEnabledAsync(getLevelEntitlementTask);
+				yield break;
+			}
 
-        void SetLevelFoundValues(GameServerPlayerTableCell __instance, bool displayLevelText)
+			instance._useBeatmapButton.interactable = false;
+			instance._useBeatmapButtonHoverHint.enabled = false;
+
+		}
+
+		void SetLevelFoundValues(GameServerPlayerTableCell __instance, bool displayLevelText)
         {
             __instance._suggestedLevelText.gameObject.SetActive(displayLevelText);
             __instance._suggestedCharacteristicIcon.gameObject.SetActive(displayLevelText);

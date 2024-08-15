@@ -56,7 +56,7 @@ namespace MultiplayerCore.Objects
 
         internal void HandlePlayerConnected(IConnectedPlayer connectedPlayer)
         {
-            // Send our MpBeatmapPacket again so they have it
+            // Send our MpBeatmapPacket again so newly joined players have it
 	        var selectedBeatmapKey = _playersData[localUserId].beatmapKey;
 	        SendMpBeatmapPacket(selectedBeatmapKey);
 		}
@@ -96,8 +96,9 @@ namespace MultiplayerCore.Objects
         private new void HandleMenuRpcManagerRecommendBeatmap(string userId, BeatmapKeyNetSerializable beatmapKeySerializable)
         {
             // RPC: Another player has recommended a beatmap (base game)
-            
-            if (!string.IsNullOrEmpty(Utilities.HashForLevelID(beatmapKeySerializable.levelID)))
+
+            var levelHash = Utilities.HashForLevelID(beatmapKeySerializable.levelID);
+			if (!string.IsNullOrEmpty(levelHash) && _beatmapLevelProvider.TryGetBeatmapFromPacketHash(levelHash!) != null) // If we have no packet run basegame behaviour
                 return;
             
             base.HandleMenuRpcManagerRecommendBeatmap(userId, beatmapKeySerializable);
