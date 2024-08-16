@@ -41,19 +41,17 @@ namespace MultiplayerCore.Patchers
                 else statusView.sprite = __instance._spectatingIcon;
             }
 
-			var key = playerData.beatmapKey;
-			//if (!key.IsValid()) return true;
-			_sharedCoroutineStarter.StartCoroutine(SetDataCoroutine(__instance, connectedPlayer, playerData, key, hasKickPermissions,
+			_sharedCoroutineStarter.StartCoroutine(SetDataCoroutine(__instance, connectedPlayer, playerData, hasKickPermissions,
 				allowSelection, getLevelEntitlementTask));
 			return false;
 		}
-		IEnumerator SetDataCoroutine(GameServerPlayerTableCell instance, IConnectedPlayer connectedPlayer, ILobbyPlayerData playerData, BeatmapKey key, bool hasKickPermissions, bool allowSelection, Task<EntitlementStatus>? getLevelEntitlementTask)
+		IEnumerator SetDataCoroutine(GameServerPlayerTableCell instance, IConnectedPlayer connectedPlayer, ILobbyPlayerData playerData, bool hasKickPermissions, bool allowSelection, Task<EntitlementStatus>? getLevelEntitlementTask)
         {
+	        var key = playerData.beatmapKey;
 			Plugin.Logger.Debug($"Start SetDataCoroutine with key {key.levelId} diff {key.difficulty.Name()}");
 	        bool displayLevelText = key.IsValid();
 			if (displayLevelText)
 			{
-				Plugin.Logger.Debug("displayLevelText if check start");
 				var level = instance._beatmapLevelsModel.GetBeatmapLevel(key.levelId);
 				var levelHash = Utilities.HashForLevelID(key.levelId);
 				instance._suggestedLevelText.text = level?.songName;
@@ -61,7 +59,6 @@ namespace MultiplayerCore.Patchers
 
 				if (level == null && _mpPlayersDataModel != null && !string.IsNullOrEmpty(levelHash)) // we didn't have the level, but we can attempt to get the packet
 				{
-					Plugin.Logger.Debug("FindLevelPacket running");
 					var packet = _mpPlayersDataModel.FindLevelPacket(levelHash);
 					instance._suggestedLevelText.text = packet?.songName;
 
@@ -69,7 +66,7 @@ namespace MultiplayerCore.Patchers
 					if (packet == null)
 					{
 						Plugin.Logger.Debug("Could not find packet, trying beatsaver");
-						mpLevelTask = _mpBeatmapLevelProvider.GetBeatmap(levelHash);
+						mpLevelTask = _mpBeatmapLevelProvider.GetBeatmapFromBeatSaver(levelHash);
 						yield return IPA.Utilities.Async.Coroutines.WaitForTask(mpLevelTask);
 						Plugin.Logger.Debug($"Task finished SongName={mpLevelTask.Result?.SongName}");
 						instance._suggestedLevelText.text = mpLevelTask.Result?.SongName;
@@ -81,7 +78,7 @@ namespace MultiplayerCore.Patchers
 
 				instance._suggestedCharacteristicIcon.sprite = key.beatmapCharacteristic.icon;
 				instance._suggestedDifficultyText.text = key.difficulty.ShortName();
-			} else Plugin.Logger.Debug("Player key was invalid");
+			} else Plugin.Logger.Debug("Player key was not valid, disabling");
 			SetLevelFoundValues(instance, displayLevelText);
 			bool anyModifiers = !(playerData?.gameplayModifiers?.IsWithoutModifiers() ?? true);
 			instance._suggestedModifiersList.gameObject.SetActive(anyModifiers);
