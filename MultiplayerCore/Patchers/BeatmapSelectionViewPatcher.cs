@@ -7,9 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Threading.Tasks;
 using MultiplayerCore.Beatmaps.Packets;
-using UnityEngine;
 
 namespace MultiplayerCore.Patchers
 {
@@ -84,7 +82,7 @@ namespace MultiplayerCore.Patchers
 	        else
 	        {
 		        var levelTask = _mpBeatmapLevelProvider.GetBeatmap(levelHash!);
-		        yield return new WaitUntil(() => levelTask.IsCompleted);
+		        yield return IPA.Utilities.Async.Coroutines.WaitForTask(levelTask);
 
 				level = levelTask.Result?.MakeBeatmapLevel(key,
 			        _mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(levelHash!));
