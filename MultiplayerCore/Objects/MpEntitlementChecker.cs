@@ -11,7 +11,7 @@ using IPALogger = IPA.Logging.Logger;
 
 namespace MultiplayerCore.Objects
 {
-    internal class MpEntitlementChecker : NetworkPlayerEntitlementChecker
+    public class MpEntitlementChecker : NetworkPlayerEntitlementChecker
     {
         public event Action<string, string, EntitlementsStatus>? receivedEntitlementEvent;
 
