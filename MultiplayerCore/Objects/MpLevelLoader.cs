@@ -104,7 +104,12 @@ namespace MultiplayerCore.Objects
             // Download from BeatSaver
             var success = await _levelDownloader.TryDownloadLevel(levelId, cancellationToken, this);
             if (!success)
-                throw new Exception($"Failed to download level: {levelId}");
+            {
+                // If the download fails we go into spectator
+                _rpcManager.SetIsEntitledToLevel(levelId, EntitlementsStatus.NotOwned);
+                _beatmapLevelData = null;
+                return LoadBeatmapLevelDataResult.Error;
+            }
 
             // Reload custom level set
             _logger.Debug("Reloading custom level collection...");
@@ -127,7 +132,7 @@ namespace MultiplayerCore.Objects
                 else throw new NotSupportedException("Game version not supported");
 			}
             //var loadResult = await _beatmapLevelsModel.LoadBeatmapLevelDataAsync(levelId, BeatmapLevelDataVersion.Original, cancellationToken);
-            if (loadResult.isError)
+            if (loadResult.isError) 
 				_logger.Error($"Custom level data could not be loaded after download: {levelId}");
 			return loadResult;
 		}
