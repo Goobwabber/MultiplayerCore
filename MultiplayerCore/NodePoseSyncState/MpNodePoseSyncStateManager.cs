@@ -8,8 +8,8 @@ namespace MultiplayerCore.NodePoseSyncState
 {
     internal class MpNodePoseSyncStateManager : IInitializable, IDisposable, IAffinity
     {
-        public float? DeltaUpdateFrequency { get; private set; } = null;
-        public float? FullStateUpdateFrequency { get; private set; } = null;
+        public long? DeltaUpdateFrequency { get; private set; } = null;
+        public long? FullStateUpdateFrequency { get; private set; } = null;
 
         private readonly MpPacketSerializer _packetSerializer;
         MpNodePoseSyncStateManager(MpPacketSerializer packetSerializer) => _packetSerializer = packetSerializer;
@@ -33,7 +33,7 @@ namespace MultiplayerCore.NodePoseSyncState
         {
             if (DeltaUpdateFrequency.HasValue)
             {
-                __result = (long)(DeltaUpdateFrequency.Value);
+                __result = DeltaUpdateFrequency.Value;
                 return false;
             }
             return true;
@@ -45,7 +45,7 @@ namespace MultiplayerCore.NodePoseSyncState
         {
             if (FullStateUpdateFrequency.HasValue)
             {
-                __result = (long)(FullStateUpdateFrequency.Value);
+                __result = FullStateUpdateFrequency.Value;
                 return false;
             }
             return true;
