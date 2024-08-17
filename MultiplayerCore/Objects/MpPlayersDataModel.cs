@@ -14,7 +14,7 @@ namespace MultiplayerCore.Objects
     internal class MpPlayersDataModel : LobbyPlayersDataModel, ILobbyPlayersDataModel, IDisposable
     {
         private readonly MpPacketSerializer _packetSerializer;
-        private readonly MpBeatmapLevelProvider _beatmapLevelProvider;
+        internal readonly MpBeatmapLevelProvider _beatmapLevelProvider;
         private readonly SiraLog _logger;
         private readonly Dictionary<string, MpBeatmapPacket> _lastPlayerBeatmapPackets = new();
         public IReadOnlyDictionary<string, MpBeatmapPacket> PlayerPackets => _lastPlayerBeatmapPackets;
@@ -57,9 +57,9 @@ namespace MultiplayerCore.Objects
         internal void HandlePlayerConnected(IConnectedPlayer connectedPlayer)
         {
             // Send our MpBeatmapPacket again so newly joined players have it
-	        var selectedBeatmapKey = _playersData[localUserId].beatmapKey;
-	        SendMpBeatmapPacket(selectedBeatmapKey);
-		}
+            var selectedBeatmapKey = _playersData[localUserId].beatmapKey;
+            SendMpBeatmapPacket(selectedBeatmapKey);
+        }
 		internal void SetLocalPlayerBeatmapLevel_override(in BeatmapKey beatmapKey)
         {
             // Game: The local player has selected / recommended a beatmap

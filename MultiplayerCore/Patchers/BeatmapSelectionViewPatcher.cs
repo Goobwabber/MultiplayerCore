@@ -112,10 +112,10 @@ namespace MultiplayerCore.Patchers
 				instance._noLevelText.enabled = true;
 		        instance._levelBar.hide = true;
 	        }
-		}
+        }
 	}
 
-	internal static class PacketExt
+	public static class PacketExt
     {
         public static BeatmapLevel MakeBeatmapLevel(this MpBeatmap mpBeatmap, in BeatmapKey key, IPreviewMediaData previewMediaData) 
         {
