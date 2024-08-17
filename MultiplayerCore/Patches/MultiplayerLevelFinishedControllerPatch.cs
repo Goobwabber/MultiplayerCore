@@ -16,7 +16,6 @@ namespace MultiplayerCore.Patches
 		{
 			// Possibly get notesCount from BeatSaver or by parsing the beatmapdata ourselves
 			// Skip score validation if notesCount is 0, since custom songs always have notesCount 0 in BeatmapBasicData
-			// TODO: Change this to only be a single if (__instance._beatmapBasicData.notesCount <= 0 && results.hasAnyResults) if check
 			if (__instance._beatmapBasicData.notesCount <= 0 && results.hasAnyResults)
 			{
 				Plugin.Logger.Info($"BeatmapData noteCount is 0, skipping validation");
