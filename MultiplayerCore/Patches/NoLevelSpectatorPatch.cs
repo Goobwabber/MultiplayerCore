@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using BGLib.Polyglot;
 using HarmonyLib;
+using IPA.Utilities;
 using MultiplayerCore.Beatmaps;
 using MultiplayerCore.Beatmaps.Providers;
 using MultiplayerCore.Objects;
@@ -16,7 +18,7 @@ namespace MultiplayerCore.Patches
 	[HarmonyPatch]
 	internal class NoLevelSpectatorPatch
 	{
-		private static MpBeatmapLevelProvider? mpBeatmapLevelProvider;
+		internal static MpBeatmapLevelProvider? mpBeatmapLevelProvider;
 
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(LobbyGameStateController), nameof(LobbyGameStateController.StartMultiplayerLevel))]
@@ -54,19 +56,28 @@ namespace MultiplayerCore.Patches
 			Plugin.Logger.Debug("LevelData present running orig");
 			return true;
 		}
+	}
+
+	[HarmonyPatch]
+	internal class NoLevelSpectatorOptionalPatch
+	{
+		static bool Prepare()
+		{
+			return UnityGame.GameVersion >= new AlmostVersion("1.37.0");
+		}
 
 		[HarmonyPrefix]
 		[HarmonyPatch(typeof(LevelBar), nameof(LevelBar.Setup), new Type[] { typeof(BeatmapKey) })]
 		internal static bool LevelBar_Setup(LevelBar __instance, BeatmapKey beatmapKey)
 		{
 			var hash = Utilities.HashForLevelID(beatmapKey.levelId);
-			if (mpBeatmapLevelProvider != null && !string.IsNullOrWhiteSpace(hash))
+			if (NoLevelSpectatorPatch.mpBeatmapLevelProvider != null && !string.IsNullOrWhiteSpace(hash) && SongCore.Loader.GetLevelByHash(hash) == null)
 			{
 				IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew<Task>(async () =>
 				{
-					BeatmapLevel? beatmapLevel = (await mpBeatmapLevelProvider.GetBeatmap(hash))?.MakeBeatmapLevel(beatmapKey, mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash));
+					BeatmapLevel? beatmapLevel = (await NoLevelSpectatorPatch.mpBeatmapLevelProvider.GetBeatmap(hash))?.MakeBeatmapLevel(beatmapKey, NoLevelSpectatorPatch.mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash));
 					if (beatmapLevel == null)
-						beatmapLevel = new NoInfoBeatmapLevel(hash).MakeBeatmapLevel(beatmapKey, mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash));
+						beatmapLevel = new NoInfoBeatmapLevel(hash).MakeBeatmapLevel(beatmapKey, NoLevelSpectatorPatch.mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash));
 
 					__instance.SetupData(beatmapLevel, beatmapKey.difficulty, beatmapKey.beatmapCharacteristic);
 
@@ -76,6 +87,5 @@ namespace MultiplayerCore.Patches
 
 			return true;
 		}
-
 	}
 }
