@@ -11,10 +11,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MultiplayerCore.Models;
+using MultiplayerCore.Repositories;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Zenject;
+using MultiplayerCore.Patchers;
 
 namespace MultiplayerCore.UI
 {
@@ -29,9 +31,12 @@ namespace MultiplayerCore.UI
 		private readonly BeatmapLevelsModel _beatmapLevelsModel;
 		private readonly MpPacketSerializer _packetSerializer;
 		private readonly MpBeatmapLevelProvider _beatmapLevelProvider;
+		private readonly MpStatusRepository _statusRepository;
+		private readonly NetworkConfigPatcher _networkConfig;
 		private BeatmapKey _currentBeatmapKey;
 		private List<string>? _allowedDiffs;
 		private CanvasGroup? _difficultyCanvasGroup;
+		private MpStatusData? _currentStatusData;
 
 		private readonly SiraLog _logger;
 
@@ -41,6 +46,8 @@ namespace MultiplayerCore.UI
 			IMultiplayerSessionManager sessionManager, 
 			MpBeatmapLevelProvider beatmapLevelProvider, 
 			MpPacketSerializer packetSerializer,
+			MpStatusRepository statusRepository,
+			NetworkConfigPatcher networkConfig,
 			SiraLog logger)
 		{
 			_gameServerLobbyFlowCoordinator = gameServerLobbyFlowCoordinator;
@@ -50,6 +57,8 @@ namespace MultiplayerCore.UI
 			_multiplayerSessionManager = sessionManager;
 			_beatmapLevelProvider = beatmapLevelProvider;
 			_packetSerializer = packetSerializer;
+			_statusRepository = statusRepository;
+			_networkConfig = networkConfig;
 			_logger = logger;
 		}
 
@@ -107,6 +116,8 @@ namespace MultiplayerCore.UI
 			_gameServerLobbyFlowCoordinator._serverPlayerListViewController.selectSuggestedBeatmapEvent += UpdateDifficultyListWithBeatmapKey;
 			_lobbyViewController.clearSuggestedBeatmapEvent += ClearLocalSelectedBeatmap;
 			_gameServerLobbyFlowCoordinator._lobbyPlayerPermissionsModel.permissionsChangedEvent += UpdateButtonsEnabled;
+
+			_statusRepository.statusUpdatedForUrlEvent += HandleStatusUpdate;
 		}
 
 		public void Dispose()
@@ -162,6 +173,8 @@ namespace MultiplayerCore.UI
 			// Move toggles to correct position
 			var locposition = _lobbyViewController._startGameReadyButton.gameObject.transform.localPosition;
 			ppth!.gameObject.transform.localPosition = locposition;
+
+			ppth.gameObject.SetActive(_networkConfig.IsOverridingApi && (_currentStatusData.supportsPPDifficulties || _currentStatusData.supportsPPModifiers));
 		}
 
 		//public void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -171,6 +184,17 @@ namespace MultiplayerCore.UI
 
 		//	}
 		//}
+
+		void HandleStatusUpdate(string statusUrl, MpStatusData statusData)
+		{
+			_logger.Info($"Got StatusData update for server {statusData.name} with values " +
+			             $"supportsPPDifficulties={statusData.supportsPPDifficulties} and " +
+			             $"supportsPPModifiers={statusData.supportsPPModifiers}");
+			ppth?.gameObject.SetActive(statusData.supportsPPDifficulties || statusData.supportsPPModifiers);
+			ppdt?.gameObject.SetActive(statusData.supportsPPDifficulties);
+			ppmt?.gameObject.SetActive(statusData.supportsPPModifiers);
+			_currentStatusData = statusData;
+		}
 
 		#region DiffListUpdater
 		// TODO: Possibly replace with BeatmapDifficultyMethods.Name ext method see BeatmapDifficultySegmentedControlController
@@ -279,7 +303,7 @@ namespace MultiplayerCore.UI
 			var ppPacket = new MpPerPlayerPacket();
 			ppPacket.PPDEnabled = ppdt!.Value;
 			ppPacket.PPMEnabled = ppmt!.Value;
-			_multiplayerSessionManager.Send(ppPacket);
+			_multiplayerSessionManager.SendToPlayer(ppPacket, _multiplayerSessionManager.connectionOwner);
 		}
 
 		private void UpdateButtonsEnabled()
@@ -295,7 +319,7 @@ namespace MultiplayerCore.UI
 			ppth!.gameObject.transform.localPosition = locposition;
 
 			// Request updated button states from server
-			_multiplayerSessionManager.Send(new GetMpPerPlayerPacket());
+			_multiplayerSessionManager.SendToPlayer(new GetMpPerPlayerPacket(), _multiplayerSessionManager.connectionOwner);
 		}
 
 		private void SetLobbyState(MultiplayerLobbyState lobbyState)
