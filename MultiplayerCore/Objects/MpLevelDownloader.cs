@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BeatSaverSharp;
 using BeatSaverSharp.Models;
+using IPA.Utilities;
 using MultiplayerCore.Helpers;
 using SiraUtil.Logging;
 using SiraUtil.Zenject;
@@ -15,7 +16,7 @@ namespace MultiplayerCore.Objects
 {
     internal class MpLevelDownloader
     {
-        public readonly string CustomLevelsFolder = Path.Combine(Application.dataPath, Plugin.CustomLevelsPath);
+        public readonly string CustomLevelsFolder = Path.Combine(Application.dataPath, UnityGame.GameVersion >= new AlmostVersion("1.37.3") ? Plugin.CustomLevelsPath : "CustomLevels");
 
         private ConcurrentDictionary<string, Task<bool>> _downloads = new();
         private readonly ZipExtractor _zipExtractor = new();
