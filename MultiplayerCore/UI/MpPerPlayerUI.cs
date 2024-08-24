@@ -105,6 +105,8 @@ namespace MultiplayerCore.UI
 			}
 
 			_lobbyViewController.didActivateEvent += DidActivate;
+			_gameServerLobbyFlowCoordinator._selectModifiersViewController.didActivateEvent +=
+				ModifierSelectionDidActivate;
 			//_lobbyViewController.didDeactivateEvent += DidDeactivate;
 
 			_packetSerializer.RegisterCallback<MpPerPlayerPacket>(HandleMpPerPlayerPacket);
@@ -123,6 +125,8 @@ namespace MultiplayerCore.UI
 		public void Dispose()
 		{
 			_lobbyViewController.didActivateEvent -= DidActivate;
+			_gameServerLobbyFlowCoordinator._selectModifiersViewController.didActivateEvent -=
+				ModifierSelectionDidActivate;
 			//_lobbyViewController.didDeactivateEvent -= DidDeactivate;
 
 			_packetSerializer.UnregisterCallback<MpPerPlayerPacket>();
@@ -175,6 +179,28 @@ namespace MultiplayerCore.UI
 			ppth!.gameObject.transform.localPosition = locposition;
 
 			ppth.gameObject.SetActive(_networkConfig.IsOverridingApi && (_currentStatusData.supportsPPDifficulties || _currentStatusData.supportsPPModifiers));
+		}
+
+		void ModifierSelectionDidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+		{
+			_logger.Trace("ModifierSelectionDidActivate");
+			var modifierController = _gameServerLobbyFlowCoordinator._selectModifiersViewController
+				._gameplayModifiersPanelController;
+			//modifierController._gameplayModifiers =
+			//	modifierController.gameplayModifiers.CopyWith(songSpeed: GameplayModifiers.SongSpeed.Normal);
+			var toggles = modifierController._gameplayModifierToggles;
+			foreach (var toggle in toggles)
+			{
+				_logger.Trace("Toggle: " + toggle.gameObject.name);
+				if (toggle.gameObject.name == "FasterSong" || toggle.gameObject.name == "SuperFastSong" ||
+				    toggle.gameObject.name == "SlowerSong")
+				{
+					toggle.toggle.interactable = !ppmt.Value;
+					var canvas = toggle.gameObject.GetComponent<CanvasGroup>();
+					if (canvas == null) canvas = toggle.gameObject.AddComponent<CanvasGroup>();
+					canvas.alpha = ppmt.Value ? 0.25f : 1f;
+				}
+			}
 		}
 
 		//public void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -293,6 +319,21 @@ namespace MultiplayerCore.UI
 			else if (!player.isConnectionOwner)
 			{
 				_logger.Warn("Player is not Connection Owner, ignoring packet");
+			}
+
+			if (player.isConnectionOwner)
+			{
+				// If a SongSpeed modifier was already set, remove it and re-announce our modifiers
+				var modifierController = _gameServerLobbyFlowCoordinator._selectModifiersViewController
+					._gameplayModifiersPanelController;
+				if (modifierController != null && modifierController.gameplayModifiers != null &&
+				    modifierController.gameplayModifiers.songSpeed != GameplayModifiers.SongSpeed.Normal)
+				{
+					modifierController._gameplayModifiers =
+						modifierController.gameplayModifiers.CopyWith(songSpeed: GameplayModifiers.SongSpeed.Normal);
+					_gameServerLobbyFlowCoordinator._lobbyPlayersDataModel.SetLocalPlayerGameplayModifiers(
+						modifierController.gameplayModifiers);
+				}
 			}
 		}
 
