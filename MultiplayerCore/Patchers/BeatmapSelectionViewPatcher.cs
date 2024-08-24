@@ -27,7 +27,7 @@ namespace MultiplayerCore.Patchers
             _mpBeatmapLevelProvider = mpBeatmapLevelProvider;
             _beatmapLevelsModel = beatmapLevelsModel;
 
-            _lbarInfo = AccessTools.Method(typeof(LevelBar), "SetupData",
+            _lbarInfo = AccessTools.Method(typeof(LevelBar), "Setup",
 	            new Type[] { typeof(BeatmapLevel), typeof(BeatmapDifficulty), typeof(BeatmapCharacteristicSO) });
             if (_lbarInfo != null) _newlbarInfo = true;
 			else _lbarInfo = AccessTools.Method(typeof(LevelBar), "Setup", new Type[] { typeof(BeatmapLevel), typeof(BeatmapCharacteristicSO), typeof(BeatmapDifficulty) });
@@ -95,7 +95,7 @@ namespace MultiplayerCore.Patchers
 		        instance._levelBar.hide = false;
 
 
-		        Plugin.Logger.Debug($"Calling Setup/SetupData with level type: {level.GetType().Name}, beatmapCharacteristic type: {key.beatmapCharacteristic.GetType().Name}, difficulty type: {key.difficulty.GetType().Name} ");
+		        Plugin.Logger.Debug($"Calling Setup with level type: {level.GetType().Name}, beatmapCharacteristic type: {key.beatmapCharacteristic.GetType().Name}, difficulty type: {key.difficulty.GetType().Name} ");
 		        if (_newlbarInfo)
 		        {
 			        _lbarInfo.Invoke(instance._levelBar, new object[] { level, key.difficulty, key.beatmapCharacteristic });
