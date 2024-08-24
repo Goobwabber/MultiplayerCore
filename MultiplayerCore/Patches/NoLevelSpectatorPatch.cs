@@ -11,7 +11,6 @@ using MultiplayerCore.Beatmaps;
 using MultiplayerCore.Beatmaps.Providers;
 using MultiplayerCore.Objects;
 using MultiplayerCore.Patchers;
-using Zenject;
 
 namespace MultiplayerCore.Patches
 {
@@ -61,31 +60,47 @@ namespace MultiplayerCore.Patches
 	[HarmonyPatch]
 	internal class NoLevelSpectatorOptionalPatch
 	{
+		private static MethodInfo _lbarInfo;
+		private static bool _newlbarInfo;
 		static bool Prepare()
 		{
-			return UnityGame.GameVersion >= new AlmostVersion("1.37.0");
+			_lbarInfo = AccessTools.Method(typeof(LevelBar), "Setup",
+				new Type[] { typeof(BeatmapLevel), typeof(BeatmapDifficulty), typeof(BeatmapCharacteristicSO) });
+			if (_lbarInfo != null) _newlbarInfo = true;
+			else _lbarInfo = AccessTools.Method(typeof(LevelBar), "Setup", new Type[] { typeof(BeatmapLevel), typeof(BeatmapCharacteristicSO), typeof(BeatmapDifficulty) });
+			if (_lbarInfo == null)
+			{
+				Plugin.Logger.Critical("Can't find a fitting LevelBar Method, is your game version supported?");
+				return false;
+			}
+
+			return true;
 		}
 
-		[HarmonyPrefix]
-		[HarmonyPatch(typeof(LevelBar), nameof(LevelBar.Setup), new Type[] { typeof(BeatmapKey) })]
-		internal static bool LevelBar_Setup(LevelBar __instance, BeatmapKey beatmapKey)
+		[HarmonyPostfix]
+		[HarmonyPatch(typeof(MultiplayerResultsViewController), nameof(MultiplayerResultsViewController.Init))]
+		internal static void MultiplayerResultsViewController_Init(MultiplayerResultsViewController __instance, BeatmapKey beatmapKey)
 		{
 			var hash = Utilities.HashForLevelID(beatmapKey.levelId);
-			if (NoLevelSpectatorPatch.mpBeatmapLevelProvider != null && !string.IsNullOrWhiteSpace(hash) && SongCore.Loader.GetLevelByHash(hash) == null)
+			if (NoLevelSpectatorPatch.mpBeatmapLevelProvider != null && !string.IsNullOrWhiteSpace(hash) &&
+			    SongCore.Loader.GetLevelByHash(hash) == null)
 			{
 				IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew<Task>(async () =>
 				{
 					BeatmapLevel? beatmapLevel = (await NoLevelSpectatorPatch.mpBeatmapLevelProvider.GetBeatmap(hash))?.MakeBeatmapLevel(beatmapKey, NoLevelSpectatorPatch.mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash));
 					if (beatmapLevel == null)
 						beatmapLevel = new NoInfoBeatmapLevel(hash).MakeBeatmapLevel(beatmapKey, NoLevelSpectatorPatch.mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash));
-
-					__instance.SetupData(beatmapLevel, beatmapKey.difficulty, beatmapKey.beatmapCharacteristic);
-
+					Plugin.Logger.Trace($"Calling Setup with level type: {beatmapLevel.GetType().Name}, beatmapCharacteristic type: {beatmapKey.beatmapCharacteristic.GetType().Name}, difficulty type: {beatmapKey.difficulty.GetType().Name} ");
+					if (_newlbarInfo)
+					{
+						_lbarInfo.Invoke(__instance._levelBar, new object[] { beatmapLevel, beatmapKey.difficulty, beatmapKey.beatmapCharacteristic });
+					}
+					else
+					{
+						_lbarInfo.Invoke(__instance._levelBar, new object[] { beatmapLevel, beatmapKey.beatmapCharacteristic, beatmapKey.difficulty });
+					}
 				});
-				return false;
 			}
-
-			return true;
 		}
 	}
 }
