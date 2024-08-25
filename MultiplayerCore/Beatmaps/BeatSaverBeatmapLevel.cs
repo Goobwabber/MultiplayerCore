@@ -1,10 +1,10 @@
-﻿using BeatSaverSharp.Models;
-using MultiplayerCore.Beatmaps.Abstractions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BeatSaverSharp.Models;
+using MultiplayerCore.Beatmaps.Abstractions;
 using UnityEngine;
 using static BeatSaverSharp.Models.BeatmapDifficulty;
 using static SongCore.Data.ExtraSongData;
@@ -12,20 +12,20 @@ using static SongCore.Data.ExtraSongData;
 namespace MultiplayerCore.Beatmaps
 {
     /// <summary>
-    /// An <see cref="IPreviewBeatmapLevel"/> created from data from BeatSaver.
+    /// Beatmap level data that was loaded remotely from the BeatSaver API.
     /// </summary>
-    public class BeatSaverBeatmapLevel : MpBeatmapLevel
+    public class BeatSaverBeatmapLevel : MpBeatmap
     {
-        public override string levelHash { get; protected set; }
+        public override string LevelHash { get; protected set; }
 
-        public override string songName => _beatmap.Metadata.SongName;
-        public override string songSubName => _beatmap.Metadata.SongSubName;
-        public override string songAuthorName => _beatmap.Metadata.SongAuthorName;
-        public override string levelAuthorName => _beatmap.Metadata.LevelAuthorName;
-        public override float beatsPerMinute => _beatmap.Metadata.BPM;
-        public override float songDuration => _beatmap.Metadata.Duration;
+        public override string SongName => _beatmap.Metadata.SongName;
+        public override string SongSubName => _beatmap.Metadata.SongSubName;
+        public override string SongAuthorName => _beatmap.Metadata.SongAuthorName;
+        public override string LevelAuthorName => _beatmap.Metadata.LevelAuthorName;
+        public override float BeatsPerMinute => _beatmap.Metadata.BPM;
+        public override float SongDuration => _beatmap.Metadata.Duration;
 
-        public override Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements
+        public override Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> Requirements
         {
             get
             {
@@ -46,8 +46,8 @@ namespace MultiplayerCore.Beatmaps
                     if (!reqs.ContainsKey(characteristic))
                         reqs.Add(characteristic, new());
                     string[] diffReqs = new string[0];
-                    if (difficulty.Chroma)
-                        diffReqs.Append("Chroma");
+                    //if (difficulty.Chroma)
+                    //    diffReqs.Append("Chroma");
                     if (difficulty.NoodleExtensions)
                         diffReqs.Append("Noodle Extensions");
                     if (difficulty.MappingExtensions)
@@ -58,7 +58,7 @@ namespace MultiplayerCore.Beatmaps
             }
         }
 
-        public override Contributor[] contributors => new Contributor[] { new Contributor
+        public override Contributor[] Contributors => new Contributor[] { new Contributor
         {
             _role = "Uploader",
             _name = _beatmap.Uploader.Name,
@@ -69,11 +69,11 @@ namespace MultiplayerCore.Beatmaps
 
         public BeatSaverBeatmapLevel(string hash, Beatmap beatmap)
         {
-            levelHash = hash;
+            LevelHash = hash;
             _beatmap = beatmap;
         }
 
-        public override async Task<Sprite> GetCoverImageAsync(CancellationToken cancellationToken) 
+        public override async Task<Sprite> TryGetCoverSpriteAsync(CancellationToken cancellationToken) 
         {
             byte[]? coverBytes = await _beatmap.LatestVersion.DownloadCoverImage(cancellationToken);
             if (coverBytes == null || coverBytes.Length == 0)

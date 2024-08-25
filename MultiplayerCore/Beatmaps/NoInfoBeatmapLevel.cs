@@ -2,17 +2,20 @@
 
 namespace MultiplayerCore.Beatmaps
 {
-    public class NoInfoBeatmapLevel : MpBeatmapLevel
+    /// <summary>
+    /// Beatmap level data placeholder, used when no information is available.
+    /// </summary>
+    public class NoInfoBeatmapLevel : MpBeatmap
     {
-        public override string levelHash { get; protected set; }
-        public override string songName => string.Empty;
-        public override string songSubName => string.Empty;
-        public override string songAuthorName => string.Empty;
-        public override string levelAuthorName => string.Empty;
+        public override string LevelHash { get; protected set; }
+        public override string SongName => string.Empty;
+        public override string SongSubName => string.Empty;
+        public override string SongAuthorName => string.Empty;
+        public override string LevelAuthorName => string.Empty;
 
         public NoInfoBeatmapLevel(string hash)
         {
-            levelHash = hash;
+            LevelHash = hash;
         }
     }
 }

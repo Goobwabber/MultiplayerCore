@@ -1,0 +1,3 @@
+<vertical id='segmentVert' bg='panel-top' anchor-pos-y='-25' pref-width='60' min-height='10' vertical-fit='MinSize' pad='2' active='false'>
+	<text-segments id='difficultyControl' select-cell='SetSelectedDifficulty' />
+</vertical>

@@ -1,21 +1,22 @@
-﻿using BeatSaverSharp;
-using BeatSaverSharp.Models;
-using MultiplayerCore.Helpers;
-using SiraUtil.Logging;
-using SiraUtil.Zenject;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BeatSaverSharp;
+using BeatSaverSharp.Models;
+using IPA.Utilities;
+using MultiplayerCore.Helpers;
+using SiraUtil.Logging;
+using SiraUtil.Zenject;
 using UnityEngine;
 
 namespace MultiplayerCore.Objects
 {
     internal class MpLevelDownloader
     {
-        public readonly string CustomLevelsFolder = Path.Combine(Application.dataPath, Plugin.CustomLevelsPath);
+        public readonly string CustomLevelsFolder = Path.Combine(Application.dataPath, UnityGame.GameVersion >= new AlmostVersion("1.37.3") ? Plugin.CustomLevelsPath : "CustomLevels");
 
         private ConcurrentDictionary<string, Task<bool>> _downloads = new();
         private readonly ZipExtractor _zipExtractor = new();
@@ -115,7 +116,7 @@ namespace MultiplayerCore.Objects
                     throw result.Exception;
             }
 
-            using (var awaiter = new EventAwaiter<SongCore.Loader, ConcurrentDictionary<string, CustomPreviewBeatmapLevel>>(cancellationToken))
+            using (var awaiter = new EventAwaiter<SongCore.Loader, ConcurrentDictionary<string, BeatmapLevel>>(cancellationToken))
             {
                 try
                 {

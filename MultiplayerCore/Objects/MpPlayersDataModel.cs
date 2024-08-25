@@ -1,20 +1,23 @@
-﻿using MultiplayerCore.Beatmaps;
-using MultiplayerCore.Beatmaps.Abstractions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
 using MultiplayerCore.Beatmaps.Packets;
 using MultiplayerCore.Beatmaps.Providers;
 using MultiplayerCore.Networking;
-using SiraUtil.Affinity;
 using SiraUtil.Logging;
-using System;
-using System.Linq;
 
 namespace MultiplayerCore.Objects
 {
+    [UsedImplicitly]
     internal class MpPlayersDataModel : LobbyPlayersDataModel, ILobbyPlayersDataModel, IDisposable
     {
         private readonly MpPacketSerializer _packetSerializer;
-        private readonly MpBeatmapLevelProvider _beatmapLevelProvider;
+        internal readonly MpBeatmapLevelProvider _beatmapLevelProvider;
         private readonly SiraLog _logger;
+        private readonly Dictionary<string, MpBeatmapPacket> _lastPlayerBeatmapPackets = new();
+        public IReadOnlyDictionary<string, MpBeatmapPacket> PlayerPackets => _lastPlayerBeatmapPackets;
 
         internal MpPlayersDataModel(
             MpPacketSerializer packetSerializer,
@@ -28,12 +31,13 @@ namespace MultiplayerCore.Objects
 
         public new void Activate()
         {
-            _packetSerializer.RegisterCallback<MpBeatmapPacket>(HandleMpexBeatmapPacket);
+            _packetSerializer.RegisterCallback<MpBeatmapPacket>(HandleMpCoreBeatmapPacket);
             base.Activate();
             _menuRpcManager.getRecommendedBeatmapEvent -= base.HandleMenuRpcManagerGetRecommendedBeatmap;
             _menuRpcManager.getRecommendedBeatmapEvent += this.HandleMenuRpcManagerGetRecommendedBeatmap;
             _menuRpcManager.recommendBeatmapEvent -= base.HandleMenuRpcManagerRecommendBeatmap;
             _menuRpcManager.recommendBeatmapEvent += this.HandleMenuRpcManagerRecommendBeatmap;
+            _multiplayerSessionManager.playerConnectedEvent += HandlePlayerConnected;
         }
 
         public new void Deactivate()
@@ -43,53 +47,106 @@ namespace MultiplayerCore.Objects
             _menuRpcManager.getRecommendedBeatmapEvent += base.HandleMenuRpcManagerGetRecommendedBeatmap;
             _menuRpcManager.recommendBeatmapEvent -= this.HandleMenuRpcManagerRecommendBeatmap;
             _menuRpcManager.recommendBeatmapEvent += base.HandleMenuRpcManagerRecommendBeatmap;
-            base.Deactivate();
+            _multiplayerSessionManager.playerConnectedEvent -= HandlePlayerConnected;
+			base.Deactivate();
         }
 
         public new void Dispose()
             => Deactivate();
 
-        private void HandleMpexBeatmapPacket(MpBeatmapPacket packet, IConnectedPlayer player)
+        internal void HandlePlayerConnected(IConnectedPlayer connectedPlayer)
         {
+            // Send our MpBeatmapPacket again so newly joined players have it
+            var selectedBeatmapKey = _playersData[localUserId].beatmapKey;
+            SendMpBeatmapPacket(selectedBeatmapKey);
+        }
+		internal void SetLocalPlayerBeatmapLevel_override(in BeatmapKey beatmapKey)
+        {
+            // Game: The local player has selected / recommended a beatmap
+
+            // send extended beatmap info to other players
+            SendMpBeatmapPacket(beatmapKey);
+            
+            //base.SetLocalPlayerBeatmapLevel(userId, in beatmapKey);
+        }
+        
+        private void HandleMpCoreBeatmapPacket(MpBeatmapPacket packet, IConnectedPlayer player)
+        {
+            // Packet: Another player has recommended a beatmap (MpCore), we have received details for the level preview
+            
             _logger.Debug($"'{player.userId}' selected song '{packet.levelHash}'.");
-            BeatmapCharacteristicSO characteristic = _beatmapCharacteristicCollection.GetBeatmapCharacteristicBySerializedName(packet.characteristic);
-            IPreviewBeatmapLevel preview = _beatmapLevelProvider.GetBeatmapFromPacket(packet);
-            base.SetPlayerBeatmapLevel(player.userId, new PreviewDifficultyBeatmap(preview, characteristic, packet.difficulty));
+            
+            var beatmap = _beatmapLevelProvider.GetBeatmapFromPacket(packet);
+            var characteristic = _beatmapCharacteristicCollection.GetBeatmapCharacteristicBySerializedName(packet.characteristicName);
+
+            PutPlayerPacket(player.userId, packet);
+            base.SetPlayerBeatmapLevel(player.userId, new BeatmapKey(beatmap.LevelID, characteristic, packet.difficulty));
         }
 
-        public new void HandleMenuRpcManagerGetRecommendedBeatmap(string userId)
+        private new void HandleMenuRpcManagerGetRecommendedBeatmap(string userId)
         {
-            ILobbyPlayerData localPlayerData = _playersData[localUserId];
-            string? levelId = localPlayerData.beatmapLevel?.beatmapLevel?.levelID;
-            if (string.IsNullOrEmpty(levelId))
-                return;
-            string? levelHash = Utilities.HashForLevelID(levelId!);
-            if (!string.IsNullOrEmpty(levelHash))
-                _multiplayerSessionManager.Send(new MpBeatmapPacket(localPlayerData.beatmapLevel!));
+            // RPC: The server / another player has asked us to send our recommended beatmap
+            
+            var selectedBeatmapKey = _playersData[localUserId].beatmapKey;
+            SendMpBeatmapPacket(selectedBeatmapKey);
 
             base.HandleMenuRpcManagerGetRecommendedBeatmap(userId);
         }
 
-        public new void HandleMenuRpcManagerRecommendBeatmap(string userId, BeatmapIdentifierNetSerializable beatmapId)
+        private new void HandleMenuRpcManagerRecommendBeatmap(string userId, BeatmapKeyNetSerializable beatmapKeySerializable)
         {
-            if (!string.IsNullOrEmpty(Utilities.HashForLevelID(beatmapId.levelID)))
+            // RPC: Another player has recommended a beatmap (base game)
+
+            var levelHash = Utilities.HashForLevelID(beatmapKeySerializable.levelID);
+			if (!string.IsNullOrEmpty(levelHash) && _beatmapLevelProvider.TryGetBeatmapFromPacketHash(levelHash!) != null) // If we have no packet run basegame behaviour
                 return;
-            base.HandleMenuRpcManagerRecommendBeatmap(userId, beatmapId);
+            
+            base.HandleMenuRpcManagerRecommendBeatmap(userId, beatmapKeySerializable);
         }
 
-        public new async void SetLocalPlayerBeatmapLevel(PreviewDifficultyBeatmap beatmapLevel)
+        private async void SendMpBeatmapPacket(BeatmapKey beatmapKey)
         {
-            _logger.Debug($"Local player selected song '{beatmapLevel.beatmapLevel.levelID}'");
-            string? levelHash = Utilities.HashForLevelID(beatmapLevel.beatmapLevel.levelID);
-            if (!string.IsNullOrEmpty(levelHash))
+            var levelId = beatmapKey.levelId;
+            _logger.Debug($"Sending beatmap packet for level {levelId}");
+
+            var levelHash = Utilities.HashForLevelID(levelId);
+            if (levelHash == null)
             {
-                if (beatmapLevel.beatmapLevel is not MpBeatmapLevel)
-                    beatmapLevel.beatmapLevel = await _beatmapLevelProvider.GetBeatmap(levelHash);
-                _multiplayerSessionManager.Send(new MpBeatmapPacket(beatmapLevel));
-                base.SetLocalPlayerBeatmapLevel(beatmapLevel);
+                _logger.Debug("Not a custom level, returning...");
                 return;
             }
-            base.SetLocalPlayerBeatmapLevel(beatmapLevel);
+            
+            var levelData = await _beatmapLevelProvider.GetBeatmap(levelHash);
+            if (levelData == null)
+            {
+                _logger.Debug("Could not get level data for beatmap, returning!");
+                return;
+            }
+
+            var packet = new MpBeatmapPacket(levelData, beatmapKey);
+            _logger.Debug("Actually sending packet");
+            _multiplayerSessionManager.Send(packet);
         }
+
+        public MpBeatmapPacket? GetPlayerPacket(string playerId)
+        {
+            _lastPlayerBeatmapPackets.TryGetValue(playerId, out var packet);
+            _logger.Debug($"Got player packet for {playerId} with levelHash: {packet?.levelHash ?? "NULL"}");
+            return packet;
+        }
+
+        private void PutPlayerPacket(string playerId, MpBeatmapPacket packet)
+        {
+            _logger.Debug($"Putting packet for player {playerId} with levelHash: {packet.levelHash}");
+            _lastPlayerBeatmapPackets[playerId] = packet;
+        }
+
+        public MpBeatmapPacket? FindLevelPacket(string levelHash)
+        {
+            var packet = _lastPlayerBeatmapPackets.Values.FirstOrDefault(packet => packet.levelHash == levelHash);
+            _logger.Debug($"Found packet: {packet?.levelHash ?? "NULL"}");
+            return packet;
+        }
+
     }
 }

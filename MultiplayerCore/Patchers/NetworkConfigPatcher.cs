@@ -1,4 +1,5 @@
-﻿using SiraUtil.Affinity;
+﻿using IgnoranceCore;
+using SiraUtil.Affinity;
 using SiraUtil.Logging;
 
 // ReSharper disable RedundantAssignment
@@ -18,6 +19,10 @@ namespace MultiplayerCore.Patchers
         public int? DiscoveryPort { get; set; }
         public int? PartyPort { get; set; }
         public int? MultiplayerPort { get; set; }
+        /// <summary>
+        /// If set: disable SSL and certificate validation for all Ignorance/ENet client connections.
+        /// </summary>
+        public bool DisableSsl { get; set; } = false;
 
         public bool IsOverridingApi => GraphUrl != null;
 
@@ -32,8 +37,8 @@ namespace MultiplayerCore.Patchers
         /// <summary>
         /// Override official servers with a custom API server.
         /// </summary>
-        public void UseCustomApiServer(string graphUrl, string statusUrl, int? maxPartySize = null,
-            string? quickPlaySetupUrl = null)
+        public void UseCustomApiServer(string graphUrl, string? statusUrl, int? maxPartySize = null,
+            string? quickPlaySetupUrl = null, bool disableSsl = true)
         {
             _logger.Debug($"Overriding multiplayer API server (graphUrl={graphUrl}, statusUrl={statusUrl}, " +
                           $"maxPartySize={maxPartySize}, quickPlaySetupUrl={quickPlaySetupUrl})");
@@ -41,7 +46,8 @@ namespace MultiplayerCore.Patchers
             GraphUrl = graphUrl;
             MasterServerStatusUrl = statusUrl;
             MaxPartySize = maxPartySize;
-            QuickPlaySetupUrl = quickPlaySetupUrl ?? statusUrl + "/mp_override.json";
+            QuickPlaySetupUrl = quickPlaySetupUrl ?? (statusUrl != null ? statusUrl + "/mp_override.json" : null);
+            DisableSsl = disableSsl;
         }
 
         /// <summary>
@@ -55,6 +61,7 @@ namespace MultiplayerCore.Patchers
             MasterServerStatusUrl = null;
             MaxPartySize = null;
             QuickPlaySetupUrl = null;
+            DisableSsl = false;
         }
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.graphUrl), AffinityMethodType.Getter)]
@@ -149,10 +156,17 @@ namespace MultiplayerCore.Patchers
         private bool ValidateCertificateChain()
         {
             return !IsOverridingApi;
-
-            // TODO
-            // It'd be best if we do certificate validation here...
-            // but for now we'll just skip it.
+        }
+        
+        [AffinityPrefix]
+        [AffinityPatch(typeof(IgnoranceClient), "Start")]
+        private void PrefixIgnoranceClientStart(IgnoranceClient __instance)
+        {
+            if (!DisableSsl)
+                return;
+            
+            __instance.UseSsl = false;
+            __instance.ValidateCertificate = false;
         }
     }
 }

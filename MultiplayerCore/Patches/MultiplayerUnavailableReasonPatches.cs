@@ -3,7 +3,6 @@ using Hive.Versioning;
 using IPA.Loader;
 using IPA.Utilities;
 using MultiplayerCore.Models;
-using System.Windows.Forms;
 
 namespace MultiplayerCore.Patches
 {
@@ -26,11 +25,13 @@ namespace MultiplayerCore.Patches
                     foreach (var requiredMod in mpData.requiredMods)
                     {
                         var metadata = PluginManager.GetPluginFromId(requiredMod.id);
-                        if (metadata == null)
+                        if (metadata == null && !requiredMod.required)
+                            // Optional mod is not installed
                             continue;
 
                         var requiredVersion = new Version(requiredMod.version);
-                        if (requiredVersion <= metadata.HVersion)
+                        if (metadata != null && metadata.HVersion >= requiredVersion)
+                            // Mod is installed and up to date
                             continue;
 
                         reason = (MultiplayerUnavailableReason)5;
@@ -63,7 +64,7 @@ namespace MultiplayerCore.Patches
             if (multiplayerUnavailableReason == (MultiplayerUnavailableReason)5)
             {
                 var metadata = PluginManager.GetPluginFromId(_requiredMod);
-                __result = $"Multiplayer Unavailable\nMod {metadata.Name} is out of date.\nPlease update to version {_requiredVersion} or newer.";
+                __result = $"Multiplayer Unavailable\nMod {metadata.Name} is missing or out of date\nPlease install version {_requiredVersion} or newer";
                 return false;
             } else if (multiplayerUnavailableReason == (MultiplayerUnavailableReason)6)
             {
