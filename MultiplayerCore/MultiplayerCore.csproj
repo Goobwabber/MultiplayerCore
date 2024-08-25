@@ -247,9 +247,6 @@
     <EmbeddedResource Include="Icons\*.png" />
     <EmbeddedResource Include="UI\ColorsUI.bsml" />
     <EmbeddedResource Include="UI\LoadingIndicator.bsml" />
-    <EmbeddedResource Include="UI\LobbySetupPanel.bsml">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
     <EmbeddedResource Include="UI\MpDifficultySelector.bsml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
