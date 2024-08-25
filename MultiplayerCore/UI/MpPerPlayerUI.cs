@@ -131,6 +131,8 @@ namespace MultiplayerCore.UI
 
 			_packetSerializer.UnregisterCallback<MpPerPlayerPacket>();
 			_packetSerializer.UnregisterCallback<GetMpPerPlayerPacket>();
+
+			_statusRepository.statusUpdatedForUrlEvent -= HandleStatusUpdate;
 		}
 
 		public void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
