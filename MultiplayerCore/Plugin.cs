@@ -42,7 +42,7 @@ namespace MultiplayerCore
         [OnEnable]
         public void OnEnable()
         {
-            SongCore.Collections.AddSeperateSongFolder(
+            SongCore.Collections.AddSeparateSongFolder(
               "Multiplayer",
               Path.Combine(Application.dataPath, CustomLevelsPath),
               SongCore.Data.FolderLevelPack.NewPack,
