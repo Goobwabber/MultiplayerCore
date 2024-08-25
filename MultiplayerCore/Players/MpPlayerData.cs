@@ -1,7 +1,7 @@
 ﻿using Hive.Versioning;
 using LiteNetLib.Utils;
 using MultiplayerCore.Networking.Abstractions;
-using System.Collections.Generic;
+using IPA.Utilities;
 
 namespace MultiplayerCore.Players
 {
@@ -20,7 +20,7 @@ namespace MultiplayerCore.Players
         /// <summary>
         /// Version
         /// </summary>
-        public Version GameVersion { get; set; }
+        public Version GameVersion { get; set; } = Version.Parse(UnityGame.GameVersion.ToString().Split('_')[0]);
 
         public override void Serialize(NetDataWriter writer)
         {
@@ -43,6 +43,8 @@ namespace MultiplayerCore.Players
         Steam = 1,
         OculusPC = 2,
         OculusQuest = 3,
-        PS4 = 4
+        PS4 = 4,
+        PS5 = 5,
+        Pico = 6
     }
 }
