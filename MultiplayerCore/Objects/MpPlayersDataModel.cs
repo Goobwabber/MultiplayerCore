@@ -59,8 +59,8 @@ namespace MultiplayerCore.Objects
         {
             // Send our MpBeatmapPacket again so newly joined players have it
             var selectedBeatmapKey = _playersData[localUserId].beatmapKey;
-            SendMpBeatmapPacket(selectedBeatmapKey, connectedPlayer);
-        }
+			if (selectedBeatmapKey.IsValid()) SendMpBeatmapPacket(selectedBeatmapKey, connectedPlayer);
+		}
 		internal void SetLocalPlayerBeatmapLevel_override(in BeatmapKey beatmapKey)
         {
             // Game: The local player has selected / recommended a beatmap
