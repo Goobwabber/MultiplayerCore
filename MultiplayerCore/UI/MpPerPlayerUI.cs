@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MultiplayerCore.Models;
+using MultiplayerCore.Objects;
 using MultiplayerCore.Repositories;
 using UnityEngine;
 using UnityEngine.UI;
@@ -31,6 +32,7 @@ namespace MultiplayerCore.UI
 		private readonly BeatmapLevelsModel _beatmapLevelsModel;
 		private readonly MpPacketSerializer _packetSerializer;
 		private readonly MpBeatmapLevelProvider _beatmapLevelProvider;
+		private readonly MpPlayersDataModel _playersDataModel;
 		private readonly MpStatusRepository _statusRepository;
 		private readonly NetworkConfigPatcher _networkConfig;
 		private BeatmapKey _currentBeatmapKey;
@@ -56,6 +58,7 @@ namespace MultiplayerCore.UI
 			_beatmapLevelsModel = beatmapLevelsModel;
 			_multiplayerSessionManager = sessionManager;
 			_beatmapLevelProvider = beatmapLevelProvider;
+			_playersDataModel = _gameServerLobbyFlowCoordinator._lobbyPlayersDataModel as MpPlayersDataModel;
 			_packetSerializer = packetSerializer;
 			_statusRepository = statusRepository;
 			_networkConfig = networkConfig;
@@ -258,11 +261,17 @@ namespace MultiplayerCore.UI
 						{
 							_logger.Debug(
 								$"Level {levelHash} has empty requirements, this should not happen, falling back to packet");
-							level = _beatmapLevelProvider.TryGetBeatmapFromPacketHash(levelHash);
-							if (level.Requirements[beatmapKey.beatmapCharacteristic.serializedName].Count > 0)
+							//level = _beatmapLevelProvider.TryGetBeatmapFromPacketHash(levelHash);
+							var packet = _playersDataModel.FindLevelPacket(levelHash);
+							level = packet != null ? _beatmapLevelProvider.GetBeatmapFromPacket(packet) : null;
+							if (level != null && level.Requirements[beatmapKey.beatmapCharacteristic.serializedName].Count > 0)
 								UpdateDifficultyList(level.Requirements[beatmapKey.beatmapCharacteristic.serializedName].Keys
 									.ToList());
-							else _logger.Debug($"Level packet {levelHash} also has empty requirements, this should not happen...");
+							else
+							{
+								_logger.Debug($"Level packet {levelHash} also has empty requirements, this should not happen...");
+								UpdateDifficultyList(new [] {beatmapKey.difficulty});
+							}
 						}
 					}
 					else _logger.Error($"Failed to get level for hash {levelHash}");
@@ -275,6 +284,7 @@ namespace MultiplayerCore.UI
 					?.GetDifficulties(beatmapKey.beatmapCharacteristic).ToList();
 				if (diffList != null) UpdateDifficultyList(diffList);
 			}
+
 		}
 
 		private void UpdateDifficultyList(IReadOnlyList<BeatmapDifficulty> difficulties)
