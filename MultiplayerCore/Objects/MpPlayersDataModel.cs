@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -58,7 +59,7 @@ namespace MultiplayerCore.Objects
         {
             // Send our MpBeatmapPacket again so newly joined players have it
             var selectedBeatmapKey = _playersData[localUserId].beatmapKey;
-            SendMpBeatmapPacket(selectedBeatmapKey);
+            SendMpBeatmapPacket(selectedBeatmapKey, connectedPlayer);
         }
 		internal void SetLocalPlayerBeatmapLevel_override(in BeatmapKey beatmapKey)
         {
@@ -104,7 +105,7 @@ namespace MultiplayerCore.Objects
             base.HandleMenuRpcManagerRecommendBeatmap(userId, beatmapKeySerializable);
         }
 
-        private async void SendMpBeatmapPacket(BeatmapKey beatmapKey)
+        private void SendMpBeatmapPacket(BeatmapKey beatmapKey, IConnectedPlayer? player = null)
         {
             var levelId = beatmapKey.levelId;
             _logger.Debug($"Sending beatmap packet for level {levelId}");
@@ -116,16 +117,18 @@ namespace MultiplayerCore.Objects
                 return;
             }
             
-            var levelData = await _beatmapLevelProvider.GetBeatmap(levelHash);
-            if (levelData == null)
+            var levelData = _beatmapLevelProvider.GetBeatmapFromLocalBeatmaps(levelHash);
+            var packet = (levelData != null) ? new MpBeatmapPacket(levelData, beatmapKey) : FindLevelPacket(levelHash);
+            if (packet == null)
             {
-                _logger.Debug("Could not get level data for beatmap, returning!");
+                _logger.Warn($"Could not get level data for beatmap '{levelHash}', returning!");
                 return;
             }
 
-            var packet = new MpBeatmapPacket(levelData, beatmapKey);
-            _logger.Debug("Actually sending packet");
-            _multiplayerSessionManager.Send(packet);
+            if (player != null)
+				_multiplayerSessionManager.SendToPlayer(packet, player);
+            else
+				_multiplayerSessionManager.Send(packet);
         }
 
         public MpBeatmapPacket? GetPlayerPacket(string playerId)
