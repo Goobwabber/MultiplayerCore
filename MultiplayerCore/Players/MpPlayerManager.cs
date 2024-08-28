@@ -34,7 +34,7 @@ namespace MultiplayerCore.Players
         {
             _sessionManager.SetLocalPlayerState("modded", true);
             _packetSerializer.RegisterCallback<MpPlayerData>(HandlePlayerData);
-            _sessionManager.playerConnectedEvent += HandlePlayerConnected;
+            //_sessionManager.playerConnectedEvent += HandlePlayerConnected;
 
             _localPlayerInfo = await _platformUserModel.GetUserInfo(CancellationToken.None);
         }
@@ -44,22 +44,22 @@ namespace MultiplayerCore.Players
             _packetSerializer.UnregisterCallback<MpPlayerData>();
         }
 
-        private void HandlePlayerConnected(IConnectedPlayer player)
-        {
-	        if (_localPlayerInfo == null) 
-		        throw new NullReferenceException("local player info was not yet set! make sure it is set before anything else happens!");
+        //private void HandlePlayerConnected(IConnectedPlayer player)
+        //{
+	       // if (_localPlayerInfo == null) 
+		      //  throw new NullReferenceException("local player info was not yet set! make sure it is set before anything else happens!");
 
-            _sessionManager.Send(new MpPlayerData
-            {
-                Platform = _localPlayerInfo.platform switch
-                {
-                    UserInfo.Platform.Oculus => Platform.OculusPC,
-                    UserInfo.Platform.Steam => Platform.Steam,
-                    _ => Platform.Unknown
-                },
-                PlatformId = _localPlayerInfo.platformUserId
-            });
-        }
+        //    _sessionManager.Send(new MpPlayerData
+        //    {
+        //        Platform = _localPlayerInfo.platform switch
+        //        {
+        //            UserInfo.Platform.Oculus => Platform.OculusPC,
+        //            UserInfo.Platform.Steam => Platform.Steam,
+        //            _ => Platform.Unknown
+        //        },
+        //        PlatformId = _localPlayerInfo.platformUserId
+        //    });
+        //}
 
         private void HandlePlayerData(MpPlayerData packet, IConnectedPlayer player)
         {
