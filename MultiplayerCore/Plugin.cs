@@ -1,12 +1,11 @@
-﻿using BeatSaverSharp;
+﻿using System;
+using System.IO;
+using BeatSaverSharp;
 using HarmonyLib;
 using IPA;
-using IPA.Config;
 using IPA.Loader;
 using MultiplayerCore.Installers;
 using SiraUtil.Zenject;
-using System;
-using System.IO;
 using UnityEngine;
 using IPALogger = IPA.Logging.Logger;
 
@@ -19,10 +18,10 @@ namespace MultiplayerCore
         public const string CustomLevelsPath = "CustomMultiplayerLevels";
 
         internal static IPALogger Logger = null!;
+        internal static BeatSaver _beatsaver = null!;
 
         private readonly Harmony _harmony;
         private readonly PluginMetadata _metadata;
-        private readonly BeatSaver _beatsaver;
 
         [Init]
         public Plugin(IPALogger logger, PluginMetadata pluginMetadata, Zenjector zenjector)
@@ -43,7 +42,12 @@ namespace MultiplayerCore
         [OnEnable]
         public void OnEnable()
         {
-            SongCore.Collections.AddSeperateSongFolder("Multiplayer", Path.Combine(Application.dataPath, CustomLevelsPath), SongCore.Data.FolderLevelPack.CustomLevels);
+            SongCore.Collections.AddSeparateSongFolder(
+              "Multiplayer",
+              Path.Combine(Application.dataPath, CustomLevelsPath),
+              SongCore.Data.FolderLevelPack.NewPack,
+              SongCore.Utilities.Utils.LoadSpriteFromResources("MultiplayerCore.Icons.MpFolder.png")
+            );
             _harmony.PatchAll(_metadata.Assembly);
         }
 

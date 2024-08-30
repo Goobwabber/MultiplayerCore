@@ -90,6 +90,18 @@ namespace MultiplayerCore.Networking
             return registeredTypes.Contains(type);
         }
 
+		/// <summary>
+		/// Registers a packet without callback
+		/// </summary>
+		/// <typeparam name="TPacket">Type of packet to register. Inherits <see cref="LiteNetLib.Utils.INetSerializable"/></typeparam>
+		public void RegisterType<TPacket>()
+        {
+            var packetType = typeof(TPacket);
+            var packetIdAttribute = packetType.GetCustomAttribute<PacketIDAttribute>();
+            var packetId = packetIdAttribute is not null ? packetIdAttribute.ID : packetType.Name;
+			registeredTypes.Add(packetType);
+        }
+
         /// <summary>
         /// Registers a callback without sender for a packet.
         /// </summary>
@@ -107,13 +119,13 @@ namespace MultiplayerCore.Networking
         /// <seealso cref="RegisterCallback{TPacket}(Action{TPacket})"/>
         public void RegisterCallback<TPacket>(Action<TPacket, IConnectedPlayer> callback) where TPacket : INetSerializable, new()
         {
-            var packetType = typeof(TPacket);
-            registeredTypes.Add(packetType);
+	        var packetType = typeof(TPacket);
+	        registeredTypes.Add(packetType);
 
-            var packetIdAttribute = packetType.GetCustomAttribute<PacketIDAttribute>();
-            var packetId = packetIdAttribute is not null ? packetIdAttribute.ID : packetType.Name;
+			var packetIdAttribute = packetType.GetCustomAttribute<PacketIDAttribute>();
+	        var packetId = packetIdAttribute is not null ? packetIdAttribute.ID : packetType.Name;
 
-            Func<NetDataReader, int, TPacket> deserialize = delegate (NetDataReader reader, int size)
+			Func<NetDataReader, int, TPacket> deserialize = delegate (NetDataReader reader, int size)
             {
                 TPacket packet = new TPacket();
                 if (packet == null)
