@@ -37,7 +37,7 @@ namespace MultiplayerCore.Patchers
         /// <summary>
         /// Override official servers with a custom API server.
         /// </summary>
-        public void UseCustomApiServer(string graphUrl, string statusUrl, int? maxPartySize = null,
+        public void UseCustomApiServer(string graphUrl, string? statusUrl, int? maxPartySize = null,
             string? quickPlaySetupUrl = null, bool disableSsl = true)
         {
             _logger.Debug($"Overriding multiplayer API server (graphUrl={graphUrl}, statusUrl={statusUrl}, " +
@@ -46,7 +46,7 @@ namespace MultiplayerCore.Patchers
             GraphUrl = graphUrl;
             MasterServerStatusUrl = statusUrl;
             MaxPartySize = maxPartySize;
-            QuickPlaySetupUrl = quickPlaySetupUrl ?? statusUrl + "/mp_override.json";
+            QuickPlaySetupUrl = quickPlaySetupUrl ?? (statusUrl != null ? statusUrl + "/mp_override.json" : null);
             DisableSsl = disableSsl;
         }
 

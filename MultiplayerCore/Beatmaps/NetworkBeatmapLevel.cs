@@ -1,51 +1,56 @@
-﻿using BeatSaverSharp;
-using MultiplayerCore.Beatmaps.Abstractions;
-using MultiplayerCore.Beatmaps.Packets;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using BeatSaverSharp;
+using MultiplayerCore.Beatmaps.Abstractions;
+using MultiplayerCore.Beatmaps.Packets;
+using MultiplayerCore.Beatmaps.Serializable;
 using UnityEngine;
 using static SongCore.Data.ExtraSongData;
 
 namespace MultiplayerCore.Beatmaps
 {
     /// <summary>
-    /// An <see cref="IPreviewBeatmapLevel"/> created from data from a network player.
+    /// Beatmap level data based on an MpBeatmapPacket from another player.
     /// </summary>
-    class NetworkBeatmapLevel : MpBeatmapLevel
+    class NetworkBeatmapLevel : MpBeatmap
     {
-        public override string levelHash { get; protected set; }
+        public override string LevelHash { get; protected set; }
 
-        public override string songName => _packet.songName;
-        public override string songSubName => _packet.songSubName;
-        public override string songAuthorName => _packet.songAuthorName;
-        public override string levelAuthorName => _packet.levelAuthorName;
-        public override float beatsPerMinute => _packet.beatsPerMinute;
-        public override float songDuration => _packet.songDuration;
+        public override string SongName => _packet.songName;
+        public override string SongSubName => _packet.songSubName;
+        public override string SongAuthorName => _packet.songAuthorName;
+        public override string LevelAuthorName => _packet.levelAuthorName;
+        public override float BeatsPerMinute => _packet.beatsPerMinute;
+        public override float SongDuration => _packet.songDuration;
 
-        public override Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> requirements => new() { { _packet.characteristic, _packet.requirements } };
-        public override Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> difficultyColors => new() { { _packet.characteristic, _packet.mapColors } };
-        public override Contributor[] contributors => _packet.contributors;
+        public override Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> Requirements =>
+            new() { { _packet.characteristicName, _packet.requirements } };
+
+        public override Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> DifficultyColors =>
+            new() { { _packet.characteristicName, _packet.mapColors } };
+
+        public override Contributor[] Contributors => _packet.contributors;
 
         private readonly MpBeatmapPacket _packet;
         private readonly BeatSaver? _beatsaver;
 
         public NetworkBeatmapLevel(MpBeatmapPacket packet)
         {
-            levelHash = packet.levelHash;
+            LevelHash = packet.levelHash;
             _packet = packet;
         }
 
         public NetworkBeatmapLevel(MpBeatmapPacket packet, BeatSaver beatsaver)
         {
-            levelHash = packet.levelHash;
+            LevelHash = packet.levelHash;
             _packet = packet;
             _beatsaver = beatsaver;
         }
 
         private Task<Sprite>? _coverImageTask;
 
-        public override Task<Sprite> GetCoverImageAsync(CancellationToken cancellationToken)
+        public override Task<Sprite> TryGetCoverSpriteAsync(CancellationToken cancellationToken)
         {
             if (_coverImageTask == null)
                 _coverImageTask = FetchCoverImage(cancellationToken);
@@ -56,7 +61,7 @@ namespace MultiplayerCore.Beatmaps
         {
             if (_beatsaver == null)
                 return null!;
-            var beatmap = await _beatsaver.BeatmapByHash(levelHash, cancellationToken);
+            var beatmap = await _beatsaver.BeatmapByHash(LevelHash, cancellationToken);
             if (beatmap == null)
                 return null!;
             byte[]? coverBytes = await beatmap.LatestVersion.DownloadCoverImage(cancellationToken);

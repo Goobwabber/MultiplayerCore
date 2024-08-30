@@ -1,19 +1,17 @@
-using BeatSaverSharp;
-using BeatSaverSharp.Models;
-using SiraUtil.Logging;
-using SiraUtil.Zenject;
-using SongCore.Data;
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BeatSaverSharp;
+using BeatSaverSharp.Models;
+using SongCore.Data;
 using Zenject;
 using IPALogger = IPA.Logging.Logger;
 
 namespace MultiplayerCore.Objects
 {
-    internal class MpEntitlementChecker : NetworkPlayerEntitlementChecker
+    public class MpEntitlementChecker : NetworkPlayerEntitlementChecker
     {
         public event Action<string, string, EntitlementsStatus>? receivedEntitlementEvent;
 
@@ -99,7 +97,7 @@ namespace MultiplayerCore.Objects
                     .Distinct().ToArray();
 
                 bool hasRequirements = requirements.All(x => string.IsNullOrEmpty(x) || SongCore.Collections.capabilities.Contains(x));
-                return Task.FromResult(hasRequirements ? EntitlementsStatus.Ok : EntitlementsStatus.NotOwned);
+				return Task.FromResult(hasRequirements ? EntitlementsStatus.Ok : EntitlementsStatus.NotOwned);
             }
 
             return _beatsaver.BeatmapByHash(levelHash).ContinueWith<EntitlementsStatus>(r =>
@@ -126,7 +124,9 @@ namespace MultiplayerCore.Objects
                         .ToArray()); // Damn this looks really cringe
 
                 bool hasRequirements = requirements.All(x => string.IsNullOrEmpty(x) || SongCore.Collections.capabilities.Contains(x));
-                return hasRequirements ? EntitlementsStatus.NotDownloaded : EntitlementsStatus.NotOwned;
+				if (hasRequirements) _logger.Debug($"Level hash {levelHash} found on BeatSaver!");
+				else _logger.Warn($"Level hash {levelHash} requirements not fullfilled! {string.Join(", ", requirements)}");
+				return hasRequirements ? EntitlementsStatus.NotDownloaded : EntitlementsStatus.NotOwned;
             });
         }
 
@@ -162,7 +162,7 @@ namespace MultiplayerCore.Objects
         /// <param name="userId">Remote user</param>
         /// <param name="levelId">Level to check entitlement</param>
         /// <returns>Level entitlement status</returns>
-        public EntitlementsStatus GetUserEntitlementStatusWithoutRequest(string userId, string levelId)
+        public EntitlementsStatus GetKnownEntitlement(string userId, string levelId)
         {
             if (_entitlementsDictionary.TryGetValue(userId, out ConcurrentDictionary<string, EntitlementsStatus> userDictionary))
                 if (userDictionary.TryGetValue(levelId, out EntitlementsStatus entitlement))

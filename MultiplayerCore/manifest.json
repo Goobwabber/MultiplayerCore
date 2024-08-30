@@ -5,15 +5,15 @@
   "author": "Goobwabber",
   "version": "1.5.0",
   "description": "Adds custom songs to Beat Saber Multiplayer.",
-  "gameVersion": "1.31.0",
+  "gameVersion": "1.37.3",
   "dependsOn": {
-    "BSIPA": "^4.3.0",
-    "SongCore": "^3.10.3",
-    "BeatSaverSharp": "^3.4.4",
-    "SiraUtil": "^3.1.3",
-    "BeatSaberMarkupLanguage": "^1.7.3",
-    "System.IO.Compression": "^4.6.0",
-    "System.IO.Compression.FileSystem": "^4.7.0"
+    "BSIPA": "^4.3.3",
+    "SongCore": "^3.13.0",
+    "BeatSaverSharp": "^3.4.5",
+    "SiraUtil": "^3.1.7",
+    "BeatSaberMarkupLanguage": "^1.9.0",
+    "System.IO.Compression": "^4.6.57",
+    "System.IO.Compression.FileSystem": "^4.7.3056"
   },
   "links": {
     "project-home": "https://github.com/Goobwabber/MultiplayerCore",

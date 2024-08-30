@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using HarmonyLib;
 using MultiplayerCore.Models;
-using MultiplayerCore.Patchers;
 using SiraUtil.Affinity;
 using SiraUtil.Logging;
 
@@ -70,7 +68,8 @@ namespace MultiplayerCore.Repositories
         #region Patch
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(MultiplayerUnavailableReasonMethods), "TryGetMultiplayerUnavailableReason")]
+        [AffinityPatch(typeof(MultiplayerUnavailableReasonMethods),
+            nameof(MultiplayerUnavailableReasonMethods.TryGetMultiplayerUnavailableReason))]
         private void PrefixTryGetMultiplayerUnavailableReason(MultiplayerStatusData data)
         {
             // TryGetMultiplayerUnavailableReason is called whenever a server response is parsed
