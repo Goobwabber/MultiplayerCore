@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using MultiplayerCore.Beatmaps;
+using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Beatmaps.Packets;
 using MultiplayerCore.Beatmaps.Providers;
 using MultiplayerCore.Networking;
@@ -12,7 +14,7 @@ using SiraUtil.Logging;
 namespace MultiplayerCore.Objects
 {
     [UsedImplicitly]
-    internal class MpPlayersDataModel : LobbyPlayersDataModel, ILobbyPlayersDataModel, IDisposable
+    public class MpPlayersDataModel : LobbyPlayersDataModel, ILobbyPlayersDataModel, IDisposable
     {
         private readonly MpPacketSerializer _packetSerializer;
         internal readonly MpBeatmapLevelProvider _beatmapLevelProvider;
@@ -149,6 +151,18 @@ namespace MultiplayerCore.Objects
             var packet = _lastPlayerBeatmapPackets.Values.FirstOrDefault(packet => packet.levelHash == levelHash);
             _logger.Debug($"Found packet: {packet?.levelHash ?? "NULL"}");
             return packet;
+        }
+
+        public MpBeatmap GetLevelLocalOrFromPacketOrDummy(string levelHash)
+        {
+	        var level = _beatmapLevelProvider.GetBeatmapFromLocalBeatmaps(levelHash);
+	        if (level == null)
+	        {
+		        var packet = FindLevelPacket(levelHash);
+		        if (packet != null) level = _beatmapLevelProvider.GetBeatmapFromPacket(packet);
+	        }
+	        if (level == null) level = new NoInfoBeatmapLevel(levelHash);
+            return level;
         }
 
     }
