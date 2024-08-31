@@ -2,17 +2,26 @@
 using System;
 using Zenject;
 using SiraUtil.Affinity;
+using SiraUtil.Logging;
 
 
 namespace MultiplayerCore.NodePoseSyncState
 {
     internal class MpNodePoseSyncStateManager : IInitializable, IDisposable, IAffinity
     {
-        public long? DeltaUpdateFrequency { get; private set; } = null;
-        public long? FullStateUpdateFrequency { get; private set; } = null;
+		public long? DeltaUpdateFrequency { get; private set; }
+        public long? FullStateUpdateFrequency { get; private set; }
 
-        private readonly MpPacketSerializer _packetSerializer;
-        MpNodePoseSyncStateManager(MpPacketSerializer packetSerializer) => _packetSerializer = packetSerializer;
+        public bool ShouldForceUpdate { get; private set; }
+
+		private readonly MpPacketSerializer _packetSerializer;
+        private readonly SiraLog _logger;
+
+        MpNodePoseSyncStateManager(MpPacketSerializer packetSerializer, SiraLog logger)
+        {
+	        _packetSerializer = packetSerializer;
+	        _logger = logger;
+        }
         
         public void Initialize() => _packetSerializer.RegisterCallback<MpNodePoseSyncStatePacket>(HandleUpdateFrequencyUpdated);
         
@@ -22,6 +31,10 @@ namespace MultiplayerCore.NodePoseSyncState
         {
             if (player.isConnectionOwner)
             {
+                _logger.Debug("Updating node pose sync frequency to following values: " +
+                              $"delta: {data.deltaUpdateFrequency}ms, full: {data.fullStateUpdateFrequency}ms");
+                ShouldForceUpdate = DeltaUpdateFrequency != data.deltaUpdateFrequency ||
+                                    FullStateUpdateFrequency != data.fullStateUpdateFrequency;
                 DeltaUpdateFrequency = data.deltaUpdateFrequency;
                 FullStateUpdateFrequency = data.fullStateUpdateFrequency;
             }
@@ -33,6 +46,7 @@ namespace MultiplayerCore.NodePoseSyncState
         {
             if (DeltaUpdateFrequency.HasValue)
             {
+                _logger.Debug($"Returning delta update frequency: {DeltaUpdateFrequency.Value}ms");
                 __result = DeltaUpdateFrequency.Value;
                 return false;
             }
@@ -45,10 +59,35 @@ namespace MultiplayerCore.NodePoseSyncState
         {
             if (FullStateUpdateFrequency.HasValue)
             {
+	            _logger.Debug($"Returning full state update frequency: {FullStateUpdateFrequency.Value}ms");
                 __result = FullStateUpdateFrequency.Value;
                 return false;
             }
             return true;
         }
-    }
+
+        [AffinityPrefix]
+        [AffinityPatch(typeof(NodePoseSyncStateManager), nameof(NodePoseSyncStateManager.TryCreateLocalState))]
+        private void TryCreateLocalState(NodePoseSyncStateManager __instance)
+        {
+	        if (ShouldForceUpdate)
+	        {
+		        _logger.Debug("Forcing new state buffer update");
+				__instance._localState = null;
+                ShouldForceUpdate = false;
+	        }
+        }
+
+        [AffinityPrefix]
+        [AffinityPatch(typeof(NodePoseSyncStateManager), nameof(NodePoseSyncStateManager.HandlePlayerConnected))]
+        private void HandlePlayerConnected(NodePoseSyncStateManager __instance)
+        {
+	        if (ShouldForceUpdate)
+	        {
+                _logger.Debug("Forcing new state buffer update");
+		        __instance._localState = null;
+                ShouldForceUpdate = false;
+	        }
+		}
+	}
 }
