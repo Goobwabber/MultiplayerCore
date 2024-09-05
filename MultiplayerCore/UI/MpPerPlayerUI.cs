@@ -183,7 +183,10 @@ namespace MultiplayerCore.UI
 			var locposition = _lobbyViewController._startGameReadyButton.gameObject.transform.localPosition;
 			ppth!.gameObject.transform.localPosition = locposition;
 
-			ppth.gameObject.SetActive(_networkConfig.IsOverridingApi && (_currentStatusData.supportsPPDifficulties || _currentStatusData.supportsPPModifiers));
+			ppth.gameObject.SetActive(_networkConfig.IsOverridingApi && _currentStatusData != null && (_currentStatusData.supportsPPDifficulties || _currentStatusData.supportsPPModifiers));
+			ppdt.gameObject.SetActive(_currentStatusData != null && _currentStatusData.supportsPPDifficulties);
+			ppmt.gameObject.SetActive(_currentStatusData != null && _currentStatusData.supportsPPModifiers);
+			if (_currentStatusData == null) _logger.Error($"Missing Status Data for current server status endpoint {_networkConfig.MasterServerStatusUrl} (Check your config)");
 		}
 
 		void ModifierSelectionDidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
