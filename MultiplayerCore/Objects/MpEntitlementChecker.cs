@@ -125,7 +125,7 @@ namespace MultiplayerCore.Objects
 
                 bool hasRequirements = requirements.All(x => string.IsNullOrEmpty(x) || SongCore.Collections.capabilities.Contains(x));
 				if (hasRequirements) _logger.Debug($"Level hash {levelHash} found on BeatSaver!");
-				else _logger.Warn($"Level hash {levelHash} requirements not fullfilled! {string.Join(", ", requirements)}");
+				else _logger.Warn($"Level hash {levelHash} requirements not fullfilled! {string.Join(", ", requirements.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray())}");
 				return hasRequirements ? EntitlementsStatus.NotDownloaded : EntitlementsStatus.NotOwned;
             });
         }
