@@ -118,7 +118,7 @@ namespace MultiplayerCore.Objects
 
                 string[] requirements = beatmapVersion.Difficulties
                     .Aggregate(Array.Empty<string>(), (a, n) => a
-                        .Append(n.Chroma ? "Chroma" : "")
+                        //.Append(n.Chroma ? "Chroma" : "") //  Ignore as BeatSaver marks Suggestions and Requirements, we only need requirements
                         .Append(n.MappingExtensions ? "Mapping Extensions" : "")
                         .Append(n.NoodleExtensions ? "Noodle Extensions" : "")
                         .ToArray()); // Damn this looks really cringe
