@@ -267,10 +267,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="BeforeBuild" Condition="'$(NCRUNCH)' != '1'">
@@ -283,6 +279,9 @@
       <Output TaskParameter="GitUser" PropertyName="GitUser" />
     </GetCommitInfo>
     <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true' AND '$(GitUser)' == 'Goobwabber' AND '$(IsPullRequest)' != 'true'">
+      <VersionType>Official</VersionType>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(GitUser)' == 'Goobwabber' AND '$(IsPullRequest)' != 'true' AND '$(Configuration)' == 'Release'">
       <VersionType>Official</VersionType>
     </PropertyGroup>
     <PropertyGroup Condition="'$(GitModified)' != 'Modified'">
