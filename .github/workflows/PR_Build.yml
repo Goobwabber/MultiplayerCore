@@ -12,18 +12,24 @@ jobs:
   Build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Setup dotnet
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
-    - name: Fetch SIRA References
-      uses: ProjectSIRA/download-sira-stripped@1.0.0
+        dotnet-version: 8.0.x
+    # - name: Fetch SIRA References
+    #   uses: ProjectSIRA/download-sira-stripped@1.0.0
+    #   with:
+    #     manifest: ./MultiplayerCore/manifest.json
+    #     sira-server-code: ${{ secrets.SIRA_SERVER_CODE }}
+    - name: Initialize modding environment
+      uses: beat-forge/init-beatsaber@v1
       with:
+        token: ${{ github.token }}
+        repo: michael-r-elp/beatsaber-stripped
         manifest: ./MultiplayerCore/manifest.json
-        sira-server-code: ${{ secrets.SIRA_SERVER_CODE }}
     - name: Fetch Mod References
-      uses: Goobwabber/download-beatmods-deps@1.1
+      uses: Goobwabber/download-beatmods-deps@1.2
       with:
         manifest: ./MultiplayerCore/manifest.json
     - name: Build
@@ -39,7 +45,7 @@ jobs:
         BUILDTEXT: Filename=${{ steps.Build.outputs.filename }}
         ASSEMBLYNAME: AssemblyName=${{ steps.Build.outputs.assemblyname }}
     - name: Upload Artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ steps.Build.outputs.filename }}
         path: ${{ steps.Build.outputs.artifactpath }}
