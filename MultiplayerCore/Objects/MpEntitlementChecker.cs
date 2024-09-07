@@ -92,6 +92,7 @@ namespace MultiplayerCore.Objects
                 if (extraSongData == null)
                     return Task.FromResult(EntitlementsStatus.Ok);
 
+                // Note: If there is even just one diff in the beatmap that requires a mod, this will flag the whole map, possible check selected difficulty?
                 string[] requirements = extraSongData._difficulties
                     .Aggregate(Array.Empty<string>(), (a, n) => a.Concat(n.additionalDifficultyData?._requirements ?? Array.Empty<string>()).ToArray())
                     .Distinct().ToArray();
@@ -99,6 +100,8 @@ namespace MultiplayerCore.Objects
                 bool hasRequirements = requirements.All(x => string.IsNullOrEmpty(x) || SongCore.Collections.capabilities.Contains(x));
 				return Task.FromResult(hasRequirements ? EntitlementsStatus.Ok : EntitlementsStatus.NotOwned);
             }
+
+            // TODO: Check beatmap packets first maybe and then beatsaver as fallback?
 
             return _beatsaver.BeatmapByHash(levelHash).ContinueWith<EntitlementsStatus>(r =>
             {
@@ -116,11 +119,12 @@ namespace MultiplayerCore.Objects
                     return EntitlementsStatus.NotOwned;
                 }
 
+                // Note: If there is even just one diff in the beatmap that requires a mod, this will flag the whole map, possible check selected difficulty?
                 string[] requirements = beatmapVersion.Difficulties
                     .Aggregate(Array.Empty<string>(), (a, n) => a
                         //.Append(n.Chroma ? "Chroma" : "") //  Ignore as BeatSaver marks Suggestions and Requirements, we only need requirements
-                        .Append(n.MappingExtensions ? "Mapping Extensions" : "")
-                        .Append(n.NoodleExtensions ? "Noodle Extensions" : "")
+                        .Append(n.MappingExtensions ? "Mapping Extensions" : string.Empty)
+                        .Append(n.NoodleExtensions ? "Noodle Extensions" : string.Empty)
                         .ToArray()); // Damn this looks really cringe
 
                 bool hasRequirements = requirements.All(x => string.IsNullOrEmpty(x) || SongCore.Collections.capabilities.Contains(x));
