@@ -23,10 +23,11 @@ jobs:
     #     manifest: ./MultiplayerCore/manifest.json
     #     sira-server-code: ${{ secrets.SIRA_SERVER_CODE }}
     - name: Initialize modding environment
-      uses: beat-forge/init-beatsaber@v1
+      uses: beat-forge/init-beatsaber@v1.6.3
       with:
         token: ${{ github.token }}
-        repo: beat-forge/beatsaber-stripped
+        repo: michael-r-elp/beatsaber-stripped
+        manifest: ./MultiplayerCore/manifest.json
     - name: Fetch Mod References
       uses: Goobwabber/download-beatmods-deps@1.1
       with:
