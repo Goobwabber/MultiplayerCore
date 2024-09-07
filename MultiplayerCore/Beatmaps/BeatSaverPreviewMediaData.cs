@@ -1,10 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BeatSaverSharp;
 using BeatSaverSharp.Models;
 
@@ -26,7 +22,7 @@ namespace MultiplayerCore.Beatmaps
         }
 
         private Beatmap? _beatmap = null;
-        private async Task<Beatmap> GetBeatsaverBeatmap()
+        private async Task<Beatmap?> GetBeatsaverBeatmap()
         {
             if (_beatmap != null) return _beatmap;
             _beatmap = await BeatSaverClient.BeatmapByHash(LevelHash);
@@ -49,12 +45,12 @@ namespace MultiplayerCore.Beatmaps
             return CoverImagesprite;
         }
 
-        public async Task<AudioClip> GetPreviewAudioClip(CancellationToken cancellationToken)
+        public Task<AudioClip> GetPreviewAudioClip(CancellationToken cancellationToken)
         {
             // TODO: something with preview url
-            // var bm = await GetBeatsaverBeatmap();
+            //var bm = await GetBeatsaverBeatmap();
             // bm.LatestVersion.PreviewURL
-            return null;
+            return null!;
         }
 
         public void UnloadPreviewAudioClip() {}

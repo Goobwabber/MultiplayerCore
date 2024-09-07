@@ -38,14 +38,16 @@ namespace MultiplayerCore.Patches
 			if (gameplaySetupData != null && beatmapLevelData == null && !string.IsNullOrWhiteSpace(levelHash))
 			{
 				Plugin.Logger.Info($"No LevelData for custom level {levelHash} running patch for spectator");
-				var packet = _playersDataModel.FindLevelPacket(levelHash);
-				Task<MpBeatmap>? levelTask = null;
+				var packet = _playersDataModel.FindLevelPacket(levelHash!);
+				Task<MpBeatmap?>? levelTask = null;
 				if (packet != null)
 				{
+#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target types.
 					levelTask = Task.FromResult(_mpBeatmapLevelProvider.GetBeatmapFromPacket(packet));
+#pragma warning restore CS8619
 				}
 
-				if (levelTask == null) levelTask = _mpBeatmapLevelProvider.GetBeatmap(levelHash);
+				if (levelTask == null) levelTask = _mpBeatmapLevelProvider.GetBeatmap(levelHash!);
 				__instance.countdownStarted = false;
 				__instance.StopListeningToGameStart(); // Ensure we stop listening for the start event while we run our start task
 				levelTask.ContinueWith(beatmapTask =>
@@ -53,10 +55,10 @@ namespace MultiplayerCore.Patches
 					if (__instance.countdownStarted) return;  // Another countdown has started, don't start the level
 
 					BeatmapLevel? beatmapLevel = beatmapTask.Result?.MakeBeatmapLevel(gameplaySetupData.beatmapKey,
-						_mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(levelHash));
+						_mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(levelHash!));
 					if (beatmapLevel == null)
-						beatmapLevel = new NoInfoBeatmapLevel(levelHash).MakeBeatmapLevel(gameplaySetupData.beatmapKey,
-							_mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(levelHash));
+						beatmapLevel = new NoInfoBeatmapLevel(levelHash!).MakeBeatmapLevel(gameplaySetupData.beatmapKey,
+							_mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(levelHash!));
 
 					__instance._menuTransitionsHelper.StartMultiplayerLevel("Multiplayer", gameplaySetupData.beatmapKey, beatmapLevel, beatmapLevelData,
 						__instance._playerDataModel.playerData.colorSchemesSettings.GetOverrideColorScheme(), gameplaySetupData.gameplayModifiers,
@@ -99,17 +101,17 @@ namespace MultiplayerCore.Patches
 		{
 			var hash = Utilities.HashForLevelID(beatmapKey.levelId);
 			if (NoLevelSpectatorPatch._mpBeatmapLevelProvider != null && !string.IsNullOrWhiteSpace(hash) &&
-			    SongCore.Loader.GetLevelByHash(hash) == null)
+			    SongCore.Loader.GetLevelByHash(hash!) == null)
 			{
 				IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew<Task>(async () =>
 				{
-					var packet = NoLevelSpectatorPatch._playersDataModel?.FindLevelPacket(hash);
+					var packet = NoLevelSpectatorPatch._playersDataModel?.FindLevelPacket(hash!);
 					BeatmapLevel? beatmapLevel = packet != null ? NoLevelSpectatorPatch._mpBeatmapLevelProvider.GetBeatmapFromPacket(packet)?
-						.MakeBeatmapLevel(beatmapKey, NoLevelSpectatorPatch._mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash)) : null;
-					if (beatmapLevel == null) beatmapLevel = (await NoLevelSpectatorPatch._mpBeatmapLevelProvider.GetBeatmap(hash))?
-						.MakeBeatmapLevel(beatmapKey, NoLevelSpectatorPatch._mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash));
+						.MakeBeatmapLevel(beatmapKey, NoLevelSpectatorPatch._mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash!)) : null;
+					if (beatmapLevel == null) beatmapLevel = (await NoLevelSpectatorPatch._mpBeatmapLevelProvider.GetBeatmap(hash!))?
+						.MakeBeatmapLevel(beatmapKey, NoLevelSpectatorPatch._mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash!));
 					if (beatmapLevel == null)
-						beatmapLevel = new NoInfoBeatmapLevel(hash).MakeBeatmapLevel(beatmapKey, NoLevelSpectatorPatch._mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash));
+						beatmapLevel = new NoInfoBeatmapLevel(hash!).MakeBeatmapLevel(beatmapKey, NoLevelSpectatorPatch._mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash!));
 					Plugin.Logger.Trace($"Calling Setup with level type: {beatmapLevel.GetType().Name}, beatmapCharacteristic type: {beatmapKey.beatmapCharacteristic.GetType().Name}, difficulty type: {beatmapKey.difficulty.GetType().Name} ");
 					if (_newlbarInfo)
 					{

@@ -30,9 +30,9 @@ namespace MultiplayerCore.Patchers
         public bool AddEmptyPlayerSlotForEvenCount { get; set; } = false;
 
         private readonly INetworkConfig _networkConfig;
-        private static SiraLog _logger;
+        private static SiraLog? _logger;
 
-        internal PlayerCountPatcher(
+		internal PlayerCountPatcher(
             INetworkConfig networkConfig,
             SiraLog logger)
         {

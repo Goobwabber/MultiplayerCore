@@ -68,7 +68,7 @@ namespace MultiplayerCore.Objects
 
         private async Task<bool> TryDownloadLevelInternal(string levelId, CancellationToken cancellationToken, IProgress<double>? progress = null)
         {
-            string levelHash = Utilities.HashForLevelID(levelId);
+            string? levelHash = Utilities.HashForLevelID(levelId);
             if (string.IsNullOrEmpty(levelHash))
             {
                 _logger.Error($"Could not parse hash from id {levelId}");
@@ -77,7 +77,7 @@ namespace MultiplayerCore.Objects
 
             try
             {
-                await DownloadLevel(levelHash, cancellationToken, progress);
+                await DownloadLevel(levelHash!, cancellationToken, progress);
                 _logger.Debug($"Download finished: {levelId}");
                 _downloads.TryRemove(levelId, out _);
                 return true;

@@ -23,7 +23,7 @@ namespace MultiplayerCore.Patchers
 
         [AffinityPrefix]
         [AffinityPatch(typeof(GameServerPlayerTableCell), nameof(GameServerPlayerTableCell.SetData))]
-        bool GameServerPlayerTableCell_SetData(ref GameServerPlayerTableCell __instance, IConnectedPlayer connectedPlayer, ILobbyPlayerData? playerData, bool hasKickPermissions, bool allowSelection, Task<EntitlementStatus>? getLevelEntitlementTask)
+        bool GameServerPlayerTableCell_SetData(ref GameServerPlayerTableCell __instance, IConnectedPlayer connectedPlayer, ILobbyPlayerData playerData, bool hasKickPermissions, bool allowSelection, Task<EntitlementStatus>? getLevelEntitlementTask)
         {
             __instance._playerNameText.text = connectedPlayer.userName;
             __instance._localPlayerBackgroundImage.enabled = connectedPlayer.isMe;
@@ -59,14 +59,14 @@ namespace MultiplayerCore.Patchers
 
 				if (level == null && _mpPlayersDataModel != null && !string.IsNullOrEmpty(levelHash)) // we didn't have the level, but we can attempt to get the packet
 				{
-					var packet = _mpPlayersDataModel.FindLevelPacket(levelHash);
+					var packet = _mpPlayersDataModel.FindLevelPacket(levelHash!);
 					instance._suggestedLevelText.text = packet?.songName;
 
 					Task<MpBeatmap?>? mpLevelTask = null;
 					if (packet == null)
 					{
 						Plugin.Logger.Debug("Could not find packet, trying beatsaver");
-						mpLevelTask = _mpBeatmapLevelProvider.GetBeatmapFromBeatSaver(levelHash);
+						mpLevelTask = _mpBeatmapLevelProvider.GetBeatmapFromBeatSaver(levelHash!);
 						yield return IPA.Utilities.Async.Coroutines.WaitForTask(mpLevelTask);
 						Plugin.Logger.Debug($"Task finished SongName={mpLevelTask.Result?.SongName}");
 						instance._suggestedLevelText.text = mpLevelTask.Result?.SongName;

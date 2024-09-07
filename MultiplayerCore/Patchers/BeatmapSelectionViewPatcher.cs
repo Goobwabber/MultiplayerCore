@@ -13,11 +13,11 @@ namespace MultiplayerCore.Patchers
 {
 	internal class BeatmapSelectionViewPatcher : IAffinity
     {
-        private MpPlayersDataModel _mpPlayersDataModel;
+        private MpPlayersDataModel? _mpPlayersDataModel;
         private MpBeatmapLevelProvider _mpBeatmapLevelProvider;
         private BeatmapLevelsModel _beatmapLevelsModel;
 
-        private static MethodInfo _lbarInfo;
+        private static MethodInfo? _lbarInfo;
         private static bool _newlbarInfo;
 
 

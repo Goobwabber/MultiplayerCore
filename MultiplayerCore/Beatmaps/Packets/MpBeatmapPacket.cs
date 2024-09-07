@@ -28,7 +28,7 @@ namespace MultiplayerCore.Beatmaps.Packets
 
         public MpBeatmapPacket(MpBeatmap beatmap, BeatmapKey beatmapKey)
         {
-            levelHash = Utilities.HashForLevelID(beatmap.LevelID);
+            levelHash = Utilities.HashForLevelID(beatmap.LevelID) ?? "";
             songName = beatmap.SongName;
             songSubName = beatmap.SongSubName;
             songAuthorName = beatmap.SongAuthorName;

@@ -58,7 +58,7 @@ namespace MultiplayerCore.UI
 			_beatmapLevelsModel = beatmapLevelsModel;
 			_multiplayerSessionManager = sessionManager;
 			_beatmapLevelProvider = beatmapLevelProvider;
-			_playersDataModel = _gameServerLobbyFlowCoordinator._lobbyPlayersDataModel as MpPlayersDataModel;
+			_playersDataModel = (_gameServerLobbyFlowCoordinator._lobbyPlayersDataModel as MpPlayersDataModel)!;
 			_packetSerializer = packetSerializer;
 			_statusRepository = statusRepository;
 			_networkConfig = networkConfig;
@@ -203,7 +203,7 @@ namespace MultiplayerCore.UI
 				if (toggle.gameObject.name == "FasterSong" || toggle.gameObject.name == "SuperFastSong" ||
 				    toggle.gameObject.name == "SlowerSong")
 				{
-					toggle.toggle.interactable = !ppmt.Value;
+					toggle.toggle.interactable = !ppmt!.Value;
 					var canvas = toggle.gameObject.GetComponent<CanvasGroup>();
 					if (canvas == null) canvas = toggle.gameObject.AddComponent<CanvasGroup>();
 					canvas.alpha = ppmt.Value ? 0.25f : 1f;
@@ -424,14 +424,14 @@ namespace MultiplayerCore.UI
 		[UIValue("PerPlayerDifficulty")]
 		public bool PerPlayerDifficulty
 		{
-			get => ppdt.Value;
+			get => ppdt!.Value;
 			set
 			{
-				ppdt.Value = value;
+				ppdt!.Value = value;
 				_multiplayerSessionManager.Send(new MpPerPlayerPacket
 				{
 					PPDEnabled = ppdt.Value,
-					PPMEnabled = ppmt.Value
+					PPMEnabled = ppmt!.Value
 				});
 			}
 		}
@@ -439,13 +439,13 @@ namespace MultiplayerCore.UI
 		[UIValue("PerPlayerModifiers")]
 		public bool PerPlayerModifiers
 		{
-			get => ppmt.Value;
+			get => ppmt!.Value;
 			set
 			{
-				ppmt.Value = value;
+				ppmt!.Value = value;
 				_multiplayerSessionManager.Send(new MpPerPlayerPacket
 				{
-					PPDEnabled = ppdt.Value,
+					PPDEnabled = ppdt!.Value,
 					PPMEnabled = ppmt.Value
 				});
 			}

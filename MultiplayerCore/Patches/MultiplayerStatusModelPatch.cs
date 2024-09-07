@@ -25,6 +25,6 @@ namespace MultiplayerCore.Patches
                 .InstructionEnumeration();
 
         private static object DeserializeObjectAttacher(string value)
-	        => JsonConvert.DeserializeObject<MpStatusData>(value);
+	        => JsonConvert.DeserializeObject<MpStatusData>(value)!;
 	}
 }

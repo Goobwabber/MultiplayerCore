@@ -86,7 +86,7 @@ namespace MultiplayerCore.Objects
             if (string.IsNullOrEmpty(levelHash))
                 return base.GetEntitlementStatus(levelId);
 
-            if (SongCore.Collections.songWithHashPresent(levelHash))
+            if (!string.IsNullOrWhiteSpace(levelHash) && SongCore.Collections.songWithHashPresent(levelHash))
             {
                 ExtraSongData? extraSongData = SongCore.Collections.RetrieveExtraSongData(levelHash);
                 if (extraSongData == null)
