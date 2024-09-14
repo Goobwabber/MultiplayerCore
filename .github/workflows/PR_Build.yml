@@ -26,7 +26,7 @@ jobs:
       uses: beat-forge/init-beatsaber@v1
       with:
         token: ${{ github.token }}
-        repo: michael-r-elp/beatsaber-stripped
+        repo: beat-forge/beatsaber-stripped
         manifest: ./MultiplayerCore/manifest.json
     - name: Fetch Mod References
       uses: Goobwabber/download-beatmods-deps@1.2
