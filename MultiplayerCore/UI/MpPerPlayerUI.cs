@@ -90,13 +90,13 @@ namespace MultiplayerCore.UI
 		public void Initialize()
 		{
 			// DifficultySelector
-			BSMLParser.instance.Parse(
+			BSMLParser.Instance.Parse(
 				BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), 
 					DifficultySelectorResourcePath), _lobbyViewController._beatmapSelectionView.gameObject, this);
 			_difficultyCanvasGroup = segmentVert?.gameObject.AddComponent<CanvasGroup>();
 
 			// PerPlayerToggle
-			BSMLParser.instance.Parse(
+			BSMLParser.Instance.Parse(
 				BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(),
 					PerPlayerTogglesResourcePath), _lobbyViewController.gameObject, this);
 
@@ -174,10 +174,10 @@ namespace MultiplayerCore.UI
 				}
 			}
 
-			ppdt!.interactable = _lobbyViewController._isPartyOwner;
-			ppdt!.text.alpha = _lobbyViewController._isPartyOwner ? 1f : 0.25f;
-			ppmt!.interactable = _lobbyViewController._isPartyOwner;
-			ppmt!.text.alpha = _lobbyViewController._isPartyOwner ? 1f : 0.25f;
+			ppdt!.Interactable = _lobbyViewController._isPartyOwner;
+			ppdt!.TextMesh.alpha = _lobbyViewController._isPartyOwner ? 1f : 0.25f;
+			ppmt!.Interactable = _lobbyViewController._isPartyOwner;
+			ppmt!.TextMesh.alpha = _lobbyViewController._isPartyOwner ? 1f : 0.25f;
 
 			// Move toggles to correct position
 			var locposition = _lobbyViewController._startGameReadyButton.gameObject.transform.localPosition;
@@ -365,10 +365,10 @@ namespace MultiplayerCore.UI
 		private void UpdateButtonsEnabled()
 		{
 			bool isPartyOwner = _gameServerLobbyFlowCoordinator._lobbyPlayerPermissionsModel.isPartyOwner;
-			ppdt!.interactable = isPartyOwner;
-			ppdt!.text.alpha = isPartyOwner ? 1f : 0.25f;
-			ppmt!.interactable = isPartyOwner;
-			ppmt!.text.alpha = isPartyOwner ? 1f : 0.25f;
+			ppdt!.Interactable = isPartyOwner;
+			ppdt!.TextMesh.alpha = isPartyOwner ? 1f : 0.25f;
+			ppmt!.Interactable = isPartyOwner;
+			ppmt!.TextMesh.alpha = isPartyOwner ? 1f : 0.25f;
 
 			// Move toggles to correct position
 			var locposition = _lobbyViewController._startGameReadyButton.gameObject.transform.localPosition;
@@ -393,15 +393,15 @@ namespace MultiplayerCore.UI
 
 			if (_lobbyViewController._isPartyOwner)
 			{
-				ppdt!.interactable = lobbyState == MultiplayerLobbyState.LobbySetup ||
+				ppdt!.Interactable = lobbyState == MultiplayerLobbyState.LobbySetup ||
 				                              lobbyState == MultiplayerLobbyState.LobbyCountdown;
-				ppmt!.interactable = lobbyState == MultiplayerLobbyState.LobbySetup || 
+				ppmt!.Interactable = lobbyState == MultiplayerLobbyState.LobbySetup || 
 				                              lobbyState == MultiplayerLobbyState.LobbyCountdown;
 
-				ppdt!.text.alpha = (lobbyState == MultiplayerLobbyState.LobbySetup ||
+				ppdt!.TextMesh.alpha = (lobbyState == MultiplayerLobbyState.LobbySetup ||
 				                    lobbyState == MultiplayerLobbyState.LobbyCountdown) ? 1f : 0.25f;
 
-				ppmt!.text.alpha = (lobbyState == MultiplayerLobbyState.LobbySetup ||
+				ppmt!.TextMesh.alpha = (lobbyState == MultiplayerLobbyState.LobbySetup ||
 				                   lobbyState == MultiplayerLobbyState.LobbyCountdown) ? 1f : 0.25f;
 			}
 		}

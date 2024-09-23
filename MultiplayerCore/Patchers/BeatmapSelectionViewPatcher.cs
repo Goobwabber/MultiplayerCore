@@ -17,24 +17,11 @@ namespace MultiplayerCore.Patchers
         private MpBeatmapLevelProvider _mpBeatmapLevelProvider;
         private BeatmapLevelsModel _beatmapLevelsModel;
 
-        private static MethodInfo? _lbarInfo;
-        private static bool _newlbarInfo;
-
-
         BeatmapSelectionViewPatcher(ILobbyPlayersDataModel playersDataModel, MpBeatmapLevelProvider mpBeatmapLevelProvider, BeatmapLevelsModel beatmapLevelsModel)
         {
             _mpPlayersDataModel = playersDataModel as MpPlayersDataModel;
             _mpBeatmapLevelProvider = mpBeatmapLevelProvider;
             _beatmapLevelsModel = beatmapLevelsModel;
-
-            _lbarInfo = AccessTools.Method(typeof(LevelBar), "Setup",
-	            new Type[] { typeof(BeatmapLevel), typeof(BeatmapDifficulty), typeof(BeatmapCharacteristicSO) });
-            if (_lbarInfo != null) _newlbarInfo = true;
-			else _lbarInfo = AccessTools.Method(typeof(LevelBar), "Setup", new Type[] { typeof(BeatmapLevel), typeof(BeatmapCharacteristicSO), typeof(BeatmapDifficulty) });
-			if (_lbarInfo == null)
-			{
-				Plugin.Logger.Critical("Can't find a fitting LevelBar Method, is your game version supported?");
-			}
 		}
 
 		[AffinityPrefix]
@@ -96,14 +83,8 @@ namespace MultiplayerCore.Patchers
 
 
 		        Plugin.Logger.Debug($"Calling Setup with level type: {level.GetType().Name}, beatmapCharacteristic type: {key.beatmapCharacteristic.GetType().Name}, difficulty type: {key.difficulty.GetType().Name} ");
-		        if (_newlbarInfo)
-		        {
-			        _lbarInfo.Invoke(instance._levelBar, new object[] { level, key.difficulty, key.beatmapCharacteristic });
-		        }
-		        else
-		        {
-			        _lbarInfo.Invoke(instance._levelBar, new object[] { level, key.beatmapCharacteristic, key.difficulty });
-		        }
+
+				instance._levelBar.Setup(level, key.difficulty, key.beatmapCharacteristic);
 	        }
 	        else
 	        {
@@ -129,96 +110,31 @@ namespace MultiplayerCore.Patchers
 				0,
 				0,
 				0,
+				0,
 				new[] { mpBeatmap.LevelAuthorName },
 				Array.Empty<string>()
 			)
 			};
 
-			// For 1.35
-			var conInfo = AccessTools.Constructor(typeof(BeatmapLevel), new Type[]
-			{
-				typeof(bool),
-				typeof(string),
-				typeof(string),
-				typeof(string),
-				typeof(string),
-				typeof(string[]),
-				typeof(string[]),
-				typeof(float),
-				typeof(float),
-				typeof(float),
-				typeof(float),
-				typeof(float),
-				typeof(float),
-				typeof(PlayerSensitivityFlag),
-				typeof(IPreviewMediaData),
-				typeof(IReadOnlyDictionary<(BeatmapCharacteristicSO, BeatmapDifficulty), BeatmapBasicData>)
-			});
-			if (conInfo != null)
-			{
-				return (BeatmapLevel)conInfo.Invoke(new object[]
-				{
-					false,
-					mpBeatmap.LevelID,
-					mpBeatmap.SongName,
-					mpBeatmap.SongAuthorName,
-					mpBeatmap.SongSubName,
-					new[] { mpBeatmap.LevelAuthorName },
-					Array.Empty<string>(),
-					mpBeatmap.BeatsPerMinute,
-					-6.0f,
-					0,
-					0,
-					0,
-					mpBeatmap.SongDuration,
-					PlayerSensitivityFlag.Safe,
-					previewMediaData,
-					dict
-				});
-			}
-			// For 1.37
-			conInfo = AccessTools.Constructor(typeof(BeatmapLevel), new Type[]
-			{
-				typeof(int),
-				typeof(bool),
-				typeof(string),
-				typeof(string),
-				typeof(string),
-				typeof(string),
-				typeof(string[]),
-				typeof(string[]),
-				typeof(float),
-				typeof(float),
-				typeof(float),
-				typeof(float),
-				typeof(float),
-				typeof(float),
-				typeof(PlayerSensitivityFlag),
-				typeof(IPreviewMediaData),
-				typeof(IReadOnlyDictionary<(BeatmapCharacteristicSO, BeatmapDifficulty), BeatmapBasicData>)
-			});
-			if (conInfo != null)
-				return (BeatmapLevel)conInfo.Invoke(new object[]
-				{
-					0,
-					false,
-					mpBeatmap.LevelID,
-					mpBeatmap.SongName,
-					mpBeatmap.SongAuthorName,
-					mpBeatmap.SongSubName,
-					new[] { mpBeatmap.LevelAuthorName },
-					Array.Empty<string>(),
-					mpBeatmap.BeatsPerMinute,
-					-6.0f,
-					0,
-					0,
-					0,
-					mpBeatmap.SongDuration,
-					PlayerSensitivityFlag.Safe,
-					previewMediaData,
-					dict
-				});
-			throw new NotSupportedException("Game Version not supported");
+			return new BeatmapLevel(
+				0,
+				false,
+				mpBeatmap.LevelID,
+				mpBeatmap.SongName,
+				mpBeatmap.SongAuthorName,
+				mpBeatmap.SongSubName,
+				new[] { mpBeatmap.LevelAuthorName },
+				Array.Empty<string>(),
+				mpBeatmap.BeatsPerMinute,
+				-6.0f,
+				0,
+				0,
+				0,
+				mpBeatmap.SongDuration,
+				PlayerSensitivityFlag.Safe,
+				previewMediaData,
+				dict
+			);
         }
     }
 }

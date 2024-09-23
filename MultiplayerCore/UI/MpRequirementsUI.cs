@@ -98,7 +98,7 @@ namespace MultiplayerCore.UI
         public void Initialize()
         {
             var bar = _lobbySetupViewController.GetComponentInChildren<EditableBeatmapSelectionView>().transform.Find("LevelBarSimple").GetComponent<LevelBar>();
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), ButtonResourcePath), bar.gameObject, this);
+            BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), ButtonResourcePath), bar.gameObject, this);
             _infoButtonTransform.localScale *= 0.7f;
             _infoButtonTransform.gameObject.SetActive(true);
             _buttonBG = _infoButtonTransform.Find("BG").GetComponent<ImageView>();
@@ -108,7 +108,7 @@ namespace MultiplayerCore.UI
             _playersDataModel.didChangeEvent += BeatmapSelected;
             _colorsUI.dismissedEvent += ColorsDismissed;
 
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), ResourcePath), _root.gameObject, this);
+            BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), ResourcePath), _root.gameObject, this);
             _modalPosition = _modal!.transform.localPosition;
         }
 
@@ -162,9 +162,9 @@ namespace MultiplayerCore.UI
                         {
                             var cell = GetCellInfo();
                             bool installed = SongCore.Collections.capabilities.Contains(req);
-                            cell.text = $"<size=75%>{req}";
-                            cell.subtext = installed ? "Requirement found" : "Requirement missing";
-                            cell.icon = installed ? HaveReqIcon : MissingReqIcon;
+                            cell.Text = $"<size=75%>{req}";
+                            cell.Subtext = installed ? "Requirement found" : "Requirement missing";
+                            cell.Icon = installed ? HaveReqIcon : MissingReqIcon;
                             _levelInfoCells.Add(cell);
                         }
                     }
@@ -172,9 +172,9 @@ namespace MultiplayerCore.UI
                     foreach (var contributor in extraSongData.contributors) 
                     {
                         var cell = GetCellInfo();
-                        cell.text = $"<size=75%>{contributor._name}";
-                        cell.subtext = contributor._role;
-                        cell.icon = InfoIcon;
+                        cell.Text = $"<size=75%>{contributor._name}";
+                        cell.Subtext = contributor._role;
+                        cell.Icon = InfoIcon;
                         _levelInfoCells.Add(cell);
                     }
 
@@ -191,9 +191,9 @@ namespace MultiplayerCore.UI
                         )
                     {
                         var cell = GetCellInfo();
-                        cell.text = "<size=75%>Custom Colors Available";
-                        cell.subtext = "Click here to preview";
-                        cell.icon = ColorsIcon;
+                        cell.Text = "<size=75%>Custom Colors Available";
+                        cell.Subtext = "Click here to preview";
+                        cell.Icon = ColorsIcon;
                         _levelInfoCells.Add(cell);
 
                         _colorsUI.AcceptColors(
@@ -223,9 +223,9 @@ namespace MultiplayerCore.UI
 				{
 					var cell = GetCellInfo();
 					bool installed = SongCore.Collections.capabilities.Contains(req);
-					cell.text = $"<size=75%>{req}";
-					cell.subtext = installed ? "Requirement found" : "Requirement missing";
-					cell.icon = installed ? HaveReqIcon : MissingReqIcon;
+					cell.Text = $"<size=75%>{req}";
+					cell.Subtext = installed ? "Requirement found" : "Requirement missing";
+					cell.Icon = installed ? HaveReqIcon : MissingReqIcon;
 					_levelInfoCells.Add(cell);
 				}
 			}
@@ -233,18 +233,18 @@ namespace MultiplayerCore.UI
 			foreach (var contributor in packet.contributors)
             {
                 var cell = GetCellInfo();
-                cell.text = $"<size=75%>{contributor._name}";
-                cell.subtext = contributor._role;
-                cell.icon = InfoIcon;
+                cell.Text = $"<size=75%>{contributor._name}";
+                cell.Subtext = contributor._role;
+                cell.Icon = InfoIcon;
                 _levelInfoCells.Add(cell);
             }
 
             if (packet.mapColors.TryGetValue(diff, out var mapColors) && mapColors.AnyAreNotNull) 
             {
                 var cell = GetCellInfo();
-                cell.text = "<size=75%>Custom Colors Available";
-                cell.subtext = "Click here to preview";
-                cell.icon = ColorsIcon;
+                cell.Text = "<size=75%>Custom Colors Available";
+                cell.Subtext = "Click here to preview";
+                cell.Icon = ColorsIcon;
                 _levelInfoCells.Add(cell);
 
                 _colorsUI.AcceptColors(mapColors);
@@ -276,18 +276,18 @@ namespace MultiplayerCore.UI
 
         private void UpdateData()
         {
-            customListTableData.data.Clear();
+            customListTableData.Data.Clear();
 
-            foreach (var cell in _levelInfoCells) customListTableData.data.Add(cell);
+            foreach (var cell in _levelInfoCells) customListTableData.Data.Add(cell);
 
-            customListTableData.tableView.ReloadData();
-            customListTableData.tableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
+            customListTableData.TableView.ReloadData();
+            customListTableData.TableView.ScrollToCellWithIdx(0, TableView.ScrollPositionType.Beginning, false);
 
             UpdateRequirementButton();
         }
 
         // if there is data, we should have the button be active
-        private void UpdateRequirementButton() => ButtonInteractable = customListTableData.data.Count > 0;
+        private void UpdateRequirementButton() => ButtonInteractable = customListTableData.Data.Count > 0;
 
         private void ColorsDismissed() => ShowRequirements();
 
@@ -304,10 +304,10 @@ namespace MultiplayerCore.UI
             var localUserData = _playersDataModel[_playersDataModel.localUserId];
             var beatmapLevel = localUserData.beatmapKey;
 
-            var cell = customListTableData.data[index];
-            if (cell.icon == ColorsIcon) _modal.Hide(false, () => _colorsUI.ShowColors());
+            var cell = customListTableData.Data[index];
+            if (cell.Icon == ColorsIcon) _modal.Hide(false, () => _colorsUI.ShowColors());
 
-            customListTableData.tableView.ClearSelection();
+            customListTableData.TableView.ClearSelection();
         }
     }
 }

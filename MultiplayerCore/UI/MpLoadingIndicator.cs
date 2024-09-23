@@ -42,7 +42,7 @@ namespace MultiplayerCore.UI
 
         public void Initialize()
         {
-            BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), ResourcePath), _screenController.gameObject, this);
+            BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), ResourcePath), _screenController.gameObject, this);
             GameObject existingLoadingControl = Resources.FindObjectsOfTypeAll<LoadingControl>().First().gameObject;
             GameObject loadingControlGO = GameObject.Instantiate(existingLoadingControl, _vert.transform);
             _loadingControl = loadingControlGO.GetComponent<LoadingControl>();
