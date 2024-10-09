@@ -73,27 +73,6 @@ namespace MultiplayerCore.Patches
 			Plugin.Logger.Debug("LevelData present running orig");
 			return true;
 		}
-	}
-
-	[HarmonyPatch]
-	internal class NoLevelSpectatorOptionalPatch
-	{
-		private static MethodInfo _lbarInfo;
-		private static bool _newlbarInfo;
-		static bool Prepare()
-		{
-			_lbarInfo = AccessTools.Method(typeof(LevelBar), "Setup",
-				new Type[] { typeof(BeatmapLevel), typeof(BeatmapDifficulty), typeof(BeatmapCharacteristicSO) });
-			if (_lbarInfo != null) _newlbarInfo = true;
-			else _lbarInfo = AccessTools.Method(typeof(LevelBar), "Setup", new Type[] { typeof(BeatmapLevel), typeof(BeatmapCharacteristicSO), typeof(BeatmapDifficulty) });
-			if (_lbarInfo == null)
-			{
-				Plugin.Logger.Critical("Can't find a fitting LevelBar Method, is your game version supported?");
-				return false;
-			}
-
-			return true;
-		}
 
 		[HarmonyPostfix]
 		[HarmonyPatch(typeof(MultiplayerResultsViewController), nameof(MultiplayerResultsViewController.Init))]
@@ -101,7 +80,7 @@ namespace MultiplayerCore.Patches
 		{
 			var hash = Utilities.HashForLevelID(beatmapKey.levelId);
 			if (NoLevelSpectatorPatch._mpBeatmapLevelProvider != null && !string.IsNullOrWhiteSpace(hash) &&
-			    SongCore.Loader.GetLevelByHash(hash!) == null)
+				SongCore.Loader.GetLevelByHash(hash!) == null)
 			{
 				IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew<Task>(async () =>
 				{
@@ -113,14 +92,7 @@ namespace MultiplayerCore.Patches
 					if (beatmapLevel == null)
 						beatmapLevel = new NoInfoBeatmapLevel(hash!).MakeBeatmapLevel(beatmapKey, NoLevelSpectatorPatch._mpBeatmapLevelProvider.MakeBeatSaverPreviewMediaData(hash!));
 					Plugin.Logger.Trace($"Calling Setup with level type: {beatmapLevel.GetType().Name}, beatmapCharacteristic type: {beatmapKey.beatmapCharacteristic.GetType().Name}, difficulty type: {beatmapKey.difficulty.GetType().Name} ");
-					if (_newlbarInfo)
-					{
-						_lbarInfo.Invoke(__instance._levelBar, new object[] { beatmapLevel, beatmapKey.difficulty, beatmapKey.beatmapCharacteristic });
-					}
-					else
-					{
-						_lbarInfo.Invoke(__instance._levelBar, new object[] { beatmapLevel, beatmapKey.beatmapCharacteristic, beatmapKey.difficulty });
-					}
+					__instance._levelBar.Setup(beatmapLevel, beatmapKey.difficulty, beatmapKey.beatmapCharacteristic);
 				});
 			}
 		}

@@ -40,13 +40,15 @@ namespace MultiplayerCore.Patchers
         public void UseCustomApiServer(string graphUrl, string? statusUrl, int? maxPartySize = null,
             string? quickPlaySetupUrl = null, bool disableSsl = true)
         {
+            quickPlaySetupUrl = quickPlaySetupUrl ?? (statusUrl != null ? statusUrl + "/mp_override.json" : null);
+
             _logger.Debug($"Overriding multiplayer API server (graphUrl={graphUrl}, statusUrl={statusUrl}, " +
                           $"maxPartySize={maxPartySize}, quickPlaySetupUrl={quickPlaySetupUrl})");
 
             GraphUrl = graphUrl;
             MasterServerStatusUrl = statusUrl;
             MaxPartySize = maxPartySize;
-            QuickPlaySetupUrl = quickPlaySetupUrl ?? (statusUrl != null ? statusUrl + "/mp_override.json" : null);
+            QuickPlaySetupUrl = quickPlaySetupUrl;
             DisableSsl = disableSsl;
         }
 

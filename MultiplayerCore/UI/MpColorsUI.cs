@@ -78,7 +78,7 @@ namespace MultiplayerCore.UI
         private void Parse()
         {
             if (!_modal)
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), ResourcePath), _lobbySetupViewController.GetComponentInChildren<LevelBar>(true).gameObject, this);
+                BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), ResourcePath), _lobbySetupViewController.GetComponentInChildren<LevelBar>(true).gameObject, this);
             _modal.transform.localPosition = _modalPosition;
         }
 
