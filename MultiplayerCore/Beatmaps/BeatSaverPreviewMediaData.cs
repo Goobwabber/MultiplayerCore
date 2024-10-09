@@ -29,14 +29,14 @@ namespace MultiplayerCore.Beatmaps
             return _beatmap;
         }
 
-        public async Task<Sprite> GetCoverSpriteAsync(CancellationToken cancellationToken)
+        public async Task<Sprite> GetCoverSpriteAsync()
         {
             if (CoverImagesprite != null) return CoverImagesprite;
 
             var bm = await GetBeatsaverBeatmap();
             if (bm == null) return null!;
 
-            byte[]? coverBytes = await bm.LatestVersion.DownloadCoverImage(cancellationToken);
+            byte[]? coverBytes = await bm.LatestVersion.DownloadCoverImage();
             if (coverBytes == null || coverBytes.Length == 0) return null!;
 
             Texture2D texture = new Texture2D(2, 2);
@@ -45,7 +45,15 @@ namespace MultiplayerCore.Beatmaps
             return CoverImagesprite;
         }
 
-        public Task<AudioClip> GetPreviewAudioClip(CancellationToken cancellationToken)
+        public void UnloadCoverSprite()
+        {
+            if (CoverImagesprite == null) return;
+            Object.Destroy(CoverImagesprite.texture);
+            Object.Destroy(CoverImagesprite);
+            CoverImagesprite = null;
+        }
+
+        public Task<AudioClip> GetPreviewAudioClip()
         {
             // TODO: something with preview url
             //var bm = await GetBeatsaverBeatmap();

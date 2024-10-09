@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>MultiplayerCore</AssemblyName>
-    <AssemblyVersion>1.5.2</AssemblyVersion>
+    <AssemblyVersion>1.5.3</AssemblyVersion>
     <TargetFramework>net472</TargetFramework>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
@@ -131,6 +131,11 @@
     </Reference>
     <Reference Include="netstandard">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\netstandard.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Networking.NetworkPlayerEntitlementsChecker" Publicize="true">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Networking.NetworkPlayerEntitlementsChecker.dll</HintPath>
       <Private>False</Private>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
