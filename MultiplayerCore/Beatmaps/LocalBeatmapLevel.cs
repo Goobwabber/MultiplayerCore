@@ -71,6 +71,6 @@ namespace MultiplayerCore.Beatmaps
         }
 
         public override Task<Sprite> TryGetCoverSpriteAsync(CancellationToken cancellationToken)
-            => _localBeatmapLevel.previewMediaData.GetCoverSpriteAsync(cancellationToken);
+            => _localBeatmapLevel.previewMediaData.GetCoverSpriteAsync();
     }
 }

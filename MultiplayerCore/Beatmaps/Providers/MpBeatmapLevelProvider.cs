@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.Tracing;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using BeatSaverSharp;
 using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Beatmaps.Packets;
+using SiraUtil.Logging;
 using SiraUtil.Zenject;
 
 namespace MultiplayerCore.Beatmaps.Providers
@@ -12,13 +12,16 @@ namespace MultiplayerCore.Beatmaps.Providers
     public class MpBeatmapLevelProvider
     {
         private readonly BeatSaver _beatsaver;
+        private readonly SiraLog _logger;
         private readonly Dictionary<string, MpBeatmap> _hashToNetworkMaps = new();
-        private readonly Dictionary<string, MpBeatmap> _hashToBeatsaverMaps = new();
+        private readonly ConcurrentDictionary<string, Task<MpBeatmap?>> _hashToBeatsaverMaps = new();
 
         internal MpBeatmapLevelProvider(
-            UBinder<Plugin, BeatSaver> beatsaver)
+            UBinder<Plugin, BeatSaver> beatsaver,
+            SiraLog logger)
         {
             _beatsaver = beatsaver.Value;
+            _logger = logger;
         }
 
 		/// <summary>
@@ -44,23 +47,33 @@ namespace MultiplayerCore.Beatmaps.Providers
             return new LocalBeatmapLevel(levelHash, localBeatmapLevel);
         }
 
-		/// <summary>
-		/// Gets an <see cref="MpBeatmap"/> for the specified level hash from BeatSaver.
-		/// </summary>
-		/// <param name="levelHash">The hash of the level to get</param>
-		/// <returns>An <see cref="MpBeatmap"/> with a matching level hash, or null if none was found.</returns>
-		public async Task<MpBeatmap?> GetBeatmapFromBeatSaver(string levelHash)
+        /// <summary>
+        /// Gets an <see cref="MpBeatmap"/> for the specified level hash from BeatSaver.
+        /// </summary>
+        /// <param name="levelHash">The hash of the level to get</param>
+        /// <returns>An <see cref="MpBeatmap"/> with a matching level hash, or null if none was found.</returns>
+        public async Task<MpBeatmap?> GetBeatmapFromBeatSaver(string levelHash)
         {
-            if (_hashToBeatsaverMaps.TryGetValue(levelHash, out var map)) return map;
-            var beatmap = await _beatsaver.BeatmapByHash(levelHash);
-            if (beatmap != null)
+            if (!_hashToBeatsaverMaps.TryGetValue(levelHash, out var map))
             {
-                map = new BeatSaverBeatmapLevel(levelHash, beatmap);
-                _hashToBeatsaverMaps.Add(levelHash, map);
-                return map;
-            }
+				map = Task.Run(async () =>
+				{
+					var beatmap = await _beatsaver.BeatmapByHash(levelHash);
+					if (beatmap != null)
+					{
+						MpBeatmap bmap = new BeatSaverBeatmapLevel(levelHash, beatmap);
+						return bmap;
+					}
 
-            return null;
+					return null;
+				});
+
+				_hashToBeatsaverMaps[levelHash] = map;
+			}
+
+			var bmap = await map;
+            if (bmap == null) _hashToBeatsaverMaps.TryRemove(levelHash, out _); // Ensure we remove null bmaps
+			return bmap;
         }
 
         public BeatSaverPreviewMediaData MakeBeatSaverPreviewMediaData(string levelHash) => new BeatSaverPreviewMediaData(_beatsaver, levelHash);
