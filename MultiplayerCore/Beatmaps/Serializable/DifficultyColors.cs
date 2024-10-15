@@ -64,17 +64,17 @@ namespace MultiplayerCore.Beatmaps.Serializable
             if ((colors & 0x1) != 0)
                 ColorLeft = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
             if (((colors >> 1) & 0x1) != 0)
-                ColorLeft = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
+                ColorRight = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
             if (((colors >> 2) & 0x1) != 0)
-                ColorLeft = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
+                EnvColorLeft = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
             if (((colors >> 3) & 0x1) != 0)
-                ColorLeft = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
+                EnvColorRight = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
             if (((colors >> 4) & 0x1) != 0)
-                ColorLeft = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
+                EnvColorLeftBoost = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
             if (((colors >> 5) & 0x1) != 0)
-                ColorLeft = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
+                EnvColorRightBoost = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
             if (((colors >> 6) & 0x1) != 0)
-                ColorLeft = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
+                ObstacleColor = new MapColor(reader.GetFloat(), reader.GetFloat(), reader.GetFloat());
         }
 
         public class MapColorSerializable : INetSerializable
