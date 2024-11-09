@@ -164,11 +164,10 @@ namespace MultiplayerCore.Patchers
         [AffinityPatch(typeof(IgnoranceClient), "Start")]
         private void PrefixIgnoranceClientStart(IgnoranceClient __instance)
         {
-            if (!DisableSsl)
-                return;
-            
-            __instance.UseSsl = false;
-            __instance.ValidateCertificate = false;
+            if (DisableSsl)
+                __instance.UseSsl = false;
+            if (IsOverridingApi)
+                __instance.ValidateCertificate = false;
         }
     }
 }
