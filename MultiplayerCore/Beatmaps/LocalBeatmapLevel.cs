@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Beatmaps.Serializable;
 using UnityEngine;
-using static SongCore.Data.ExtraSongData;
+using static SongCore.Data.SongData;
 
 namespace MultiplayerCore.Beatmaps
 {
@@ -28,7 +29,7 @@ namespace MultiplayerCore.Beatmaps
             get
             {
                 Dictionary<string, Dictionary<BeatmapDifficulty, string[]>> reqs = new();
-                var difficulties = SongCore.Collections.RetrieveExtraSongData(LevelHash)?._difficulties;
+                var difficulties = SongCore.Collections.GetCustomLevelSongData(LevelID)?._difficulties; // TODO: Check if we need to call levelIDsForHash
                 if (difficulties == null)
                     return new();
                 foreach (var difficulty in difficulties)
@@ -46,7 +47,7 @@ namespace MultiplayerCore.Beatmaps
             get
             {
                 Dictionary<string, Dictionary<BeatmapDifficulty, DifficultyColors>> colors = new();
-                var difficulties = SongCore.Collections.RetrieveExtraSongData(LevelHash)?._difficulties;
+                var difficulties = SongCore.Collections.GetCustomLevelSongData(LevelID)?._difficulties;
                 if (difficulties == null)
                     return new();
                 foreach (var difficulty in difficulties)
@@ -60,7 +61,7 @@ namespace MultiplayerCore.Beatmaps
             }
         }
 
-        public override Contributor[] Contributors => SongCore.Collections.RetrieveExtraSongData(LevelHash)?.contributors ?? new Contributor[0];
+        public override Contributor[] Contributors => SongCore.Collections.GetCustomLevelSongData(LevelID)?.contributors ?? new Contributor[0];
 
         private readonly BeatmapLevel _localBeatmapLevel;
 

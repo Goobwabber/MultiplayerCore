@@ -3,7 +3,7 @@ using LiteNetLib.Utils;
 using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Beatmaps.Serializable;
 using MultiplayerCore.Networking.Abstractions;
-using static SongCore.Data.ExtraSongData;
+using static SongCore.Data.SongData;
 
 namespace MultiplayerCore.Beatmaps.Packets
 {

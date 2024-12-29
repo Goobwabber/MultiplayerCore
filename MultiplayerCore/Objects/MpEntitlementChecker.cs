@@ -88,12 +88,12 @@ namespace MultiplayerCore.Objects
 
             if (!string.IsNullOrWhiteSpace(levelHash) && SongCore.Collections.songWithHashPresent(levelHash))
             {
-                ExtraSongData? extraSongData = SongCore.Collections.RetrieveExtraSongData(levelHash);
-                if (extraSongData == null)
+                SongData? SongData = SongCore.Collections.GetCustomLevelSongData(levelId);
+                if (SongData == null)
                     return Task.FromResult(EntitlementsStatus.Ok);
 
                 // Note: If there is even just one diff in the beatmap that requires a mod, this will flag the whole map, possible check selected difficulty?
-                string[] requirements = extraSongData._difficulties
+                string[] requirements = SongData._difficulties
                     .Aggregate(Array.Empty<string>(), (a, n) => a.Concat(n.additionalDifficultyData?._requirements ?? Array.Empty<string>()).ToArray())
                     .Distinct().ToArray();
 

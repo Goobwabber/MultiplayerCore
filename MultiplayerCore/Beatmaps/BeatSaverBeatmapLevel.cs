@@ -7,7 +7,7 @@ using BeatSaverSharp.Models;
 using MultiplayerCore.Beatmaps.Abstractions;
 using UnityEngine;
 using static BeatSaverSharp.Models.BeatmapDifficulty;
-using static SongCore.Data.ExtraSongData;
+using static SongCore.Data.SongData;
 
 namespace MultiplayerCore.Beatmaps
 {

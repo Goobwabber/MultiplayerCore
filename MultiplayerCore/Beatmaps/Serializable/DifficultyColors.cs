@@ -1,5 +1,5 @@
 ﻿using LiteNetLib.Utils;
-using static SongCore.Data.ExtraSongData;
+using static SongCore.Data.SongData;
 
 namespace MultiplayerCore.Beatmaps.Serializable
 {

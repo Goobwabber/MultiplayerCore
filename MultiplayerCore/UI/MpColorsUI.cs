@@ -117,7 +117,7 @@ namespace MultiplayerCore.UI
             );
         }
 
-        internal void AcceptColors(ExtraSongData.MapColor? leftColor, ExtraSongData.MapColor? rightColor, ExtraSongData.MapColor? envLeftColor, ExtraSongData.MapColor? envLeftBoostColor, ExtraSongData.MapColor? envRightColor, ExtraSongData.MapColor? envRightBoostColor, ExtraSongData.MapColor? obstacleColor)
+        internal void AcceptColors(SongData.MapColor? leftColor, SongData.MapColor? rightColor, SongData.MapColor? envLeftColor, SongData.MapColor? envLeftBoostColor, SongData.MapColor? envRightColor, SongData.MapColor? envRightBoostColor, SongData.MapColor? obstacleColor)
         {
             Parse();
 

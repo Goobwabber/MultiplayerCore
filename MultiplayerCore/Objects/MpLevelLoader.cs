@@ -65,14 +65,14 @@ namespace MultiplayerCore.Objects
             if (levelHash == null)
                 return;
             
-            var extraSongData = SongCore.Collections.RetrieveExtraSongData(levelHash);
-            if (extraSongData == null)
+            var SongData = SongCore.Collections.GetCustomLevelSongData(levelId);
+            if (SongData == null)
                 return;
 
             var difficulty = _gameplaySetupData.beatmapKey.difficulty;
             var characteristicName = _gameplaySetupData.beatmapKey.beatmapCharacteristic.serializedName;
 
-            var difficultyData = extraSongData._difficulties.FirstOrDefault(x =>
+            var difficultyData = SongData._difficulties.FirstOrDefault(x =>
                 x._difficulty == difficulty && x._beatmapCharacteristicName == characteristicName);
             if (difficultyData == null)
                 return;

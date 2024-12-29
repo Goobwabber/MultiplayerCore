@@ -6,7 +6,7 @@ using MultiplayerCore.Beatmaps.Abstractions;
 using MultiplayerCore.Beatmaps.Packets;
 using MultiplayerCore.Beatmaps.Serializable;
 using UnityEngine;
-using static SongCore.Data.ExtraSongData;
+using static SongCore.Data.SongData;
 
 namespace MultiplayerCore.Beatmaps
 {

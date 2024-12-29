@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MultiplayerCore.Beatmaps.Serializable;
 using UnityEngine;
-using static SongCore.Data.ExtraSongData;
+using static SongCore.Data.SongData;
 
 namespace MultiplayerCore.Beatmaps.Abstractions
 {

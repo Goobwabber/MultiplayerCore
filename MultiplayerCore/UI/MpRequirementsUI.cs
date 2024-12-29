@@ -152,10 +152,10 @@ namespace MultiplayerCore.UI
             var levelHash = Utilities.HashForLevelID(key.levelId);
             if (!string.IsNullOrEmpty(levelHash))
             {
-                var extraSongData = SongCore.Collections.RetrieveExtraSongData(levelHash!);
-                if (extraSongData != null)
+                var SongData = SongCore.Collections.GetCustomLevelSongData(key.levelId);
+                if (SongData != null)
                 {
-                    var diffData = SongCore.Collections.RetrieveDifficultyData(level, key);
+                    var diffData = SongCore.Collections.GetCustomLevelSongDifficultyData(key);
                     if (diffData != null && diffData.additionalDifficultyData != null && diffData.additionalDifficultyData._requirements != null)
                     {
                         foreach (var req in diffData.additionalDifficultyData._requirements)
@@ -169,7 +169,7 @@ namespace MultiplayerCore.UI
                         }
                     }
 
-                    foreach (var contributor in extraSongData.contributors) 
+                    foreach (var contributor in SongData.contributors) 
                     {
                         var cell = GetCellInfo();
                         cell.Text = $"<size=75%>{contributor._name}";
