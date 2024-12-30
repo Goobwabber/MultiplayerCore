@@ -86,7 +86,7 @@ namespace MultiplayerCore.Patches
                 __result =
                  $"Game Version Mismatch\n" +
                  $"Your Beat Saber version is not compatible with the lobby hosts\n" +
-                 $"You may need to either downgrade or update your game";
+                 $"You or the host may need to either downgrade or update the game";
                 return false;
 	        }
 
