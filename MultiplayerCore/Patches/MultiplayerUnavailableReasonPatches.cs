@@ -66,12 +66,62 @@ namespace MultiplayerCore.Patches
                 var metadata = PluginManager.GetPluginFromId(_requiredMod);
                 __result = $"Multiplayer Unavailable\nMod {metadata.Name} is missing or out of date\nPlease install version {_requiredVersion} or newer";
                 return false;
-            } else if (multiplayerUnavailableReason == (MultiplayerUnavailableReason)6)
+            }
+            if (multiplayerUnavailableReason == (MultiplayerUnavailableReason)6)
             {
-                __result = $"Multiplayer Unavailable\nBeat Saber version is too new\nMaximum version: {_maximumBsVersion}\nCurrent version: {UnityGame.GameVersion.ToString()}";
+                __result = $"Multiplayer Unavailable\nBeat Saber version is too new\nMaximum version: {_maximumBsVersion}\nCurrent version: {UnityGame.GameVersion}";
                 return false;
             }
             return true;
         }
-    }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(ConnectionFailedReasonMethods), nameof(ConnectionFailedReasonMethods.LocalizedKey))]
+        private static bool LocalizeConnectionFailedReason(ConnectionFailedReason connectionFailedReason,
+	        ref string __result)
+        {
+	        if (connectionFailedReason == (ConnectionFailedReason)50)
+	        {
+                //__result = "CONNECTION_FAILED_VERSION_MISMATCH"; // Would show an "Update the game message"
+                __result =
+                 $"Game Version Unknown\n" +
+                 $"Your game version was not within any version ranges known by the server";
+                return false;
+	        }
+	        if (connectionFailedReason == (ConnectionFailedReason)51)
+	        {
+		        __result =
+			        $"Game Version Too Old\n" +
+			        $"Your game version is below the supported version range of the lobby\n" +
+			        $"You either need to update or the lobby host needs to downgrade their game";
+		        return false;
+	        }
+	        if (connectionFailedReason == (ConnectionFailedReason)52)
+	        {
+		        __result =
+			        $"Game Version Too New\n" +
+			        $"Your game version is above the supported version range of the lobby\n" +
+			        $"You either need to downgrade or the lobby host needs to update their game";
+		        return false;
+	        }
+
+			return true;
+        }
+
+		[HarmonyPrefix]
+        [HarmonyPatch(typeof(MultiplayerPlacementErrorCodeMethods), nameof(MultiplayerPlacementErrorCodeMethods.ToConnectionFailedReason))]
+        private static bool ToConnectionFailedReason(MultiplayerPlacementErrorCode errorCode,
+	        ref ConnectionFailedReason __result)
+        {
+            Plugin.Logger.Debug($"Got MPEC-{errorCode}");
+	        if ((int)errorCode >= 50)
+	        {
+		        __result = (ConnectionFailedReason)errorCode;
+		        return false;
+	        }
+
+	        return true;
+        }
+
+	}
 }
