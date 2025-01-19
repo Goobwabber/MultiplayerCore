@@ -38,11 +38,28 @@ namespace MultiplayerCore.Patchers
         [HarmonyPatch(typeof(LobbySetupViewController), nameof(LobbySetupViewController.SetPlayersMissingLevelText))]
         private static void SetPlayersMissingLevelText(LobbySetupViewController __instance, string playersMissingLevelText, ref Button ____startGameReadyButton)
         {
-            if (!string.IsNullOrEmpty(playersMissingLevelText) && ____startGameReadyButton.interactable)
+            if (!string.IsNullOrEmpty(playersMissingLevelText) && ____startGameReadyButton.interactable && __instance._isPartyOwner)
                 __instance.SetStartGameEnabled(CannotStartGameReason.DoNotOwnSong);
         }
 
-        [AffinityPrefix]
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(GameServerLobbyFlowCoordinator),
+	        nameof(GameServerLobbyFlowCoordinator.HandleMenuRpcManagerSetPlayersMissingEntitlementsToLevel))]
+        private static bool HandleMenuRpcManagerSetPlayersMissingEntitlementsToLevel(
+	        GameServerLobbyFlowCoordinator __instance,
+	        PlayersMissingEntitlementsNetSerializable playersMissingEntitlements)
+        {
+	        //if (__instance.isQuickStartServer)
+	        //{
+		        __instance._playerIdsWithoutEntitlements.Clear();
+		        __instance._playerIdsWithoutEntitlements.AddRange(playersMissingEntitlements.playersWithoutEntitlements);
+		        __instance.SetPlayersMissingLevelText();
+		        return false;
+	        //}
+            //return true;
+		}
+
+		[AffinityPrefix]
         [AffinityPatch(typeof(JoinQuickPlayViewController), nameof(JoinQuickPlayViewController.Setup))]
         private void SetupPre(JoinQuickPlayViewController __instance, ref BeatmapDifficultyDropdown ____beatmapDifficultyDropdown, QuickPlaySongPacksDropdown ____songPacksDropdown, QuickPlaySetupData quickPlaySetupData)
         {
