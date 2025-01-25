@@ -80,31 +80,33 @@ namespace MultiplayerCore.Patches
         private static bool LocalizeConnectionFailedReason(ConnectionFailedReason connectionFailedReason,
 	        ref string __result)
         {
-	        if (connectionFailedReason == (ConnectionFailedReason)50)
+	        switch ((byte)connectionFailedReason)
 	        {
-                //__result = "CONNECTION_FAILED_VERSION_MISMATCH"; // Would show an "Update the game message"
-                __result =
-                 $"Game Version Unknown\n" +
-                 $"Your game version was not within any version ranges known by the server";
-                return false;
-	        }
-	        if (connectionFailedReason == (ConnectionFailedReason)51)
-	        {
-		        __result =
-			        $"Game Version Too Old\n" +
-			        $"Your game version is below the supported version range of the lobby\n" +
-			        $"You either need to update or the lobby host needs to downgrade their game";
-		        return false;
-	        }
-	        if (connectionFailedReason == (ConnectionFailedReason)52)
-	        {
-		        __result =
-			        $"Game Version Too New\n" +
-			        $"Your game version is above the supported version range of the lobby\n" +
-			        $"You either need to downgrade or the lobby host needs to update their game";
-		        return false;
-	        }
-
+		        case 50:
+		        {
+					//__result = "CONNECTION_FAILED_VERSION_MISMATCH"; // Would show an "Update the game message"
+					__result =
+						$"Game Version Unknown\n" +
+						$"Your game version was not within any version ranges known by the server";
+					return false;
+				}
+		        case 51:
+		        {
+			        __result =
+				        $"Game Version Too Old\n" +
+				        $"Your game version is below the supported version range of the lobby\n" +
+				        $"You either need to update or the lobby host needs to downgrade their game";
+			        return false;
+				}
+		        case 52:
+		        {
+			        __result =
+				        $"Game Version Too New\n" +
+				        $"Your game version is above the supported version range of the lobby\n" +
+				        $"You either need to downgrade or the lobby host needs to update their game";
+			        return false;
+				}
+			}
 			return true;
         }
 
