@@ -46,45 +46,46 @@
     <None Remove="UI\RequirementsUI.bsml" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="netstandard"/>
     <Reference Include="Microsoft.CSharp">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Microsoft.CSharp.dll</HintPath>
+      <!--<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Microsoft.CSharp.dll</HintPath>
       <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>-->
     </Reference>
     <Reference Include="mscorlib">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\mscorlib.dll</HintPath>
+      <!--<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\mscorlib.dll</HintPath>
       <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>-->
     </Reference>
     <Reference Include="System">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.dll</HintPath>
+      <!--<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.dll</HintPath>
       <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>-->
     </Reference>
     <Reference Include="System.Core">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Core.dll</HintPath>
+      <!--<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Core.dll</HintPath>
       <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>-->
     </Reference>
     <Reference Include="System.Xml.Linq">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Xml.Linq.dll</HintPath>
+      <!--<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Xml.Linq.dll</HintPath>
       <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>-->
     </Reference>
     <Reference Include="System.Data.DataSetExtensions">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Data.DataSetExtensions.dll</HintPath>
+      <!--<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Data.DataSetExtensions.dll</HintPath>
       <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>-->
     </Reference>
     <Reference Include="System.Data">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Data.dll</HintPath>
+      <!--<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Data.dll</HintPath>
       <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>-->
     </Reference>
     <Reference Include="System.Xml">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Xml.dll</HintPath>
+      <!--<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\System.Xml.dll</HintPath>
       <Private>False</Private>
-      <SpecificVersion>False</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>-->
     </Reference>
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2">
       <PrivateAssets>all</PrivateAssets>
