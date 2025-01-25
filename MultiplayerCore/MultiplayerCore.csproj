@@ -46,6 +46,11 @@
     <None Remove="UI\RequirementsUI.bsml" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Microsoft.CSharp.dll</HintPath>
+      <Private>False</Private>
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="mscorlib">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\mscorlib.dll</HintPath>
       <Private>False</Private>
