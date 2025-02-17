@@ -31,7 +31,7 @@ namespace MultiplayerCore.Patchers
 					{
 						Plugin.Logger.Error(
 							$"An error occurred while attempting to post to the Graph API: Uri '{request.RequestUri}' StatusCode: {(int)response.StatusCode}: {response.StatusCode}");
-						Plugin.Logger.Trace($"Response: {response.Content.ReadAsStringAsync().Result}");
+						Plugin.Logger.Trace($"Response: {await response.Content.ReadAsStringAsync()}");
 					}
 
 				}
