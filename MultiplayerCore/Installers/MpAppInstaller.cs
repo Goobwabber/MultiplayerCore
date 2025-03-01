@@ -32,7 +32,6 @@ namespace MultiplayerCore.Installers
             Container.Bind<MpBeatmapLevelProvider>().ToSelf().AsSingle();
             Container.BindInterfacesAndSelfTo<CustomLevelsPatcher>().AsSingle();
             Container.BindInterfacesAndSelfTo<NetworkConfigPatcher>().AsSingle();
-			Container.BindInterfacesAndSelfTo<GraphAPIClientPatcher>().AsSingle();
 			Container.BindInterfacesAndSelfTo<ModeSelectionPatcher>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlayerCountPatcher>().AsSingle();
             Container.Bind<BGNetDebugLogger>().ToSelf().AsSingle();
