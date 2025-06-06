@@ -14,7 +14,13 @@ namespace MultiplayerCore.Patches
 	[HarmonyPatch]
 	internal class GraphAPIClientPatch
 	{
-		private static readonly HttpClient _client = new();
+
+		private static readonly HttpClientHandler _handler = new HttpClientHandler()
+		{
+			UseCookies = false,
+		};
+
+		private static readonly HttpClient _client = new(_handler);
 
 		// TODO: If this ever breaks, just patch the GraphAPIClient ctor and replace HttpClient _client with a custom HttpClient that has a logging handler
 
