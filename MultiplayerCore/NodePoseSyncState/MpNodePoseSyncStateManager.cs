@@ -67,8 +67,8 @@ namespace MultiplayerCore.NodePoseSyncState
         }
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(NodePoseSyncStateManager), nameof(NodePoseSyncStateManager.TryCreateLocalState))]
-        private void TryCreateLocalState(NodePoseSyncStateManager __instance)
+        [AffinityPatch(typeof(MultiplayerSyncStateManager<global::NodePoseSyncState, global::NodePoseSyncState.NodePose, PoseSerializable, NodePoseSyncStateNetSerializable, NodePoseSyncStateDeltaNetSerializable>), nameof(NodePoseSyncStateManager.TryCreateLocalState))]
+        private void TryCreateLocalState(MultiplayerSyncStateManager<global::NodePoseSyncState, global::NodePoseSyncState.NodePose, PoseSerializable, NodePoseSyncStateNetSerializable, NodePoseSyncStateDeltaNetSerializable> __instance)
         {
 	        if (ShouldForceUpdate)
 	        {
@@ -79,8 +79,8 @@ namespace MultiplayerCore.NodePoseSyncState
         }
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(NodePoseSyncStateManager), nameof(NodePoseSyncStateManager.HandlePlayerConnected))]
-        private void HandlePlayerConnected(NodePoseSyncStateManager __instance)
+        [AffinityPatch(typeof(MultiplayerSyncStateManager<global::NodePoseSyncState, global::NodePoseSyncState.NodePose, PoseSerializable, NodePoseSyncStateNetSerializable, NodePoseSyncStateDeltaNetSerializable>), nameof(NodePoseSyncStateManager.HandlePlayerConnected))]
+        private void HandlePlayerConnected(MultiplayerSyncStateManager<global::NodePoseSyncState, global::NodePoseSyncState.NodePose, PoseSerializable, NodePoseSyncStateNetSerializable, NodePoseSyncStateDeltaNetSerializable> __instance)
         {
 	        if (ShouldForceUpdate)
 	        {

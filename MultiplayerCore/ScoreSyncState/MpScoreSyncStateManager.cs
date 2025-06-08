@@ -64,8 +64,8 @@ namespace MultiplayerCore.NodePoseSyncState
         }
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(ScoreSyncStateManager), nameof(ScoreSyncStateManager.TryCreateLocalState))]
-        private void TryCreateLocalState(ScoreSyncStateManager __instance)
+        [AffinityPatch(typeof(MultiplayerSyncStateManager<StandardScoreSyncState, StandardScoreSyncState.Score, int, StandardScoreSyncStateNetSerializable, StandardScoreSyncStateDeltaNetSerializable>), nameof(ScoreSyncStateManager.TryCreateLocalState))]
+        private void TryCreateLocalState(MultiplayerSyncStateManager<StandardScoreSyncState, StandardScoreSyncState.Score, int, StandardScoreSyncStateNetSerializable, StandardScoreSyncStateDeltaNetSerializable> __instance)
         {
 	        if (ShouldForceUpdate)
 	        {
@@ -76,8 +76,8 @@ namespace MultiplayerCore.NodePoseSyncState
         }
 
         [AffinityPrefix]
-        [AffinityPatch(typeof(ScoreSyncStateManager), nameof(ScoreSyncStateManager.HandlePlayerConnected))]
-        private void HandlePlayerConnected(ScoreSyncStateManager __instance)
+        [AffinityPatch(typeof(MultiplayerSyncStateManager<StandardScoreSyncState, StandardScoreSyncState.Score, int, StandardScoreSyncStateNetSerializable, StandardScoreSyncStateDeltaNetSerializable>), nameof(ScoreSyncStateManager.HandlePlayerConnected))]
+        private void HandlePlayerConnected(MultiplayerSyncStateManager<StandardScoreSyncState, StandardScoreSyncState.Score, int, StandardScoreSyncStateNetSerializable, StandardScoreSyncStateDeltaNetSerializable> __instance)
         {
 	        if (ShouldForceUpdate)
 	        {
