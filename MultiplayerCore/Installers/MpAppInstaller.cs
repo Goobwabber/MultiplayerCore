@@ -1,4 +1,5 @@
 ﻿using BeatSaverSharp;
+using BGNet.Core.GameLift;
 using MultiplayerCore.Beatmaps.Providers;
 using MultiplayerCore.Networking;
 using MultiplayerCore.NodePoseSyncState;
@@ -7,6 +8,7 @@ using MultiplayerCore.Patchers;
 using MultiplayerCore.Players;
 using MultiplayerCore.Repositories;
 using SiraUtil.Zenject;
+using System;
 using Zenject;
 
 namespace MultiplayerCore.Installers
@@ -31,11 +33,16 @@ namespace MultiplayerCore.Installers
             Container.Bind<MpLevelDownloader>().ToSelf().AsSingle();
             Container.Bind<MpBeatmapLevelProvider>().ToSelf().AsSingle();
             Container.BindInterfacesAndSelfTo<CustomLevelsPatcher>().AsSingle();
-            Container.BindInterfacesAndSelfTo<NetworkConfigPatcher>().AsSingle();
+			Container.BindInterfacesAndSelfTo<NetworkConfigPatcher>().AsSingle();
 			Container.BindInterfacesAndSelfTo<ModeSelectionPatcher>().AsSingle();
             Container.BindInterfacesAndSelfTo<PlayerCountPatcher>().AsSingle();
             Container.Bind<BGNetDebugLogger>().ToSelf().AsSingle();
             Container.BindInterfacesAndSelfTo<MpStatusRepository>().AsSingle();
+
+            if (Container.HasBinding<IGameLiftPlayerSessionProvider>())
+            {
+                Plugin.Logger.Trace("IGameLiftPlayerSessionProvider found in AppInstaller");
+            }
         }
     }
 }

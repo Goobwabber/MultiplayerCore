@@ -62,7 +62,7 @@ namespace MultiplayerCore.Patches
 
 					__instance._menuTransitionsHelper.StartMultiplayerLevel("Multiplayer", gameplaySetupData.beatmapKey, beatmapLevel, beatmapLevelData,
 						__instance._playerDataModel.playerData.colorSchemesSettings.GetOverrideColorScheme(), gameplaySetupData.gameplayModifiers,
-						__instance._playerDataModel.playerData.playerSpecificSettings, null, Localization.Get("BUTTON_MENU"), false,
+						__instance._playerDataModel.playerData.playerSpecificSettings, __instance._environmentsListModel, null, Localization.Get("BUTTON_MENU"), false,
 						beforeSceneSwitchCallback,
 						__instance.HandleMultiplayerLevelDidFinish,
 						__instance.HandleMultiplayerLevelDidDisconnect

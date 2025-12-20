@@ -18,13 +18,13 @@ namespace MultiplayerCore.Objects
         private ConcurrentDictionary<string, ConcurrentDictionary<string, EntitlementsStatus>> _entitlementsDictionary = new();
         private ConcurrentDictionary<string, ConcurrentDictionary<string, TaskCompletionSource<EntitlementsStatus>>> _tcsDictionary = new();
 
-        private IMultiplayerSessionManager _sessionManager = null!;
+        private IBeatSaberMultiplayerSessionManager _sessionManager = null!;
         private BeatSaver _beatsaver = null!;
         private IPALogger _logger = null!;
 
         [Inject]
         internal void Inject(
-            IMultiplayerSessionManager sessionManager)
+            IBeatSaberMultiplayerSessionManager sessionManager)
         {
             _sessionManager = sessionManager;
             _beatsaver = Plugin._beatsaver;

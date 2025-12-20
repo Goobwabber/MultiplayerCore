@@ -8,29 +8,29 @@ using Zenject;
 
 namespace MultiplayerCore.Networking
 {
-    public class MpPacketSerializer : INetworkPacketSubSerializer<IConnectedPlayer>, IInitializable, IDisposable
+    public class MpPacketSerializer : INetworkPacketSubSerializer<IBeatSaberConnectedPlayer>, IInitializable, IDisposable
     {
         private const int ID = 100;
 
-        private Dictionary<string, Action<NetDataReader, int, IConnectedPlayer>> packetHandlers = new();
+        private Dictionary<string, Action<NetDataReader, int, IBeatSaberConnectedPlayer>> packetHandlers = new();
         private List<Type> registeredTypes = new();
 
-        private readonly MultiplayerSessionManager _sessionManager;
+        private readonly BeatSaberMultiplayerSessionManager _sessionManager;
         private readonly SiraLog _logger;
 
         internal MpPacketSerializer(
-            IMultiplayerSessionManager sessionManager, 
+            IBeatSaberMultiplayerSessionManager sessionManager, 
             SiraLog logger)
         {
-            _sessionManager = (sessionManager as MultiplayerSessionManager)!;
+            _sessionManager = (sessionManager as BeatSaberMultiplayerSessionManager)!;
             _logger = logger;
         }
 
         public void Initialize()
-            => _sessionManager.RegisterSerializer((MultiplayerSessionManager.MessageType)ID, this);
+            => _sessionManager.RegisterSerializer((NetworkMessageType)ID, this);
 
         public void Dispose()
-            => _sessionManager.UnregisterSerializer((MultiplayerSessionManager.MessageType)ID, this);
+            => _sessionManager.UnregisterSerializer((NetworkMessageType)ID, this);
 
         /// <summary>
         /// Method the base game uses to serialize an <see cref="INetSerializable"/>.
@@ -54,14 +54,14 @@ namespace MultiplayerCore.Networking
         /// <param name="reader">The buffer to read from</param>
         /// <param name="length">Length of the packet</param>
         /// <param name="data">The sender of the packet</param>
-        public void Deserialize(NetDataReader reader, int length, IConnectedPlayer data)
+        public void Deserialize(NetDataReader reader, int length, IBeatSaberConnectedPlayer data)
         {
             int prevPosition = reader.Position;
             string packetId = reader.GetString();
             length -= reader.Position - prevPosition;
             prevPosition = reader.Position;
 
-            Action<NetDataReader, int, IConnectedPlayer> action;
+            Action<NetDataReader, int, IBeatSaberConnectedPlayer> action;
             if (packetHandlers.TryGetValue(packetId, out action) && action != null)
             {
                 try
@@ -141,7 +141,7 @@ namespace MultiplayerCore.Networking
                 return packet!;
             };
 
-            packetHandlers[packetId] = delegate (NetDataReader reader, int size, IConnectedPlayer player)
+            packetHandlers[packetId] = delegate (NetDataReader reader, int size, IBeatSaberConnectedPlayer player)
             {
                 callback(deserialize(reader, size), player);
             };

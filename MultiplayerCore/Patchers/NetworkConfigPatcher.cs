@@ -1,6 +1,10 @@
-﻿using IgnoranceCore;
+﻿using BGNet.Core.GameLift;
+using IgnoranceCore;
+using MultiplayerCore.Objects;
 using SiraUtil.Affinity;
 using SiraUtil.Logging;
+using System;
+using Zenject;
 
 // ReSharper disable RedundantAssignment
 // ReSharper disable MemberCanBePrivate.Global
@@ -28,11 +32,19 @@ namespace MultiplayerCore.Patchers
 
         private readonly SiraLog _logger;
 
-        internal NetworkConfigPatcher(
-            SiraLog logger)
+        internal IGameLiftPlayerSessionProvider _sessionProvider;
+
+
+		internal NetworkConfigPatcher(
+			IGameLiftPlayerSessionProvider sessionProvider,
+			SiraLog logger)
         {
+            _sessionProvider = sessionProvider;
             _logger = logger;
-        }
+			var cSessionProvider = (_sessionProvider as CustomPlayerSessionProvider);
+            if (cSessionProvider != null) cSessionProvider._customNetconfig = this;
+
+		}
 
         /// <summary>
         /// Override official servers with a custom API server.
@@ -50,6 +62,14 @@ namespace MultiplayerCore.Patchers
             MaxPartySize = maxPartySize;
             QuickPlaySetupUrl = quickPlaySetupUrl;
             DisableSsl = disableSsl;
+
+            if (_sessionProvider is CustomPlayerSessionProvider customPlayerSessionProvider)
+            {
+                customPlayerSessionProvider.UpdateServer();
+            } else
+            {
+                _logger.Error("Could not get instance of CustomPlayerSessionProvider");
+            }
         }
 
         /// <summary>
@@ -64,7 +84,16 @@ namespace MultiplayerCore.Patchers
             MaxPartySize = null;
             QuickPlaySetupUrl = null;
             DisableSsl = false;
-        }
+
+			if (_sessionProvider is CustomPlayerSessionProvider customPlayerSessionProvider)
+			{
+				customPlayerSessionProvider.UpdateServer();
+			}
+			else
+			{
+				_logger.Error("Could not get instance of CustomPlayerSessionProvider");
+			}
+		}
 
         [AffinityPatch(typeof(NetworkConfigSO), nameof(NetworkConfigSO.graphUrl), AffinityMethodType.Getter)]
         private void GetGraphUrl(ref string __result)
@@ -153,18 +182,22 @@ namespace MultiplayerCore.Patchers
             activeNetworkPlayerModelType = UnifiedNetworkPlayerModel.ActiveNetworkPlayerModelType.GameLift;
         }
 
-        [AffinityPrefix]
-        [AffinityPatch(typeof(ClientCertificateValidator), "ValidateCertificateChainInternal")]
-        private bool ValidateCertificateChain()
-        {
-            return !IsOverridingApi;
-        }
+
+        // Don't think this method is used, but still setting this to be safe
+        //[AffinityPrefix]
+        //[AffinityPatch(typeof(ICertificateValidator), "ValidateCertificateChain")]
+        //private bool ValidateCertificateChain()
+        //{
+        //    return !IsOverridingApi;
+        //}
         
         [AffinityPrefix]
         [AffinityPatch(typeof(IgnoranceClient), "Start")]
         private void PrefixIgnoranceClientStart(IgnoranceClient __instance)
         {
-            if (DisableSsl)
+            __instance.ValidateCertificate = !IsOverridingApi;
+
+			if (DisableSsl)
                 __instance.UseSsl = false;
             if (IsOverridingApi)
                 __instance.ValidateCertificate = false;
