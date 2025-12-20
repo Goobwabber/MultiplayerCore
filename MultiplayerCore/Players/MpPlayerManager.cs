@@ -1,4 +1,5 @@
 ﻿using MultiplayerCore.Networking;
+using OculusStudios.Platform.Core;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,29 +18,62 @@ namespace MultiplayerCore.Players
         private ConcurrentDictionary<string, MpPlayerData> _playerData = new();
 
         private readonly MpPacketSerializer _packetSerializer;
-        private readonly IMultiplayerSessionManager _sessionManager;
-        private readonly IPlatformUserModel _platformUserModel;
+        private readonly IBeatSaberMultiplayerSessionManager _sessionManager;
+        private readonly IPlatform _platform;
 
         internal MpPlayerManager(
             MpPacketSerializer packetSerializer,
-            IMultiplayerSessionManager sessionManager,
-            IPlatformUserModel platformUserModel)
+			IBeatSaberMultiplayerSessionManager sessionManager,
+            IPlatform platform)
         {
             _packetSerializer = packetSerializer;
             _sessionManager = sessionManager;
-            _platformUserModel = platformUserModel;
+            _platform = platform;
         }
 
-        public async void Initialize()
+        public void Initialize()
         {
             _sessionManager.SetLocalPlayerState("modded", true);
             _packetSerializer.RegisterCallback<MpPlayerData>(HandlePlayerData);
-            //_sessionManager.playerConnectedEvent += HandlePlayerConnected;
+			//_sessionManager.playerConnectedEvent += HandlePlayerConnected;
 
-            _localPlayerInfo = await _platformUserModel.GetUserInfo(CancellationToken.None);
+            InitUserInfo();
         }
 
-        public void Dispose()
+        public void InitUserInfo()
+        {
+			string key = _platform.key;
+			UserInfo.Platform platform;
+			if (!(key == "steam"))
+			{
+				if (!(key == "oculus"))
+				{
+					if (!(key == "oculus-mock"))
+					{
+						if (!(key == "mock"))
+						{
+							throw new NotImplementedException();
+						}
+						platform = UserInfo.Platform.Test;
+					}
+					else
+					{
+						platform = UserInfo.Platform.Oculus;
+					}
+				}
+				else
+				{
+					platform = UserInfo.Platform.Oculus;
+				}
+			}
+			else
+			{
+				platform = UserInfo.Platform.Steam;
+			}
+			_localPlayerInfo = new UserInfo(platform, _platform.user.userId.ToString(), _platform.user.displayName);
+		}
+
+		public void Dispose()
         {
             _packetSerializer.UnregisterCallback<MpPlayerData>();
         }

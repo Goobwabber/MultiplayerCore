@@ -1,4 +1,6 @@
-﻿using MultiplayerCore.Patchers;
+﻿using BGNet.Core.GameLift;
+using MultiplayerCore.Objects;
+using MultiplayerCore.Patchers;
 using MultiplayerCore.UI;
 using Zenject;
 
@@ -15,8 +17,17 @@ namespace MultiplayerCore.Installers
             Container.BindInterfacesAndSelfTo<GameServerPlayerTableCellPatcher>().AsSingle();
             Container.BindInterfacesAndSelfTo<BeatmapSelectionViewPatcher>().AsSingle();
 
-            // Inject sira stuff that didn't get injected on appinit
-            Container.Inject(Container.Resolve<NetworkPlayerEntitlementChecker>());
+			if (Container.HasBinding<IGameLiftPlayerSessionProvider>())
+			{
+				Plugin.Logger.Trace("IGameLiftPlayerSessionProvider found in MenuInstaller");
+			}
+
+			//Container.Rebind<IGameLiftPlayerSessionProvider>()
+	  //          .To<CustomPlayerSessionProvider>()
+	  //          .AsSingle();
+
+			// Inject sira stuff that didn't get injected on appinit
+			Container.Inject(Container.Resolve<NetworkPlayerEntitlementChecker>());
         }
 
 	}

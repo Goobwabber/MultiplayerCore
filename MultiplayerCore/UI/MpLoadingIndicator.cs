@@ -14,7 +14,7 @@ namespace MultiplayerCore.UI
     {
         public const string ResourcePath = "MultiplayerCore.UI.LoadingIndicator.bsml";
 
-        private readonly IMultiplayerSessionManager _sessionManager;
+        private readonly IBeatSaberMultiplayerSessionManager _sessionManager;
         private readonly ILobbyGameStateController _gameStateController;
         private readonly ILobbyPlayersDataModel _playersDataModel;
         private readonly MpEntitlementChecker _entitlementChecker;
@@ -25,7 +25,7 @@ namespace MultiplayerCore.UI
         private bool _isDownloading;
 
         internal MpLoadingIndicator(
-            IMultiplayerSessionManager sessionManager,
+            IBeatSaberMultiplayerSessionManager sessionManager,
             ILobbyGameStateController gameStateController,
             ILobbyPlayersDataModel playersDataModel,
             NetworkPlayerEntitlementChecker entitlementChecker,

@@ -27,7 +27,7 @@ namespace MultiplayerCore.UI
 		public static string PerPlayerTogglesResourcePath => "MultiplayerCore.UI.MpPerPlayerToggles.bsml";
 		private readonly GameServerLobbyFlowCoordinator _gameServerLobbyFlowCoordinator;
 		private readonly LobbySetupViewController _lobbyViewController;
-		private readonly IMultiplayerSessionManager _multiplayerSessionManager;
+		private readonly IBeatSaberMultiplayerSessionManager _multiplayerSessionManager;
 		private readonly ILobbyGameStateController _gameStateController;
 		private readonly BeatmapLevelsModel _beatmapLevelsModel;
 		private readonly MpPacketSerializer _packetSerializer;
@@ -45,7 +45,7 @@ namespace MultiplayerCore.UI
 		public MpPerPlayerUI(
 			GameServerLobbyFlowCoordinator gameServerLobbyFlowCoordinator, 
 			BeatmapLevelsModel beatmapLevelsModel, 
-			IMultiplayerSessionManager sessionManager, 
+			IBeatSaberMultiplayerSessionManager sessionManager, 
 			MpBeatmapLevelProvider beatmapLevelProvider, 
 			MpPacketSerializer packetSerializer,
 			MpStatusRepository statusRepository,

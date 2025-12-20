@@ -14,14 +14,14 @@ namespace MultiplayerCore.Objects
 
         public ILevelGameplaySetupData? CurrentLoadingData => _gameplaySetupData;
 
-        internal readonly IMultiplayerSessionManager _sessionManager;
+        internal readonly IBeatSaberMultiplayerSessionManager _sessionManager;
 		internal readonly MpLevelDownloader _levelDownloader;
 		internal readonly MpEntitlementChecker _entitlementChecker;
 		internal readonly IMenuRpcManager _rpcManager;
 		internal readonly SiraLog _logger;
 
         internal MpLevelLoader(
-            IMultiplayerSessionManager sessionManager,
+            IBeatSaberMultiplayerSessionManager sessionManager,
             MpLevelDownloader levelDownloader,
             NetworkPlayerEntitlementChecker entitlementChecker,
             IMenuRpcManager rpcManager,
@@ -108,7 +108,7 @@ namespace MultiplayerCore.Objects
                 // If the download fails we go into spectator
                 _rpcManager.SetIsEntitledToLevel(levelId, EntitlementsStatus.NotOwned);
                 _beatmapLevelData = null;
-                return LoadBeatmapLevelDataResult.Error;
+                return LoadBeatmapLevelDataResult.BeatmapLevelDataNotFound;
             }
 
             // Reload custom level set
@@ -120,7 +120,7 @@ namespace MultiplayerCore.Objects
             
 			// Load level data
 			var method = AccessTools.Method(_beatmapLevelsModel.GetType(), nameof(_beatmapLevelsModel.LoadBeatmapLevelDataAsync));
-			LoadBeatmapLevelDataResult loadResult = LoadBeatmapLevelDataResult.Error;
+			LoadBeatmapLevelDataResult loadResult = LoadBeatmapLevelDataResult.BeatmapLevelDataNotFound;
 			if (method != null)
 			{
 				if (method.GetParameters().Length > 2)

@@ -10,7 +10,7 @@ namespace MultiplayerCore.Patches
     internal class LoggingPatch
     {
         [HarmonyTranspiler]
-        [HarmonyPatch(typeof(ConnectedPlayerManager), "HandleNetworkReceive")]
+        [HarmonyPatch(typeof(ConnectedPlayerManager<IBeatSaberConnectedPlayer, BeatSaberConnectedPlayer, BeatSaberPlayerIdentityPacketData>), "HandleNetworkReceive")]
         private static IEnumerable<CodeInstruction> PacketErrorLogger(IEnumerable<CodeInstruction> instructions, ILGenerator gen)
         {
             LocalBuilder localException = gen.DeclareLocal(typeof(Exception));

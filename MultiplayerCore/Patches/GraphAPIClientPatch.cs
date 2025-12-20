@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BGNet.Core.GameLift;
 using HarmonyLib;
+using IPA.Utilities;
 
 namespace MultiplayerCore.Patches
 {
@@ -24,6 +25,15 @@ namespace MultiplayerCore.Patches
 
 		// TODO: If this ever breaks, just patch the GraphAPIClient ctor and replace HttpClient _client with a custom HttpClient that has a logging handler
 
+		//[HarmonyPostfix]
+		//[HarmonyPatch(typeof(GraphAPIClientPatch), ".ctor")]
+		//static void ctor(GraphAPIClient __instance)
+		//{
+		//	__instance.SetField(nameof(GraphAPIClient._client), _client);
+		//}
+
+
+		// Old Patch
 		private static readonly MethodInfo _sendAsyncAttacher =
 			SymbolExtensions.GetMethodInfo(() => SendAsync(null!, 0, CancellationToken.None));
 
@@ -32,7 +42,7 @@ namespace MultiplayerCore.Patches
 
 		private static MethodBase TargetMethod()
 		{
-			return AccessTools.FirstInner(typeof(GraphAPIClient), t => t.Name.StartsWith("<Post>d__5`1"))
+			return AccessTools.FirstInner(typeof(GraphAPIClient), t => t.Name.StartsWith("<Post>d__6`1"))
 				?.MakeGenericType(typeof(GetMultiplayerInstanceResponse))
 				.GetMethod("MoveNext", BindingFlags.NonPublic | BindingFlags.Instance)!;
 		}
@@ -52,6 +62,7 @@ namespace MultiplayerCore.Patches
 						Plugin.Logger.Trace("Found SendAsync call");
 						var newCode = new CodeInstruction(OpCodes.Callvirt, _sendAsyncAttacher);
 						codes[i] = newCode;
+						break;
 					}
 				}
 			}
@@ -64,6 +75,9 @@ namespace MultiplayerCore.Patches
 			CancellationToken cancellationToken)
 		{
 			Plugin.Logger.Debug("SendAsync MasterServer Request called");
+#if DEBUG
+			Plugin.Logger.Trace($"URI: '{request.RequestUri.ToString()}'");
+#endif
 			var result = _client.SendAsync(request, completionOption, cancellationToken);
 
 			result.ContinueWith(async task =>

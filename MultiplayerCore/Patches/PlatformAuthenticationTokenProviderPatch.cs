@@ -23,7 +23,7 @@ namespace MultiplayerCore.Patches
 				{
 					Plugin.Logger.Error("An error occurred while attempting to get the auth token: " + task.Exception);
 					Plugin.Logger.Warn("Failed to get auth token, returning custom authentication token!");
-					return new AuthenticationToken(__instance.platform, __instance.hashedUserId, __instance.userName, DummyAuth);
+					return new AuthenticationToken(__instance.GetTokenPlatform(PlatformEnvironment.Production), __instance.hashedUserId, __instance.userName, DummyAuth);
 				}
 				Plugin.Logger.Debug("Successfully got auth token!");
 				return result;
