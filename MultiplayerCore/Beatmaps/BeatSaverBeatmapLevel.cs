@@ -45,14 +45,14 @@ namespace MultiplayerCore.Beatmaps
                     };
                     if (!reqs.ContainsKey(characteristic))
                         reqs.Add(characteristic, new());
-                    string[] diffReqs = new string[0];
+                    var diffReqs = new List<string>();
                     //if (difficulty.Chroma)
                     //    diffReqs.Append("Chroma");
                     if (difficulty.NoodleExtensions)
-                        diffReqs.Append("Noodle Extensions");
+                        diffReqs.Add("Noodle Extensions");
                     if (difficulty.MappingExtensions)
-                        diffReqs.Append("Mapping Extensions");
-                    reqs[characteristic][difficultyKey] = diffReqs;
+                        diffReqs.Add("Mapping Extensions");
+                    reqs[characteristic][difficultyKey] = diffReqs.ToArray();
                 }
                 return reqs;
             }

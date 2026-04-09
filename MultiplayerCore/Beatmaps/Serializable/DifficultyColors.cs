@@ -29,6 +29,7 @@ namespace MultiplayerCore.Beatmaps.Serializable
             EnvColorRight = envColorRight;
             EnvColorLeftBoost = envColorLeftBoost;
             EnvColorRightBoost = envColorRightBoost;
+            ObstacleColor = obstacleColor;
         }
 
         public void Serialize(NetDataWriter writer)
