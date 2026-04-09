@@ -39,6 +39,7 @@ namespace MultiplayerCore.UI
 		private List<string>? _allowedDiffs;
 		private CanvasGroup? _difficultyCanvasGroup;
 		private MpStatusData? _currentStatusData;
+		private bool _skipUpdateHandler = false;
 
 		private readonly SiraLog _logger;
 
@@ -166,8 +167,10 @@ namespace MultiplayerCore.UI
 				if (addedToHierarchy)
 				{
 					// Reset our buttons
+					_skipUpdateHandler = true;
 					ppdt!.Value = false;
 					ppmt!.Value = false;
+					_skipUpdateHandler = false;
 
 					// Request Updated state
 					_multiplayerSessionManager.Send(new GetMpPerPlayerPacket());
@@ -328,8 +331,10 @@ namespace MultiplayerCore.UI
 			if ((packet.PPDEnabled != PerPlayerDifficulty || packet.PPMEnabled != PerPlayerModifiers) && 
 			    ppdt != null && ppmt != null && player.isConnectionOwner)
 			{
+				_skipUpdateHandler = true;
 				ppdt.Value = packet.PPDEnabled;
 				ppmt.Value = packet.PPMEnabled;
+				_skipUpdateHandler = false;
 			}
 			else if (!player.isConnectionOwner)
 			{
@@ -428,6 +433,8 @@ namespace MultiplayerCore.UI
 			set
 			{
 				ppdt!.Value = value;
+
+				if (_skipUpdateHandler) return;
 				_multiplayerSessionManager.Send(new MpPerPlayerPacket
 				{
 					PPDEnabled = ppdt.Value,
@@ -443,6 +450,8 @@ namespace MultiplayerCore.UI
 			set
 			{
 				ppmt!.Value = value;
+
+				if (_skipUpdateHandler) return;
 				_multiplayerSessionManager.Send(new MpPerPlayerPacket
 				{
 					PPDEnabled = ppdt!.Value,
